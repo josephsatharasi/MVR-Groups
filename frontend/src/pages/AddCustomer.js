@@ -83,11 +83,11 @@ const AddCustomer = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl md:text-3xl font-bold text-teal-700 mb-6">Add New Customer</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">Add New Customer</h1>
       
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-4 md:p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="rounded-xl shadow-lg p-4 md:p-6 space-y-4" style={{ backgroundColor: '#4db6ac' }}>
         <div>
-          <label className="block text-sm font-semibold text-teal-700 mb-2">Customer Name *</label>
+          <label className="block text-sm font-semibold text-white mb-2">Customer Name <span className="text-red-500">*</span></label>
           <input
             type="text"
             name="name"
@@ -100,7 +100,7 @@ const AddCustomer = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-teal-700 mb-2">Phone Number *</label>
+          <label className="block text-sm font-semibold text-white mb-2">Phone Number <span className="text-red-500">*</span></label>
           <input
             type="tel"
             name="phone"
@@ -116,7 +116,7 @@ const AddCustomer = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-teal-700 mb-2">Email *</label>
+          <label className="block text-sm font-semibold text-white mb-2">Email <span className="text-red-500">*</span></label>
           <input
             type="email"
             name="email"
@@ -129,7 +129,7 @@ const AddCustomer = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-teal-700 mb-2">Address *</label>
+          <label className="block text-sm font-semibold text-white mb-2">Address <span className="text-red-500">*</span></label>
           <textarea
             name="address"
             value={formData.address}
@@ -142,7 +142,7 @@ const AddCustomer = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-teal-700 mb-2">Select Partner *</label>
+          <label className="block text-sm font-semibold text-white mb-2">Select Partner <span className="text-red-500">*</span></label>
           <select
             name="partnerId"
             value={formData.partnerId}
@@ -159,7 +159,7 @@ const AddCustomer = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-teal-700 mb-2">Rental Plan *</label>
+          <label className="block text-sm font-semibold text-white mb-2">Rental Plan <span className="text-red-500">*</span></label>
           <select
             name="plan"
             value={formData.plan}
@@ -173,7 +173,7 @@ const AddCustomer = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-teal-700 mb-2">Start Date *</label>
+          <label className="block text-sm font-semibold text-white mb-2">Start Date <span className="text-red-500">*</span></label>
           <input
             type="date"
             name="startDate"

@@ -24,9 +24,9 @@ const Layout = ({ children, setIsLoggedIn }) => {
   ];
 
   return (
-    <div className="flex h-screen bg-teal-50">
+    <div className="flex h-screen" style={{ backgroundColor: '#4db6ac' }}>
       {/* Desktop Sidebar */}
-      <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-teal-600 to-teal-700 text-white transition-all duration-300 hidden md:flex flex-col shadow-xl`}>
+      <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-teal-700 to-teal-800 text-white transition-all duration-300 hidden md:flex flex-col shadow-xl`}>
         <div className="p-4 flex items-center justify-between border-b border-teal-500">
           {isSidebarOpen && (
             <img src={logo} alt="MKL" className="h-12 bg-white p-1 rounded" />
@@ -72,7 +72,7 @@ const Layout = ({ children, setIsLoggedIn }) => {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-teal-600 to-teal-700 text-white z-50" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-teal-700 to-teal-800 text-white z-50" onClick={(e) => e.stopPropagation()}>
             <div className="p-4 flex items-center justify-between border-b border-teal-500">
               <img src={logo} alt="MKL" className="h-12 bg-white p-1 rounded" />
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-white">
@@ -106,15 +106,15 @@ const Layout = ({ children, setIsLoggedIn }) => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        <header className="bg-white shadow-md p-4 flex items-center justify-between">
+        <header className="shadow-md p-4 flex items-center justify-between" style={{ backgroundColor: '#4db6ac' }}>
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-teal-700">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-white">
               <Menu size={24} />
             </button>
-            <h2 className="text-xl md:text-2xl font-bold text-teal-700">MKL Water Purifier Admin</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-white">MKL Water Purifier Admin</h2>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-teal-600 hidden md:block">Admin Panel</span>
+            <span className="text-sm text-white hidden md:block">Admin Panel</span>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold"

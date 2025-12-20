@@ -48,7 +48,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      <h1 className="text-2xl md:text-3xl font-bold text-teal-700 mb-6">Dashboard</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">Dashboard</h1>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
         {cards.map((card, index) => {
@@ -70,8 +70,8 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-teal-700 mb-4">Quick Actions</h2>
+        <div className="rounded-xl shadow-lg p-6" style={{ backgroundColor: '#4db6ac' }}>
+          <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
           <div className="space-y-3">
             <Link to="/admin/add-customer" className="flex items-center gap-2 w-full bg-gradient-to-r from-teal-600 to-teal-700 text-white py-3 px-4 rounded-lg hover:from-teal-700 hover:to-teal-800 transition-colors font-semibold shadow-md">
               <UserPlus size={20} />
@@ -88,8 +88,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-teal-700 mb-4 flex items-center gap-2">
+        <div className="rounded-xl shadow-lg p-6" style={{ backgroundColor: '#4db6ac' }}>
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <TrendingUp size={24} />
             Recent Activity
           </h2>

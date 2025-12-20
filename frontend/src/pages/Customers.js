@@ -53,29 +53,29 @@ const Customers = () => {
   return (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-teal-700">Customers</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-white">Customers</h1>
         <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-lg font-semibold transition-all ${filter === 'all' ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-teal-700 hover:bg-teal-50 hover:shadow-md'}`}>All</button>
-          <button onClick={() => setFilter('active')} className={`px-4 py-2 rounded-lg font-semibold transition-all ${filter === 'active' ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-teal-700 hover:bg-teal-50 hover:shadow-md'}`}>Active</button>
-          <button onClick={() => setFilter('expiring')} className={`px-4 py-2 rounded-lg font-semibold transition-all ${filter === 'expiring' ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-teal-700 hover:bg-teal-50 hover:shadow-md'}`}>Expiring</button>
-          <button onClick={() => setFilter('expired')} className={`px-4 py-2 rounded-lg font-semibold transition-all ${filter === 'expired' ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-teal-700 hover:bg-teal-50 hover:shadow-md'}`}>Expired</button>
+          <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-lg font-semibold transition-all ${filter === 'all' ? 'bg-teal-700 text-white shadow-lg' : 'bg-white text-teal-700 hover:bg-teal-50 hover:shadow-md'}`}>All</button>
+          <button onClick={() => setFilter('active')} className={`px-4 py-2 rounded-lg font-semibold transition-all ${filter === 'active' ? 'bg-teal-700 text-white shadow-lg' : 'bg-white text-teal-700 hover:bg-teal-50 hover:shadow-md'}`}>Active</button>
+          <button onClick={() => setFilter('expiring')} className={`px-4 py-2 rounded-lg font-semibold transition-all ${filter === 'expiring' ? 'bg-teal-700 text-white shadow-lg' : 'bg-white text-teal-700 hover:bg-teal-50 hover:shadow-md'}`}>Expiring</button>
+          <button onClick={() => setFilter('expired')} className={`px-4 py-2 rounded-lg font-semibold transition-all ${filter === 'expired' ? 'bg-teal-700 text-white shadow-lg' : 'bg-white text-teal-700 hover:bg-teal-50 hover:shadow-md'}`}>Expired</button>
         </div>
       </div>
 
       <div className="mb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+          <Search className="absolute left-3 top-3 text-teal-400" size={20} />
           <input
             type="text"
             placeholder="Search by name, phone, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border-2 border-teal-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent shadow-sm"
+            className="w-full pl-10 pr-4 py-3 bg-white border-2 border-teal-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent shadow-sm"
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="rounded-xl shadow-lg overflow-hidden bg-white">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gradient-to-r from-teal-600 to-teal-700 text-white">
@@ -95,7 +95,7 @@ const Customers = () => {
               {filteredCustomers.map((customer, index) => (
                 <tr 
                   key={customer.id} 
-                  className={`transition-all hover:bg-teal-100 hover:shadow-md cursor-pointer ${index % 2 === 0 ? 'bg-teal-50' : 'bg-white'}`}
+                  className={`transition-all hover:bg-teal-100 hover:shadow-md cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-teal-50'}`}
                   onClick={() => setSelectedCustomer(customer)}
                 >
                   <td className="px-4 md:px-6 py-4 text-sm font-semibold text-teal-700">{customer.name}</td>

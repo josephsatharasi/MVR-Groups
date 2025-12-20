@@ -55,9 +55,9 @@ const CustomerDetails = ({ customer, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-6 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-teal-700 to-teal-800 text-white p-6 flex justify-between items-center">
           <h2 className="text-2xl font-bold">Customer Profile</h2>
-          <button onClick={onClose} className="hover:bg-blue-700 p-2 rounded-lg transition-colors">
+          <button onClick={onClose} className="hover:bg-teal-600 p-2 rounded-lg transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -65,52 +65,52 @@ const CustomerDetails = ({ customer, onClose }) => {
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
-              <User className="text-blue-600 mt-1" size={20} />
+              <User className="text-teal-600 mt-1" size={20} />
               <div>
                 <p className="text-sm text-gray-600">Customer Name</p>
-                <p className="font-semibold text-blue-900">{customer.name}</p>
+                <p className="font-semibold text-teal-900">{customer.name}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Phone className="text-blue-600 mt-1" size={20} />
+              <Phone className="text-teal-600 mt-1" size={20} />
               <div>
                 <p className="text-sm text-gray-600">Phone Number</p>
-                <p className="font-semibold text-blue-900">{customer.phone}</p>
+                <p className="font-semibold text-teal-900">{customer.phone}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Mail className="text-blue-600 mt-1" size={20} />
+              <Mail className="text-teal-600 mt-1" size={20} />
               <div>
                 <p className="text-sm text-gray-600">Email</p>
-                <p className="font-semibold text-blue-900">{customer.email}</p>
+                <p className="font-semibold text-teal-900">{customer.email}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Package className="text-blue-600 mt-1" size={20} />
+              <Package className="text-teal-600 mt-1" size={20} />
               <div>
                 <p className="text-sm text-gray-600">Partner</p>
-                <p className="font-semibold text-blue-900">{customer.partnerName}</p>
+                <p className="font-semibold text-teal-900">{customer.partnerName}</p>
               </div>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <MapPin className="text-blue-600 mt-1" size={20} />
+            <MapPin className="text-teal-600 mt-1" size={20} />
             <div>
               <p className="text-sm text-gray-600">Address</p>
-              <p className="font-semibold text-blue-900">{customer.address}</p>
+              <p className="font-semibold text-teal-900">{customer.address}</p>
             </div>
           </div>
 
-          <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
-            <h3 className="font-bold text-blue-900 mb-3">Subscription Details</h3>
+          <div className="bg-teal-50 rounded-lg p-4 border-2 border-teal-200">
+            <h3 className="font-bold text-teal-900 mb-3">Subscription Details</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-600">Plan Duration</p>
-                <p className="font-semibold text-blue-900">{customer.plan} Months</p>
+                <p className="font-semibold text-teal-900">{customer.plan} Months</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Amount</p>
@@ -118,11 +118,11 @@ const CustomerDetails = ({ customer, onClose }) => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Start Date</p>
-                <p className="font-semibold text-blue-900">{customer.startDate}</p>
+                <p className="font-semibold text-teal-900">{customer.startDate}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">End Date</p>
-                <p className="font-semibold text-blue-900">{customer.endDate}</p>
+                <p className="font-semibold text-teal-900">{customer.endDate}</p>
               </div>
             </div>
           </div>
@@ -142,8 +142,8 @@ const CustomerDetails = ({ customer, onClose }) => {
             </div>
           </div>
 
-          <div className="bg-purple-50 rounded-lg p-4 border-2 border-purple-200">
-            <h3 className="font-bold text-purple-900 mb-3">Spare Parts</h3>
+          <div className="bg-teal-50 rounded-lg p-4 border-2 border-teal-200">
+            <h3 className="font-bold text-teal-900 mb-3">Spare Parts</h3>
             <div className="grid grid-cols-2 gap-2 mb-4">
               {Object.keys(spareParts).map((part) => (
                 <label key={part} className="flex items-center gap-2 cursor-pointer">
@@ -151,7 +151,7 @@ const CustomerDetails = ({ customer, onClose }) => {
                     type="checkbox"
                     checked={spareParts[part]}
                     onChange={() => handleCheckboxChange(part)}
-                    className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                    className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500"
                   />
                   <span className="text-sm text-gray-700">{part}</span>
                 </label>
@@ -164,7 +164,7 @@ const CustomerDetails = ({ customer, onClose }) => {
                 value={totalPrice}
                 onChange={(e) => setTotalPrice(e.target.value)}
                 placeholder="Enter total price"
-                className="w-full px-3 py-2 border-2 border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border-2 border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
             <div className="mb-4">
@@ -176,7 +176,7 @@ const CustomerDetails = ({ customer, onClose }) => {
                     value="UPI"
                     checked={paymentMethod === 'UPI'}
                     onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-4 h-4 text-purple-600"
+                    className="w-4 h-4 text-teal-600"
                   />
                   <span className="text-sm text-gray-700">UPI</span>
                 </label>
@@ -186,7 +186,7 @@ const CustomerDetails = ({ customer, onClose }) => {
                     value="Cash"
                     checked={paymentMethod === 'Cash'}
                     onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-4 h-4 text-purple-600"
+                    className="w-4 h-4 text-teal-600"
                   />
                   <span className="text-sm text-gray-700">Cash</span>
                 </label>
@@ -196,7 +196,7 @@ const CustomerDetails = ({ customer, onClose }) => {
                     value="Card"
                     checked={paymentMethod === 'Card'}
                     onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-4 h-4 text-purple-600"
+                    className="w-4 h-4 text-teal-600"
                   />
                   <span className="text-sm text-gray-700">Card</span>
                 </label>
@@ -211,7 +211,7 @@ const CustomerDetails = ({ customer, onClose }) => {
               </button>
               <button
                 onClick={handleEdit}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                className="flex-1 bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors font-semibold"
               >
                 Edit
               </button>
@@ -225,7 +225,7 @@ const CustomerDetails = ({ customer, onClose }) => {
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="font-bold text-blue-900 mb-2">Additional Information</h3>
+            <h3 className="font-bold text-teal-900 mb-2">Additional Information</h3>
             <div className="text-sm text-gray-600">
               <p>Customer ID: #{customer.id}</p>
               <p>Registered: {new Date(customer.createdAt).toLocaleDateString()}</p>

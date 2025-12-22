@@ -40,10 +40,10 @@ const Dashboard = () => {
   }, []);
 
   const cards = [
-    { title: 'Total Customers', value: stats.total, icon: Users, color: 'bg-gradient-to-br from-blue-500 to-blue-600', link: '/admin/customers' },
-    { title: 'Active Subscriptions', value: stats.active, icon: CheckCircle, color: 'bg-gradient-to-br from-green-500 to-green-600', link: '/admin/customers' },
-    { title: 'Expiring Soon', value: stats.expiringSoon, icon: AlertTriangle, color: 'bg-gradient-to-br from-yellow-500 to-yellow-600', link: '/admin/expiry-alerts' },
-    { title: 'Expired', value: stats.expired, icon: XCircle, color: 'bg-gradient-to-br from-red-500 to-red-600', link: '/admin/customers' },
+    { title: 'Total Customers', value: stats.total, icon: Users, color: 'bg-teal-50', link: '/admin/customers' },
+    { title: 'Active Subscriptions', value: stats.active, icon: CheckCircle, color: 'bg-teal-50', link: '/admin/customers' },
+    { title: 'Expiring Soon', value: stats.expiringSoon, icon: AlertTriangle, color: 'bg-teal-50', link: '/admin/expiry-alerts' },
+    { title: 'Expired', value: stats.expired, icon: XCircle, color: 'bg-teal-50', link: '/admin/customers' },
   ];
 
   return (
@@ -55,13 +55,13 @@ const Dashboard = () => {
           const Icon = card.icon;
           return (
             <Link key={index} to={card.link}>
-              <div className={`${card.color} text-white rounded-xl shadow-lg p-6 hover:scale-105 transition-transform cursor-pointer`}>
+              <div className={`${card.color} rounded-xl shadow-lg p-6 hover:scale-105 transition-transform cursor-pointer`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm opacity-90">{card.title}</p>
-                    <p className="text-4xl font-bold mt-2">{card.value}</p>
+                    <p className="text-sm text-gray-700">{card.title}</p>
+                    <p className="text-4xl font-bold mt-2 text-gray-900">{card.value}</p>
                   </div>
-                  <Icon size={48} className="opacity-80" />
+                  <Icon size={48} className="text-gray-700" />
                 </div>
               </div>
             </Link>

@@ -55,12 +55,12 @@ const ExpiryAlerts = () => {
             <table className="w-full">
               <thead className="bg-gradient-to-r from-teal-600 to-teal-700 text-white">
                 <tr>
-                  <th className="px-4 md:px-6 py-3 text-left text-sm">Customer Name</th>
+                  <th className="px-4 md:px-6 py-3 text-left text-sm whitespace-nowrap">Customer Name</th>
                   <th className="px-4 md:px-6 py-3 text-left text-sm">Phone</th>
                   <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Email</th>
                   <th className="px-4 md:px-6 py-3 text-left text-sm">Plan</th>
-                  <th className="px-4 md:px-6 py-3 text-left text-sm">End Date</th>
-                  <th className="px-4 md:px-6 py-3 text-left text-sm">Days Left</th>
+                  <th className="px-4 md:px-6 py-3 text-left text-sm whitespace-nowrap">End Date</th>
+                  <th className="px-4 md:px-6 py-3 text-left text-sm whitespace-nowrap">Days Left</th>
                   <th className="px-4 md:px-6 py-3 text-left text-sm">Status</th>
                   <th className="px-4 md:px-6 py-3 text-left text-sm">Actions</th>
                 </tr>
@@ -73,12 +73,12 @@ const ExpiryAlerts = () => {
                       key={customer.id} 
                       className={`transition-all hover:bg-teal-100 ${index % 2 === 0 ? 'bg-white' : 'bg-teal-50'}`}
                     >
-                      <td className="px-4 md:px-6 py-4 text-sm font-semibold text-teal-700">{customer.name}</td>
-                      <td className="px-4 md:px-6 py-4 text-sm">{customer.phone}</td>
+                      <td className="px-4 md:px-6 py-4 text-sm font-semibold text-teal-700 whitespace-nowrap">{customer.name}</td>
+                      <td className="px-4 md:px-6 py-4 text-sm whitespace-nowrap">{customer.phone}</td>
                       <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.email}</td>
                       <td className="px-4 md:px-6 py-4 text-sm">{customer.plan}M</td>
-                      <td className="px-4 md:px-6 py-4 text-sm">{customer.endDate}</td>
-                      <td className="px-4 md:px-6 py-4 text-sm">
+                      <td className="px-4 md:px-6 py-4 text-sm whitespace-nowrap">{customer.endDate}</td>
+                      <td className="px-4 md:px-6 py-4 text-sm whitespace-nowrap">
                         <span className={getDaysColor(days)}>{days} days</span>
                       </td>
                       <td className="px-4 md:px-6 py-4 text-sm">{getStatusBadge(days)}</td>

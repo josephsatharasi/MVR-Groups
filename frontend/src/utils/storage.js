@@ -1,50 +1,74 @@
-export const getCustomers = () => {
-  const customers = localStorage.getItem('customers');
-  return customers ? JSON.parse(customers) : [];
-};
+const API_URL = 'http://localhost:5000/api';
 
-export const saveCustomers = (customers) => {
-  localStorage.setItem('customers', JSON.stringify(customers));
-};
-
-export const addCustomer = (customer) => {
-  const customers = getCustomers();
-  const newCustomer = {
-    ...customer,
-    id: Date.now(),
-    createdAt: new Date().toISOString(),
-  };
-  customers.push(newCustomer);
-  saveCustomers(customers);
-  return newCustomer;
-};
-
-export const updateCustomer = (id, updatedData) => {
-  const customers = getCustomers();
-  const index = customers.findIndex(c => c.id === id);
-  if (index !== -1) {
-    customers[index] = { ...customers[index], ...updatedData };
-    saveCustomers(customers);
+export const getCustomers = async () => {
+  try {
+    const response = await fetch(`${API_URL}/customers`);
+    if (!response.ok) throw new Error('Failed to fetch customers');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+    return [];
   }
 };
 
-export const deleteCustomer = (id) => {
-  const customers = getCustomers();
-  const filtered = customers.filter(c => c.id !== id);
-  saveCustomers(filtered);
+export const addCustomer = async (customer) => {
+  try {
+    const response = await fetch(`${API_URL}/customers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customer),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to add customer');
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Error adding customer:', error);
+    throw error;
+  }
 };
 
-export const calculateEndDate = (startDate, plan) => {
-  const start = new Date(startDate);
-  const months = plan === '3' ? 3 : plan === '6' ? 6 : 12;
-  start.setMonth(start.getMonth() + months);
-  return start.toISOString().split('T')[0];
+export const updateCustomer = async (id, data) => {
+  try {
+    const response = await fetch(`${API_URL}/customers/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to update customer');
+    return response.json();
+  } catch (error) {
+    console.error('Error updating customer:', error);
+    throw error;
+  }
 };
 
-export const getDaysUntilExpiry = (endDate) => {
-  const end = new Date(endDate);
-  const today = new Date();
-  const diffTime = end - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays;
+export const deleteCustomer = async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/customers/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete customer');
+    return response.json();
+  } catch (error) {
+    console.error('Error deleting customer:', error);
+    throw error;
+  }
 };
+
+export const searchCustomers = async (name) => {
+  try {
+    const response = await fetch(`${API_URL}/customers/search/${name}`);
+    if (!response.ok) throw new Error('Failed to search customers');
+    return response.json();
+  } catch (error) {
+    console.error('Error searching customers:', error);
+    return [];
+  }
+};
+
+
+
+
+

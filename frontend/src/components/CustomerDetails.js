@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { X, Calendar, User, Phone, Mail, MapPin, Package } from 'lucide-react';
-import { getDaysUntilExpiry } from '../utils/storage';
 
 const CustomerDetails = ({ customer, onClose }) => {
-  const daysLeft = getDaysUntilExpiry(customer.endDate);
   const [spareParts, setSpareParts] = useState({
     'Sediment Carbon': false,
     'Post/Carbon': false,
@@ -32,24 +30,8 @@ const CustomerDetails = ({ customer, onClose }) => {
     console.log('Edit mode activated');
   };
 
-  const getNextRemainderDate = () => {
-    const plan = parseInt(customer.plan);
-    const endDate = new Date(customer.endDate);
-    const today = new Date();
-    
-    if (plan === 3) {
-      return new Date(endDate.getTime() - (30 * 24 * 60 * 60 * 1000));
-    } else if (plan === 6) {
-      return new Date(endDate.getTime() - (60 * 24 * 60 * 60 * 1000));
-    } else if (plan === 12) {
-      return new Date(endDate.getTime() - (90 * 24 * 60 * 60 * 1000));
-    }
-    return endDate;
-  };
-
   const handleNextRemainder = () => {
-    const nextDate = getNextRemainderDate();
-    alert(`Next remainder scheduled for: ${nextDate.toLocaleDateString()}`);
+    alert('Next remainder scheduled!');
   };
 
   return (
@@ -88,13 +70,21 @@ const CustomerDetails = ({ customer, onClose }) => {
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <Package className="text-teal-600 mt-1" size={20} />
-              <div>
-                <p className="text-sm text-gray-600">Partner</p>
-                <p className="font-semibold text-teal-900">{customer.partnerName}</p>
-              </div>
+          <div className="flex items-start gap-3">
+            <Package className="text-teal-600 mt-1" size={20} />
+            <div>
+              <p className="text-sm text-gray-600">Area</p>
+              <p className="font-semibold text-teal-900">{customer.area}</p>
             </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Package className="text-teal-600 mt-1" size={20} />
+            <div>
+              <p className="text-sm text-gray-600">Brand</p>
+              <p className="font-semibold text-teal-900">{customer.brand}</p>
+            </div>
+          </div>
           </div>
 
           <div className="flex items-start gap-3">
@@ -106,38 +96,15 @@ const CustomerDetails = ({ customer, onClose }) => {
           </div>
 
           <div className="bg-teal-50 rounded-lg p-4 border-2 border-teal-200">
-            <h3 className="font-bold text-teal-900 mb-3">Subscription Details</h3>
+            <h3 className="font-bold text-teal-900 mb-3">Service Details</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600">Plan Duration</p>
-                <p className="font-semibold text-teal-900">{customer.plan} Months</p>
+                <p className="text-sm text-gray-600">Service Plan</p>
+                <p className="font-semibold text-teal-900">{customer.service} Months</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Amount</p>
-                <p className="font-semibold text-green-600 text-xl">₹{customer.amount}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Start Date</p>
-                <p className="font-semibold text-teal-900">{customer.startDate}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">End Date</p>
-                <p className="font-semibold text-teal-900">{customer.endDate}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border-2 border-yellow-300">
-            <h3 className="font-bold text-orange-900 mb-3 flex items-center gap-2">
-              <Calendar size={20} />
-              Subscription Status
-            </h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-700">Days Remaining:</span>
-                <span className={`font-bold ${daysLeft < 0 ? 'text-red-600' : daysLeft <= 7 ? 'text-orange-600' : 'text-green-600'}`}>
-                  {daysLeft < 0 ? 'Expired' : `${daysLeft} days`}
-                </span>
+                <p className="text-sm text-gray-600">Brand</p>
+                <p className="font-semibold text-teal-900">{customer.brand}</p>
               </div>
             </div>
           </div>
@@ -227,7 +194,7 @@ const CustomerDetails = ({ customer, onClose }) => {
           <div className="bg-gray-50 rounded-lg p-4">
             <h3 className="font-bold text-teal-900 mb-2">Additional Information</h3>
             <div className="text-sm text-gray-600">
-              <p>Customer ID: #{customer.id}</p>
+            <p>Customer ID: #{customer._id || customer.id}</p>
               <p>Registered: {new Date(customer.createdAt).toLocaleDateString()}</p>
             </div>
           </div>

@@ -26,36 +26,36 @@ const Login = ({ setIsLoggedIn }) => {
       <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <img src={logo} alt="MKL Enterprises" className="h-24 w-auto mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-teal-700">Admin Login</h1>
+          <h1 className="text-3xl font-bold text-blue-700">Admin Login</h1>
           <p className="text-gray-600 mt-2">Access your admin dashboard</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-teal-700 mb-2">User ID <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-semibold text-blue-700 mb-2">User ID <span className="text-red-500">*</span></label>
             <input
               type="text"
               value={credentials.username}
               onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter user ID"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-teal-700 mb-2">Password <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-semibold text-blue-700 mb-2">Password <span className="text-red-500">*</span></label>
             <input
               type="password"
               value={credentials.password}
               onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter password"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-teal-600 text-white py-3 rounded-lg hover:bg-teal-700 transition-colors font-semibold"
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-lg"
           >
             <LogIn size={20} />
             Login to Dashboard

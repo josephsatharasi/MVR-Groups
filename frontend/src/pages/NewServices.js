@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 const NewServices = () => {
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [areaFilter, setAreaFilter] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [services, setServices] = useState([]);
   const [showAddService, setShowAddService] = useState(false);
@@ -38,10 +39,12 @@ const NewServices = () => {
     loadData();
   }, []);
 
-  const filteredCustomers = customers.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.phone.includes(searchTerm)
-  );
+  const filteredCustomers = customers.filter(c => {
+    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         c.phone.includes(searchTerm);
+    const matchesArea = !areaFilter || c.area === areaFilter;
+    return matchesSearch && matchesArea;
+  });
 
   const handleRowClick = async (customer) => {
     setSelectedCustomer(customer);
@@ -228,7 +231,7 @@ const NewServices = () => {
         <p className="text-gray-600">Search and manage customer services</p>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="relative">
           <Search className="absolute left-3 top-3 text-blue-400" size={20} />
           <input
@@ -239,6 +242,28 @@ const NewServices = () => {
             className="w-full pl-10 pr-4 py-3 bg-white border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
           />
         </div>
+        <select
+          value={areaFilter}
+          onChange={(e) => setAreaFilter(e.target.value)}
+          className="w-full px-4 py-3 bg-white border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+        >
+          <option value="">All Areas</option>
+          <option value="Pendurthi">Pendurthi</option>
+          <option value="Kothavalasa">Kothavalasa</option>
+          <option value="Anakapelly">Anakapelly</option>
+          <option value="Chinna Musaliwada">Chinna Musaliwada</option>
+          <option value="NAD Junction">NAD Junction</option>
+          <option value="Marripalem">Marripalem</option>
+          <option value="Gajuwaka">Gajuwaka</option>
+          <option value="Koramanapalem">Koramanapalem</option>
+          <option value="Duvvada">Duvvada</option>
+          <option value="Kancherapalem">Kancherapalem</option>
+          <option value="RTC Complex">RTC Complex</option>
+          <option value="Madhurapalem">Madhurapalem</option>
+          <option value="Madhuruwada">Madhuruwada</option>
+          <option value="Endada">Endada</option>
+          <option value="Anumanthwada">Anumanthwada</option>
+        </select>
       </div>
 
       <div className="rounded-xl shadow-lg overflow-hidden bg-white">
@@ -248,7 +273,7 @@ const NewServices = () => {
               <tr>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Name</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Phone</th>
-                <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Email</th>
+                <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Area</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Address</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Service</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Brand</th>
@@ -263,7 +288,7 @@ const NewServices = () => {
                 >
                   <td className="px-4 md:px-6 py-4 text-sm font-semibold text-blue-700">{customer.name}</td>
                   <td className="px-4 md:px-6 py-4 text-sm">{customer.phone}</td>
-                  <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.email}</td>
+                  <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.area}</td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">{customer.address}</td>
                   <td className="px-4 md:px-6 py-4 text-sm">{customer.service}M</td>
                   <td className="px-4 md:px-6 py-4 text-sm">{customer.brand}</td>

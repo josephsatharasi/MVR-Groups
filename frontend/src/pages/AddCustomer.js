@@ -187,21 +187,21 @@ const AddCustomer = () => {
             className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-auto"
           >
             <option value="">Select Area</option>
-            <option value="Banjara Hills">Banjara Hills</option>
-            <option value="Jubilee Hills">Jubilee Hills</option>
-            <option value="Gachibowli">Gachibowli</option>
-            <option value="Kondapur">Kondapur</option>
-            <option value="Madhapur">Madhapur</option>
-            <option value="Kukatpally">Kukatpally</option>
-            <option value="Miyapur">Miyapur</option>
-            <option value="Ameerpet">Ameerpet</option>
-            <option value="Secunderabad">Secunderabad</option>
-            <option value="Begumpet">Begumpet</option>
-            <option value="Somajiguda">Somajiguda</option>
-            <option value="Punjagutta">Punjagutta</option>
-            <option value="Himayatnagar">Himayatnagar</option>
-            <option value="Abids">Abids</option>
-            <option value="Nampally">Nampally</option>
+            <option value="Pendurthi">Pendurthi</option>
+            <option value="Kothavalasa">Kothavalasa</option>
+            <option value="Anakapelly">Anakapelly</option>
+            <option value="Chinna Musaliwada">Chinna Musaliwada</option>
+            <option value="NAD Junction">NAD Junction</option>
+            <option value="Marripalem">Marripalem</option>
+            <option value="Gajuwaka">Gajuwaka</option>
+            <option value="Koramanapalem">Koramanapalem</option>
+            <option value="Duvvada">Duvvada</option>
+            <option value="Kancherapalem">Kancherapalem</option>
+            <option value="RTC Complex">RTC Complex</option>
+            <option value="Madhurapalem">Madhurapalem</option>
+            <option value="Madhuruwada">Madhuruwada</option>
+            <option value="Endada">Endada</option>
+            <option value="Anumanthwada">Anumanthwada</option>
           </select>
         </div>
 
@@ -231,13 +231,15 @@ const AddCustomer = () => {
             className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Select Brand</option>
+            <option value="Prolife">Prolife</option>
             <option value="Kent">Kent</option>
+            <option value="Merlin">Merlin</option>
+            <option value="Softner">Softner</option>
+            <option value="IRO-plant">IRO-plant</option>
+            <option value="Bpure">Bpure</option>
             <option value="Aquaguard">Aquaguard</option>
-            <option value="Pureit">Pureit</option>
-            <option value="Livpure">Livpure</option>
-            <option value="Blue Star">Blue Star</option>
-            <option value="AO Smith">AO Smith</option>
-            <option value="Havells">Havells</option>
+            <option value="Local">Local</option>
+            <option value="Flipkart">Flipkart</option>
           </select>
         </div>
 

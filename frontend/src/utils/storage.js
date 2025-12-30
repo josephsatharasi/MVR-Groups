@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://mkl-admin-backend.onrender.com/api';
 
 export const getCustomers = async () => {
   try {

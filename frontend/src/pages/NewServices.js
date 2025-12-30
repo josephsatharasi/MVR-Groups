@@ -50,7 +50,7 @@ const NewServices = () => {
 
   const loadServices = async (customerId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/services/customer/${customerId}`);
+      const response = await fetch(`https://mkl-admin-backend.onrender.com/api/services/customer/${customerId}`);
       const data = await response.json();
       setServices(data);
     } catch (error) {
@@ -109,7 +109,7 @@ const NewServices = () => {
         serviceDate: new Date().toISOString()
       };
       
-      const response = await fetch('http://localhost:5000/api/services', {
+      const response = await fetch('https://mkl-admin-backend.onrender.com/api/services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(serviceRecord)

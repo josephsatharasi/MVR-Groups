@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Save, X } from 'lucide-react';
+import { Save, X, Download } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { addCustomer } from '../utils/storage';
+import jsPDF from 'jspdf';
 
 const AddCustomer = () => {
   const navigate = useNavigate();
+  const [savedCustomer, setSavedCustomer] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -40,11 +42,78 @@ const AddCustomer = () => {
     
     try {
       const newCustomer = await addCustomer(formData);
+      setSavedCustomer(newCustomer);
       toast.success(`${newCustomer.name} added successfully!`);
-      setTimeout(() => navigate('/admin/customers'), 1500);
     } catch (error) {
       toast.error(error.message || 'Failed to add customer');
     }
+  };
+
+  const generateInvoice = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, 210, 50, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont(undefined, 'bold');
+    doc.text('MKL ENTERPRISES', 105, 18, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text('Sales & Service', 105, 28, { align: 'center' });
+    doc.setFontSize(8);
+    doc.text('D, 58-1-319, NAD Kotha Rd, opp. Bank of India, Nad Junction', 105, 36, { align: 'center' });
+    doc.text('Buchirajupalem, Dungalavanipalem, Visakhapatnam, AP 530027', 105, 42, { align: 'center' });
+    
+    // Invoice Title
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text('CUSTOMER INVOICE', 105, 65, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Invoice Date: ${new Date().toLocaleDateString('en-GB')}`, 150, 75);
+    doc.text(`Invoice No: INV-${Date.now().toString().slice(-6)}`, 150, 82);
+    
+    // Customer Details Box
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.rect(20, 90, 170, 45);
+    
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('CUSTOMER DETAILS', 25, 98);
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Name: ${savedCustomer.name}`, 25, 108);
+    doc.text(`Phone: ${savedCustomer.phone}`, 25, 116);
+    doc.text(`Email: ${savedCustomer.email}`, 25, 124);
+    doc.text(`Area: ${savedCustomer.area}`, 120, 108);
+    
+    // Service Details Box
+    doc.rect(20, 145, 170, 35);
+    
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('SERVICE DETAILS', 25, 153);
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Service Plan: ${savedCustomer.service} Months`, 25, 163);
+    doc.text(`Purifier Brand: ${savedCustomer.brand}`, 25, 171);
+    
+    // Footer
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Thank you for choosing MKL Enterprises!', 105, 270, { align: 'center' });
+    doc.text('For any queries, please contact us at the above address', 105, 277, { align: 'center' });
+    
+    doc.save(`Invoice_${savedCustomer.name}_${Date.now()}.pdf`);
+    toast.success('Invoice downloaded!');
   };
 
   return (
@@ -173,21 +242,43 @@ const AddCustomer = () => {
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">
-          <button
-            type="submit"
-            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md"
-          >
-            <Save size={20} />
-            Save
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/admin/customers')}
-            className="flex items-center justify-center gap-2 px-6 bg-gray-300 text-blue-700 py-3 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
-          >
-            <X size={20} />
-            Cancel
-          </button>
+          {savedCustomer ? (
+            <>
+              <button
+                type="button"
+                onClick={generateInvoice}
+                className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold shadow-md"
+              >
+                <Download size={20} />
+                Download Invoice
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/customers')}
+                className="flex items-center justify-center gap-2 px-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              >
+                Go to Customers
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="submit"
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md"
+              >
+                <Save size={20} />
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/customers')}
+                className="flex items-center justify-center gap-2 px-6 bg-gray-300 text-blue-700 py-3 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
+              >
+                <X size={20} />
+                Cancel
+              </button>
+            </>
+          )}
         </div>
       </form>
     </div>

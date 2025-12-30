@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, UserPlus, AlertTriangle, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, AlertTriangle, Trash2, Menu, X, LogOut } from 'lucide-react';
 import logo from '../assets/logo.JPG';
 
 const Layout = ({ children, setIsLoggedIn }) => {
@@ -21,6 +21,7 @@ const Layout = ({ children, setIsLoggedIn }) => {
     { path: '/admin/add-customer', icon: UserPlus, label: 'Add Customer' },
     { path: '/admin/customers', icon: Users, label: 'Customer Profile' },
     { path: '/admin/new-services', icon: AlertTriangle, label: 'New Services' },
+    { path: '/admin/bin', icon: Trash2, label: 'Bin' },
   ];
 
   return (

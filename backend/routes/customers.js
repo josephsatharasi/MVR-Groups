@@ -57,13 +57,41 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete customer
+// Delete customer (move to bin)
 router.delete('/:id', async (req, res) => {
   try {
-    const customer = await Customer.findByIdAndDelete(req.params.id);
-    if (!customer) return res.status(404).json({ message: 'Customer not found' });
-    res.json({ message: 'Customer deleted' });
+    console.log('Deleting customer with ID:', req.params.id);
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) {
+      console.log('Customer not found');
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+    
+    console.log('Customer found:', customer.name);
+    
+    // Save to DeletedCustomer collection
+    const DeletedCustomer = require('../models/DeletedCustomer');
+    const deletedCustomer = new DeletedCustomer({
+      name: customer.name,
+      phone: customer.phone,
+      email: customer.email,
+      address: customer.address,
+      area: customer.area,
+      service: customer.service,
+      brand: customer.brand,
+      originalId: customer._id.toString(),
+      createdAt: customer.createdAt
+    });
+    
+    await deletedCustomer.save();
+    console.log('Saved to bin:', deletedCustomer._id);
+    
+    await Customer.findByIdAndDelete(req.params.id);
+    console.log('Deleted from customers');
+    
+    res.json({ message: 'Customer moved to bin' });
   } catch (error) {
+    console.error('Error deleting customer:', error);
     res.status(500).json({ message: error.message });
   }
 });

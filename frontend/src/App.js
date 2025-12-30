@@ -9,6 +9,7 @@ import Customers from './pages/Customers';
 import AddCustomer from './pages/AddCustomer';
 import ExpiryAlerts from './pages/ExpiryAlerts';
 import NewServices from './pages/NewServices';
+import Bin from './pages/Bin';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/add-customer" element={<AddCustomer />} />
                 <Route path="/expiry-alerts" element={<ExpiryAlerts />} />
                 <Route path="/new-services" element={<NewServices />} />
+                <Route path="/bin" element={<Bin />} />
               </Routes>
             </Layout>
           ) : (

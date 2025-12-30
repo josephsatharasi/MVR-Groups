@@ -193,6 +193,24 @@ const AddCustomer = () => {
       
       <form onSubmit={handleSubmit} className="rounded-xl shadow-lg p-4 md:p-6 space-y-4 bg-white border border-gray-200">
         <div>
+          <label className="block text-sm font-semibold text-gray-800 mb-2">Profile Picture</label>
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full border-2 border-blue-200 flex items-center justify-center overflow-hidden bg-gray-50">
+              {profilePic ? (
+                <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User size={32} className="text-gray-400" />
+              )}
+            </div>
+            <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors">
+              <Upload size={18} />
+              Upload Photo
+              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <div>
           <label className="block text-sm font-semibold text-gray-800 mb-2">Customer Name <span className="text-red-500">*</span></label>
           <input
             type="text"
@@ -312,24 +330,6 @@ const AddCustomer = () => {
             <option value="Local">Local</option>
             <option value="Flipkart">Flipkart</option>
           </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-2">Profile Picture</label>
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full border-2 border-blue-200 flex items-center justify-center overflow-hidden bg-gray-50">
-              {profilePic ? (
-                <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <User size={32} className="text-gray-400" />
-              )}
-            </div>
-            <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors">
-              <Upload size={18} />
-              Upload Photo
-              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-            </label>
-          </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">

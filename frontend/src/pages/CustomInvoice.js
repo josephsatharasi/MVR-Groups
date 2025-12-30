@@ -191,38 +191,14 @@ const CustomInvoice = () => {
 
         <div>
           <label className="block text-sm font-semibold text-gray-800 mb-2">Purifier Brand <span className="text-red-500">*</span></label>
-          <select
+          <input
+            type="text"
             name="brand"
             value={formData.brand}
             onChange={handleChange}
             className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Select Brand</option>
-            <option value="Prolife">Prolife</option>
-            <option value="Kent">Kent</option>
-            <option value="Merlin">Merlin</option>
-            <option value="Softner">Softner</option>
-            <option value="IRO-plant">IRO-plant</option>
-            <option value="Bpure">Bpure</option>
-            <option value="Aquaguard">Aquaguard</option>
-            <option value="Local">Local</option>
-            <option value="Flipkart">Flipkart</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-2">Service Plan</label>
-          <select
-            name="service"
-            value={formData.service}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Select Service Plan</option>
-            <option value="3">3 Months</option>
-            <option value="6">6 Months</option>
-            <option value="12">12 Months</option>
-          </select>
+            placeholder="Enter brand name"
+          />
         </div>
 
         <div>

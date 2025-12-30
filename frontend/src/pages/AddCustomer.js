@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Save, X, Download } from 'lucide-react';
+import { Save, X, Download, Upload, User } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { addCustomer } from '../utils/storage';
 import jsPDF from 'jspdf';
@@ -8,6 +8,8 @@ import jsPDF from 'jspdf';
 const AddCustomer = () => {
   const navigate = useNavigate();
   const [savedCustomer, setSavedCustomer] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -32,6 +34,21 @@ const AddCustomer = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5000000) {
+        toast.error('File size should be less than 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -41,8 +58,11 @@ const AddCustomer = () => {
     }
     
     try {
-      const newCustomer = await addCustomer(formData);
-      setSavedCustomer(newCustomer);
+      const customerData = { ...formData, profilePic };
+      console.log('Submitting customer with profilePic:', profilePic ? 'Yes' : 'No');
+      const newCustomer = await addCustomer(customerData);
+      console.log('Saved customer:', newCustomer);
+      setSavedCustomer({ ...newCustomer, profilePic });
       toast.success(`${newCustomer.name} added successfully!`);
     } catch (error) {
       toast.error(error.message || 'Failed to add customer');
@@ -51,68 +71,117 @@ const AddCustomer = () => {
 
   const generateInvoice = () => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
     
-    // Header
-    doc.setFillColor(37, 99, 235);
-    doc.rect(0, 0, 210, 50, 'F');
+    // Header - Dark Blue Background
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageWidth, 50, 'F');
     
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
+    doc.setFontSize(22);
     doc.setFont(undefined, 'bold');
-    doc.text('MKL ENTERPRISES', 105, 18, { align: 'center' });
-    doc.setFontSize(12);
+    doc.text('MKL ENTERPRISES', pageWidth / 2, 15, { align: 'center' });
+    
+    doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
-    doc.text('Sales & Service', 105, 28, { align: 'center' });
+    doc.text('Sales & Service', pageWidth / 2, 23, { align: 'center' });
+    
     doc.setFontSize(8);
-    doc.text('D, 58-1-319, NAD Kotha Rd, opp. Bank of India, Nad Junction', 105, 36, { align: 'center' });
-    doc.text('Buchirajupalem, Dungalavanipalem, Visakhapatnam, AP 530027', 105, 42, { align: 'center' });
+    doc.text('Address: D, 58-1-319, NAD Kotha Rd, opp. Bank of India, Nad Junction,', pageWidth / 2, 31, { align: 'center' });
+    doc.text('Buchirajupalem, Dungalavanipalem, Visakhapatnam, Andhra Pradesh 530027', pageWidth / 2, 37, { align: 'center' });
+    doc.text('Contact: 8179019929', pageWidth / 2, 44, { align: 'center' });
     
-    // Invoice Title
+    // Title
     doc.setTextColor(0, 0, 0);
-    doc.setFontSize(18);
+    doc.setFontSize(16);
     doc.setFont(undefined, 'bold');
-    doc.text('CUSTOMER INVOICE', 105, 65, { align: 'center' });
+    doc.text('SERVICE RECEIPT', pageWidth / 2, 63, { align: 'center' });
     
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Invoice Date: ${new Date().toLocaleDateString('en-GB')}`, 150, 75);
-    doc.text(`Invoice No: INV-${Date.now().toString().slice(-6)}`, 150, 82);
-    
-    // Customer Details Box
-    doc.setDrawColor(37, 99, 235);
+    // Receipt ID and Date
+    doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.5);
-    doc.rect(20, 90, 170, 45);
+    doc.line(20, 70, pageWidth - 20, 70);
     
-    doc.setFontSize(12);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    const receiptId = `#${Date.now().toString().slice(-4)}`;
+    const currentDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '/');
+    doc.text(`Receipt ID: ${receiptId}`, 20, 78);
+    doc.text(`Date: ${currentDate}`, pageWidth - 20, 78, { align: 'right' });
+    
+    // Customer Details Section
+    doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
-    doc.text('CUSTOMER DETAILS', 25, 98);
+    doc.text('CUSTOMER DETAILS:', 20, 93);
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Name: ${savedCustomer.name}`, 20, 103);
+    doc.text(`Phone: +91 ${savedCustomer.phone}`, 20, 111);
+    doc.text(`Email: ${savedCustomer.email}`, 20, 119);
+    
+    // Address with larger font
+    const addressLines = doc.splitTextToSize(`Address: ${savedCustomer.address}`, pageWidth - 40);
+    let addressY = 127;
+    addressLines.forEach(line => {
+      doc.text(line, 20, addressY);
+      addressY += 7;
+    });
+    
+    // Service Details Section
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('SERVICE DETAILS:', 20, addressY + 8);
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Partner: ${savedCustomer.brand}`, 20, addressY + 18);
+    doc.text(`Plan Duration: ${savedCustomer.service} Months`, 20, addressY + 26);
+    
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + parseInt(savedCustomer.service));
+    
+    doc.text(`Start Date: ${startDate.toLocaleDateString('en-GB').replace(/\//g, '-')}`, 20, addressY + 34);
+    doc.text(`End Date: ${endDate.toLocaleDateString('en-GB').replace(/\//g, '-')}`, 20, addressY + 42);
+    
+    // Payment Details Section
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, addressY + 53, pageWidth - 40, 25, 'F');
+    
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('PAYMENT DETAILS:', 25, addressY + 63);
     
     doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Name: ${savedCustomer.name}`, 25, 108);
-    doc.text(`Phone: ${savedCustomer.phone}`, 25, 116);
-    doc.text(`Email: ${savedCustomer.email}`, 25, 124);
-    doc.text(`Area: ${savedCustomer.area}`, 120, 108);
-    
-    // Service Details Box
-    doc.rect(20, 145, 170, 35);
-    
-    doc.setFontSize(12);
+    doc.setTextColor(0, 128, 0);
     doc.setFont(undefined, 'bold');
-    doc.text('SERVICE DETAILS', 25, 153);
+    doc.text('Amount Paid: Service Activated', 25, addressY + 72);
     
-    doc.setFontSize(10);
+    // Terms & Conditions
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'italic');
+    doc.text('Terms & Conditions:', 20, addressY + 93);
+    
     doc.setFont(undefined, 'normal');
-    doc.text(`Service Plan: ${savedCustomer.service} Months`, 25, 163);
-    doc.text(`Purifier Brand: ${savedCustomer.brand}`, 25, 171);
+    doc.setFontSize(8);
+    doc.text('1. Regular maintenance included as per plan', 20, addressY + 101);
+    doc.text('2. Customer must notify 7 days before plan expiry for renewal', 20, addressY + 108);
+    doc.text('3. Installation charges may apply for new connections', 20, addressY + 115);
+    
+    // Footer Line
+    doc.setLineWidth(0.5);
+    doc.line(20, 260, pageWidth - 20, 260);
     
     // Footer
     doc.setFontSize(9);
-    doc.setTextColor(100, 100, 100);
-    doc.text('Thank you for choosing MKL Enterprises!', 105, 270, { align: 'center' });
-    doc.text('For any queries, please contact us at the above address', 105, 277, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    doc.text('Thank you for choosing MKL Enterprises!', pageWidth / 2, 270, { align: 'center' });
+    doc.setFontSize(8);
+    doc.text('For support: Contact 8179019929', pageWidth / 2, 277, { align: 'center' });
     
-    doc.save(`Invoice_${savedCustomer.name}_${Date.now()}.pdf`);
+    doc.save(`Service_Invoice_${savedCustomer.name}_${Date.now()}.pdf`);
     toast.success('Invoice downloaded!');
   };
 
@@ -243,6 +312,24 @@ const AddCustomer = () => {
           </select>
         </div>
 
+        <div>
+          <label className="block text-sm font-semibold text-gray-800 mb-2">Profile Picture</label>
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full border-2 border-blue-200 flex items-center justify-center overflow-hidden bg-gray-50">
+              {profilePic ? (
+                <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User size={32} className="text-gray-400" />
+              )}
+            </div>
+            <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors">
+              <Upload size={18} />
+              Upload Photo
+              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+            </label>
+          </div>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-4">
           {savedCustomer ? (
             <>
@@ -256,10 +343,22 @@ const AddCustomer = () => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/admin/customers')}
+                onClick={() => {
+                  setSavedCustomer(null);
+                  setFormData({
+                    name: '',
+                    phone: '',
+                    email: '',
+                    address: '',
+                    area: '',
+                    service: '',
+                    brand: '',
+                  });
+                  setProfilePic(null);
+                }}
                 className="flex items-center justify-center gap-2 px-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
               >
-                Go to Customers
+                Add Another
               </button>
             </>
           ) : (

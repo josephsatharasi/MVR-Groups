@@ -8,6 +8,7 @@ const customerSchema = new mongoose.Schema({
   area: String,
   service: String,
   brand: String,
+  profilePic: String,
   createdAt: { type: Date, default: Date.now }
 });
 

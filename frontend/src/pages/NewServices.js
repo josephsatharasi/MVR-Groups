@@ -10,6 +10,7 @@ const NewServices = () => {
   const [areaFilter, setAreaFilter] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [services, setServices] = useState([]);
+  const [yearFilter, setYearFilter] = useState('');
   const [showAddService, setShowAddService] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const [savedService, setSavedService] = useState(null);
@@ -48,6 +49,7 @@ const NewServices = () => {
 
   const handleRowClick = async (customer) => {
     setSelectedCustomer(customer);
+    setYearFilter('');
     await loadServices(customer._id);
   };
 
@@ -131,96 +133,120 @@ const NewServices = () => {
 
   const generateServiceInvoice = () => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
     
-    // Header
-    doc.setFillColor(37, 99, 235);
-    doc.rect(0, 0, 210, 50, 'F');
+    // Header - Dark Blue Background
+    doc.setFillColor(30, 58, 138);
+    doc.rect(0, 0, pageWidth, 50, 'F');
     
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
+    doc.setFontSize(22);
     doc.setFont(undefined, 'bold');
-    doc.text('MKL ENTERPRISES', 105, 18, { align: 'center' });
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
-    doc.text('Sales & Service', 105, 28, { align: 'center' });
-    doc.setFontSize(8);
-    doc.text('D, 58-1-319, NAD Kotha Rd, opp. Bank of India, Nad Junction', 105, 36, { align: 'center' });
-    doc.text('Buchirajupalem, Dungalavanipalem, Visakhapatnam, AP 530027', 105, 42, { align: 'center' });
+    doc.text('MKL ENTERPRISES', pageWidth / 2, 15, { align: 'center' });
     
-    // Invoice Title
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text('Sales & Service', pageWidth / 2, 23, { align: 'center' });
+    
+    doc.setFontSize(7);
+    doc.text('Address: D, 58-1-319, NAD Kotha Rd, opp. Bank of India, Nad Junction,', pageWidth / 2, 31, { align: 'center' });
+    doc.text('Buchirajupalem, Dungalavanipalem, Visakhapatnam, Andhra Pradesh 530027', pageWidth / 2, 37, { align: 'center' });
+    doc.text('Contact: 8179019929', pageWidth / 2, 44, { align: 'center' });
+    
+    // Title
     doc.setTextColor(0, 0, 0);
-    doc.setFontSize(18);
+    doc.setFontSize(16);
     doc.setFont(undefined, 'bold');
-    doc.text('SERVICE INVOICE', 105, 65, { align: 'center' });
+    doc.text('SERVICE RECEIPT', pageWidth / 2, 63, { align: 'center' });
     
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Service Date: ${new Date(savedService.serviceDate).toLocaleDateString('en-GB')}`, 150, 75);
-    doc.text(`Invoice No: SRV-${Date.now().toString().slice(-6)}`, 150, 82);
-    
-    // Customer Details Box
-    doc.setDrawColor(37, 99, 235);
+    // Receipt ID and Date
+    doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.5);
-    doc.rect(20, 90, 170, 30);
+    doc.line(20, 70, pageWidth - 20, 70);
     
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('CUSTOMER DETAILS', 25, 98);
-    
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
-    doc.text(`Name: ${selectedCustomer.name}`, 25, 108);
-    doc.text(`Phone: ${selectedCustomer.phone}`, 25, 116);
+    const receiptId = `#${Date.now().toString().slice(-4)}`;
+    const serviceDate = new Date(savedService.serviceDate).toLocaleDateString('en-GB').replace(/\//g, '/');
+    doc.text(`Receipt ID: ${receiptId}`, 20, 78);
+    doc.text(`Date: ${serviceDate}`, pageWidth - 20, 78, { align: 'right' });
     
-    // Spare Parts Table
-    doc.setFontSize(12);
+    // Customer Details Section
+    doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
-    doc.text('SPARE PARTS USED', 25, 135);
+    doc.text('CUSTOMER DETAILS:', 20, 93);
     
-    // Table Header
-    doc.setFillColor(37, 99, 235);
-    doc.rect(20, 140, 170, 10, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(10);
-    doc.text('S.No', 25, 147);
-    doc.text('Part Name', 50, 147);
-    doc.text('Status', 150, 147);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Name: ${selectedCustomer.name}`, 20, 103);
+    doc.text(`Phone: +91 ${selectedCustomer.phone}`, 20, 111);
+    doc.text(`Email: ${selectedCustomer.email}`, 20, 119);
+    doc.text(`Address: ${selectedCustomer.address}`, 20, 127);
     
-    // Table Body
-    doc.setTextColor(0, 0, 0);
-    let yPos = 157;
-    let sno = 1;
+    // Service Details Section
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('SERVICE DETAILS:', 20, 143);
+    
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Partner: ${selectedCustomer.brand}`, 20, 153);
+    doc.text('Spare Parts Replaced:', 20, 161);
+    
+    let yPos = 169;
+    let partCount = 0;
     Object.entries(savedService.spareParts).forEach(([part, used]) => {
       if (used) {
-        doc.text(sno.toString(), 25, yPos);
-        doc.text(part, 50, yPos);
-        doc.text('✓ Used', 150, yPos);
-        yPos += 8;
-        sno++;
+        partCount++;
+        doc.text(`  ${partCount}. ${part} - Completed`, 25, yPos);
+        yPos += 7;
       }
     });
     
-    // Payment Details Box
-    yPos += 10;
-    doc.setFillColor(240, 240, 240);
-    doc.rect(20, yPos, 170, 30, 'F');
+    if (partCount === 0) {
+      doc.text('  No parts replaced', 25, yPos);
+      yPos += 7;
+    }
     
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('PAYMENT DETAILS', 25, yPos + 10);
+    // Payment Details Section
+    yPos += 5;
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, yPos, pageWidth - 40, 25, 'F');
     
     doc.setFontSize(11);
-    doc.text(`Total Amount: ₹${savedService.totalBill}`, 25, yPos + 20);
-    doc.text(`Payment Mode: ${savedService.paymentMode}`, 100, yPos + 20);
+    doc.setFont(undefined, 'bold');
+    doc.text('PAYMENT DETAILS:', 25, yPos + 10);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(0, 128, 0);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Amount Paid: Rs.${savedService.totalBill} (${savedService.paymentMode})`, 25, yPos + 19);
+    
+    // Terms & Conditions
+    yPos += 35;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'italic');
+    doc.text('Terms & Conditions:', 20, yPos);
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8);
+    doc.text('1. Regular maintenance included as per plan', 20, yPos + 8);
+    doc.text('2. Customer must notify 7 days before plan expiry for renewal', 20, yPos + 15);
+    doc.text('3. Installation charges may apply for new connections', 20, yPos + 22);
+    
+    // Footer Line
+    doc.setLineWidth(0.5);
+    doc.line(20, 260, pageWidth - 20, 260);
     
     // Footer
     doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
-    doc.setTextColor(100, 100, 100);
-    doc.text('Thank you for choosing MKL Enterprises!', 105, 270, { align: 'center' });
-    doc.text('For any queries, please contact us at the above address', 105, 277, { align: 'center' });
+    doc.text('Thank you for choosing MKL Enterprises!', pageWidth / 2, 270, { align: 'center' });
+    doc.setFontSize(8);
+    doc.text('For support: Contact 8179019929', pageWidth / 2, 277, { align: 'center' });
     
-    doc.save(`Service_Invoice_${selectedCustomer.name}_${Date.now()}.pdf`);
+    doc.save(`Service_Receipt_${selectedCustomer.name}_${Date.now()}.pdf`);
     toast.success('Invoice downloaded!');
   };
 
@@ -277,23 +303,32 @@ const NewServices = () => {
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Address</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Service</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Brand</th>
+                <th className="px-4 md:px-6 py-3 text-left text-sm">Expire Date</th>
               </tr>
             </thead>
             <tbody>
-              {filteredCustomers.map((customer, index) => (
-                <tr 
-                  key={customer._id || customer.id} 
-                  onClick={() => handleRowClick(customer)}
-                  className={`transition-all hover:bg-blue-100 cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}`}
-                >
-                  <td className="px-4 md:px-6 py-4 text-sm font-semibold text-blue-700">{customer.name}</td>
-                  <td className="px-4 md:px-6 py-4 text-sm">{customer.phone}</td>
-                  <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.area}</td>
-                  <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">{customer.address}</td>
-                  <td className="px-4 md:px-6 py-4 text-sm">{customer.service}M</td>
-                  <td className="px-4 md:px-6 py-4 text-sm">{customer.brand}</td>
-                </tr>
-              ))}
+              {filteredCustomers.map((customer, index) => {
+                const serviceDate = customer.serviceDate ? new Date(customer.serviceDate) : new Date();
+                const expireDate = new Date(serviceDate);
+                expireDate.setMonth(expireDate.getMonth() + parseInt(customer.service || 0));
+                const formattedExpireDate = expireDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                
+                return (
+                  <tr 
+                    key={customer._id || customer.id} 
+                    onClick={() => handleRowClick(customer)}
+                    className={`transition-all hover:bg-blue-100 cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}`}
+                  >
+                    <td className="px-4 md:px-6 py-4 text-sm font-semibold text-blue-700">{customer.name}</td>
+                    <td className="px-4 md:px-6 py-4 text-sm">{customer.phone}</td>
+                    <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.area}</td>
+                    <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">{customer.address}</td>
+                    <td className="px-4 md:px-6 py-4 text-sm">{customer.service}M</td>
+                    <td className="px-4 md:px-6 py-4 text-sm">{customer.brand}</td>
+                    <td className="px-4 md:px-6 py-4 text-sm font-semibold text-red-600">{formattedExpireDate}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -314,19 +349,35 @@ const NewServices = () => {
 
             <div className="p-6 space-y-6">
               <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
-                <div className="flex justify-between items-center mb-3">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3">
                   <h3 className="font-bold text-blue-900">All Services</h3>
-                  <button
-                    onClick={handleAddService}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-                  >
-                    <Plus size={18} />
-                    Add New Service
-                  </button>
+                  <div className="flex gap-2 w-full md:w-auto">
+                    <select
+                      value={yearFilter}
+                      onChange={(e) => setYearFilter(e.target.value)}
+                      className="px-3 py-2 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    >
+                      <option value="">All Years</option>
+                      {[...new Set(services.map(s => new Date(s.serviceDate).getFullYear()))]
+                        .sort((a, b) => b - a)
+                        .map(year => (
+                          <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                    <button
+                      onClick={handleAddService}
+                      className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm"
+                    >
+                      <Plus size={18} />
+                      Add New Service
+                    </button>
+                  </div>
                 </div>
-                {services.length > 0 ? (
+                {services.filter(s => !yearFilter || new Date(s.serviceDate).getFullYear().toString() === yearFilter).length > 0 ? (
                   <div className="space-y-2">
-                    {services.map((service) => (
+                    {services
+                      .filter(s => !yearFilter || new Date(s.serviceDate).getFullYear().toString() === yearFilter)
+                      .map((service) => (
                       <div
                         key={service._id}
                         onClick={() => handleViewService(service)}
@@ -342,7 +393,7 @@ const NewServices = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-4">No service history</p>
+                  <p className="text-gray-500 text-center py-4">{yearFilter ? `No services found for ${yearFilter}` : 'No service history'}</p>
                 )}
               </div>
             </div>

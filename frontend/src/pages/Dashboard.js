@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, CheckCircle, AlertTriangle, XCircle, UserPlus, TrendingUp, Calendar } from 'lucide-react';
+import { Users, CheckCircle, AlertTriangle, XCircle, UserPlus } from 'lucide-react';
 import { getCustomers } from '../utils/storage';
 
 const Dashboard = () => {
@@ -23,13 +23,6 @@ const Dashboard = () => {
         expiringSoon: 0,
         expired: 0,
       });
-
-      const recent = customers.slice(0, 5).map(c => ({
-        name: c.name,
-        date: new Date(c.createdAt).toLocaleDateString(),
-        plan: `${c.service} Months`
-      }));
-      setRecentActivity(recent);
     };
     loadData();
   }, []);
@@ -64,44 +57,17 @@ const Dashboard = () => {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-xl shadow-lg p-6 bg-white border border-gray-200">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <Link to="/admin/add-customer" className="flex items-center gap-2 w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md">
-              <UserPlus size={20} />
-              Add New Customer
-            </Link>
-            <Link to="/admin/new-services" className="flex items-center gap-2 w-full bg-yellow-500 text-white py-3 px-4 rounded-lg hover:bg-yellow-600 transition-colors font-semibold shadow-md">
-              <AlertTriangle size={20} />
-              View Expiry Alerts
-            </Link>
-          </div>
-        </div>
-
-        <div className="rounded-xl shadow-lg p-6 bg-white border border-gray-200">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <TrendingUp size={24} />
-            Recent Activity
-          </h2>
-          <div className="space-y-3">
-            {recentActivity.length > 0 ? (
-              recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <div>
-                    <p className="font-semibold text-blue-700">{activity.name}</p>
-                    <p className="text-sm text-blue-600">{activity.plan}</p>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm text-blue-600">
-                    <Calendar size={16} />
-                    {activity.date}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-center py-4">No recent activity</p>
-            )}
-          </div>
+      <div className="rounded-xl shadow-lg p-6 bg-white border border-gray-200 max-w-md">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
+        <div className="space-y-3">
+          <Link to="/admin/add-customer" className="flex items-center gap-2 w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md">
+            <UserPlus size={20} />
+            Add New Customer
+          </Link>
+          <Link to="/admin/new-services" className="flex items-center gap-2 w-full bg-yellow-500 text-white py-3 px-4 rounded-lg hover:bg-yellow-600 transition-colors font-semibold shadow-md">
+            <AlertTriangle size={20} />
+            View Expiry Alerts
+          </Link>
         </div>
       </div>
     </div>

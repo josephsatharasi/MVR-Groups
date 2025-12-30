@@ -9,6 +9,7 @@ import Customers from './pages/Customers';
 import AddCustomer from './pages/AddCustomer';
 import ExpiryAlerts from './pages/ExpiryAlerts';
 import NewServices from './pages/NewServices';
+import CustomInvoice from './pages/CustomInvoice';
 import Bin from './pages/Bin';
 
 function App() {
@@ -16,7 +17,29 @@ function App() {
     return localStorage.getItem('isLoggedIn') === 'true';
   });
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const preventCopyPaste = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const preventContextMenu = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    document.addEventListener('copy', preventCopyPaste);
+    document.addEventListener('cut', preventCopyPaste);
+    document.addEventListener('paste', preventCopyPaste);
+    document.addEventListener('contextmenu', preventContextMenu);
+
+    return () => {
+      document.removeEventListener('copy', preventCopyPaste);
+      document.removeEventListener('cut', preventCopyPaste);
+      document.removeEventListener('paste', preventCopyPaste);
+      document.removeEventListener('contextmenu', preventContextMenu);
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('isLoggedIn', isLoggedIn);
@@ -37,6 +60,7 @@ function App() {
                 <Route path="/add-customer" element={<AddCustomer />} />
                 <Route path="/expiry-alerts" element={<ExpiryAlerts />} />
                 <Route path="/new-services" element={<NewServices />} />
+                <Route path="/custom-invoice" element={<CustomInvoice />} />
                 <Route path="/bin" element={<Bin />} />
               </Routes>
             </Layout>

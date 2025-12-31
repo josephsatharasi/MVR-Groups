@@ -1,44 +1,43 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { LogIn } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Mail } from 'lucide-react';
 import { toast } from 'react-toastify';
 import logo from '../assets/logo.JPG';
 
 const API_URL = 'http://localhost:5000/api';
 
-const Login = ({ setIsLoggedIn }) => {
-  const navigate = useNavigate();
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
+const ForgotPassword = () => {
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetLink, setResetLink] = useState('');
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!credentials.email || !credentials.password) {
-      toast.error('Please enter email and password');
+    if (!email) {
+      toast.error('Please enter your email');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
+        body: JSON.stringify({ email })
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setIsLoggedIn(true);
-        toast.success('Login successful');
-        navigate('/admin');
+        toast.success('Reset link sent to your email');
+        setEmail('');
+        setResetLink('');
       } else {
-        toast.error(data.message || 'Login failed');
+        toast.error(data.message || 'Failed to send reset link');
       }
     } catch (error) {
+      console.error('Error:', error);
       toast.error('Server error. Please try again.');
     } finally {
       setLoading(false);
@@ -58,30 +57,19 @@ const Login = ({ setIsLoggedIn }) => {
       <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <img src={logo} alt="MKL Enterprises" className="h-24 w-auto mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-blue-700">Admin Login</h1>
-          <p className="text-gray-600 mt-2">Access your admin dashboard</p>
+          <h1 className="text-3xl font-bold text-blue-700">Forgot Password</h1>
+          <p className="text-gray-600 mt-2">Enter your email to reset password</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-blue-700 mb-2">Email <span className="text-red-500">*</span></label>
             <input
               type="email"
-              value={credentials.email}
-              onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter email"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-blue-700 mb-2">Password <span className="text-red-500">*</span></label>
-            <input
-              type="password"
-              value={credentials.password}
-              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter password"
+              placeholder="Enter your email"
             />
           </div>
 
@@ -90,21 +78,17 @@ const Login = ({ setIsLoggedIn }) => {
             disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <LogIn size={20} />
-            {loading ? 'Logging in...' : 'Login to Dashboard'}
+            <Mail size={20} />
+            {loading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </form>
 
-        <div className="text-center text-sm text-gray-600 mt-4">
-          <Link to="/forgot-password" className="text-blue-600 font-semibold hover:underline">Forgot Password?</Link>
-        </div>
-
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Don't have an account? <Link to="/register" className="text-blue-600 font-semibold hover:underline">Register here</Link>
+        <p className="text-center text-sm text-gray-600 mt-6">
+          Remember your password? <Link to="/" className="text-blue-600 font-semibold hover:underline">Login here</Link>
         </p>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default ForgotPassword;

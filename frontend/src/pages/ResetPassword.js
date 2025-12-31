@@ -1,42 +1,46 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { LogIn } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import logo from '../assets/logo.JPG';
 
 const API_URL = 'http://localhost:5000/api';
 
-const Login = ({ setIsLoggedIn }) => {
+const ResetPassword = () => {
   const navigate = useNavigate();
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+  const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!credentials.email || !credentials.password) {
-      toast.error('Please enter email and password');
+    if (!formData.password || !formData.confirmPassword) {
+      toast.error('Please fill all fields');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
+        body: JSON.stringify({ token, password: formData.password })
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setIsLoggedIn(true);
-        toast.success('Login successful');
-        navigate('/admin');
+        toast.success('Password reset successful! Please login.');
+        navigate('/');
       } else {
-        toast.error(data.message || 'Login failed');
+        toast.error(data.message || 'Failed to reset password');
       }
     } catch (error) {
       toast.error('Server error. Please try again.');
@@ -58,30 +62,30 @@ const Login = ({ setIsLoggedIn }) => {
       <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <img src={logo} alt="MKL Enterprises" className="h-24 w-auto mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-blue-700">Admin Login</h1>
-          <p className="text-gray-600 mt-2">Access your admin dashboard</p>
+          <h1 className="text-3xl font-bold text-blue-700">Reset Password</h1>
+          <p className="text-gray-600 mt-2">Enter your new password</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-blue-700 mb-2">Email <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-semibold text-blue-700 mb-2">New Password <span className="text-red-500">*</span></label>
             <input
-              type="email"
-              value={credentials.email}
-              onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter email"
+              placeholder="Enter new password"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-blue-700 mb-2">Password <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-semibold text-blue-700 mb-2">Confirm Password <span className="text-red-500">*</span></label>
             <input
               type="password"
-              value={credentials.password}
-              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter password"
+              placeholder="Confirm new password"
             />
           </div>
 
@@ -90,21 +94,13 @@ const Login = ({ setIsLoggedIn }) => {
             disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <LogIn size={20} />
-            {loading ? 'Logging in...' : 'Login to Dashboard'}
+            <Lock size={20} />
+            {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>
-
-        <div className="text-center text-sm text-gray-600 mt-4">
-          <Link to="/forgot-password" className="text-blue-600 font-semibold hover:underline">Forgot Password?</Link>
-        </div>
-
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Don't have an account? <Link to="/register" className="text-blue-600 font-semibold hover:underline">Register here</Link>
-        </p>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default ResetPassword;

@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
@@ -51,6 +54,9 @@ function App() {
       <Router>
       <Routes>
         <Route path="/" element={isLoggedIn ? <Navigate to="/admin" /> : <Login setIsLoggedIn={setIsLoggedIn} />} />
+        <Route path="/register" element={isLoggedIn ? <Navigate to="/admin" /> : <Register />} />
+        <Route path="/forgot-password" element={isLoggedIn ? <Navigate to="/admin" /> : <ForgotPassword />} />
+        <Route path="/reset-password" element={isLoggedIn ? <Navigate to="/admin" /> : <ResetPassword />} />
         <Route path="/admin/*" element={
           isLoggedIn ? (
             <Layout setIsLoggedIn={setIsLoggedIn}>

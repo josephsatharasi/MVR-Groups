@@ -47,15 +47,15 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center">
+        <div className="text-white p-6 flex justify-between items-center" style={{background: '#3ea4f0'}}>
           <h2 className="text-2xl font-bold">{isEditing ? 'Edit Customer' : 'Customer Profile'}</h2>
           <div className="flex gap-2">
             {!isEditing && (
-              <button onClick={() => setIsEditing(true)} className="hover:bg-blue-500 p-2 rounded-lg transition-colors" title="Edit Customer">
+              <button onClick={() => setIsEditing(true)} className="p-2 rounded-lg transition-colors" style={{backgroundColor: 'rgba(62, 164, 240, 0.2)'}} title="Edit Customer">
                 <Edit2 size={24} />
               </button>
             )}
-            <button onClick={onClose} className="hover:bg-blue-500 p-2 rounded-lg transition-colors">
+            <button onClick={onClose} className="p-2 rounded-lg transition-colors" style={{backgroundColor: 'rgba(62, 164, 240, 0.2)'}}>
               <X size={24} />
             </button>
           </div>
@@ -63,7 +63,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
 
         <div className="p-6 space-y-6">
           <div className="flex justify-center">
-            <div className="w-32 h-32 rounded-full border-4 border-blue-500 overflow-hidden bg-gray-100">
+            <div className="w-32 h-32 rounded-full border-4 overflow-hidden bg-gray-100" style={{borderColor: '#3ea4f0'}}>
               {customer.profilePic ? (
                 <img src={customer.profilePic} alt={customer.name} className="w-full h-full object-cover" />
               ) : (
@@ -76,7 +76,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
-              <User className="text-blue-600 mt-1" size={20} />
+              <User className="mt-1" style={{color: '#3ea4f0'}} size={20} />
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Customer Name</p>
                 {isEditing ? (
@@ -88,7 +88,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
             </div>
 
             <div className="flex items-start gap-3">
-              <Phone className="text-blue-600 mt-1" size={20} />
+              <Phone className="mt-1" style={{color: '#3ea4f0'}} size={20} />
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Phone Number</p>
                 {isEditing ? (
@@ -100,7 +100,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
             </div>
 
             <div className="flex items-start gap-3">
-              <Mail className="text-blue-600 mt-1" size={20} />
+              <Mail className="mt-1" style={{color: '#3ea4f0'}} size={20} />
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Email</p>
                 {isEditing ? (
@@ -112,7 +112,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
             </div>
 
             <div className="flex items-start gap-3">
-              <Package className="text-blue-600 mt-1" size={20} />
+              <Package className="mt-1" style={{color: '#3ea4f0'}} size={20} />
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Area</p>
                 {isEditing ? (
@@ -124,7 +124,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
             </div>
 
             <div className="flex items-start gap-3">
-              <Package className="text-blue-600 mt-1" size={20} />
+              <Package className="mt-1" style={{color: '#3ea4f0'}} size={20} />
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Brand</p>
                 {isEditing ? (
@@ -136,7 +136,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
             </div>
 
             <div className="flex items-start gap-3">
-              <Package className="text-blue-600 mt-1" size={20} />
+              <Package className="mt-1" style={{color: '#3ea4f0'}} size={20} />
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Service (Months)</p>
                 {isEditing ? (
@@ -148,7 +148,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
             </div>
 
             <div className="flex items-start gap-3">
-              <Package className="text-blue-600 mt-1" size={20} />
+              <Package className="mt-1" style={{color: '#3ea4f0'}} size={20} />
               <div>
                 <p className="text-sm text-gray-600">Recent Service Date</p>
                 <p className="font-semibold text-blue-900">
@@ -172,7 +172,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
           </div>
 
           <div className="flex items-start gap-3">
-            <MapPin className="text-blue-600 mt-1" size={20} />
+            <MapPin className="mt-1" style={{color: '#3ea4f0'}} size={20} />
             <div className="flex-1">
               <p className="text-sm text-gray-600">Address</p>
               {isEditing ? (
@@ -196,7 +196,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
               <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button onClick={handleSave} className="px-4 py-2 text-white rounded-lg transition-colors" style={{background: '#3ea4f0'}}>
                 Save Changes
               </button>
             </div>

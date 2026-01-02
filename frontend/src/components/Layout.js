@@ -28,15 +28,15 @@ const Layout = ({ children, setIsLoggedIn }) => {
   return (
     <div className="flex h-screen bg-white">
       {/* Desktop Sidebar */}
-      <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-blue-600 to-blue-800 text-white transition-all duration-300 hidden md:flex flex-col shadow-xl`}>
+      <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} text-white transition-all duration-300 hidden md:flex flex-col shadow-xl`} style={{background: 'linear-gradient(to bottom, #3ea4f0, #2a8fd6)'}}>
         <div className="p-4 flex items-center justify-between border-b border-blue-400">
           {isSidebarOpen && (
             <Link to="/admin">
-              <img src={logo} alt="MKL" className="h-12 bg-white p-1 rounded cursor-pointer hover:opacity-90 transition-opacity" />
+              <img src={logo} alt="MKL" className="h-16 bg-white p-1 rounded" />
             </Link>
           )}
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white hover:text-teal-200">
-            <Menu size={20} />
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white" style={{opacity: 0.9}}>
+            {isSidebarOpen ? <Menu size={20} /> : <Menu size={20} />}
           </button>
         </div>
         
@@ -49,9 +49,10 @@ const Layout = ({ children, setIsLoggedIn }) => {
                 to={item.path}
                 className={`flex items-center gap-3 p-3 mb-2 rounded-lg transition-colors ${
                   location.pathname === item.path
-                    ? 'bg-blue-500 text-white shadow-lg'
-                    : 'hover:bg-blue-600 text-blue-50'
+                    ? 'text-white shadow-lg'
+                    : 'text-blue-50'
                 }`}
+                style={location.pathname === item.path ? {background: '#3ea4f0'} : {}}
               >
                 <Icon size={20} />
                 {isSidebarOpen && <span>{item.label}</span>}
@@ -61,13 +62,24 @@ const Layout = ({ children, setIsLoggedIn }) => {
         </nav>
 
         {isSidebarOpen && (
-          <div className="p-4 border-t border-blue-400">
+          <div className="p-4 border-t" style={{borderColor: 'rgba(255,255,255,0.3)'}}>
             <button
               onClick={() => setShowLogoutConfirm(true)}
-              className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2 px-4 rounded-lg transition-colors"
             >
               <LogOut size={18} />
               Logout
+            </button>
+          </div>
+        )}
+        {!isSidebarOpen && (
+          <div className="p-4 border-t flex justify-center" style={{borderColor: 'rgba(255,255,255,0.3)'}}>
+            <button
+              onClick={() => setShowLogoutConfirm(true)}
+              className="text-white transition-colors"
+              title="Logout"
+            >
+              <LogOut size={20} />
             </button>
           </div>
         )}
@@ -76,10 +88,10 @@ const Layout = ({ children, setIsLoggedIn }) => {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-blue-600 to-blue-800 text-white z-50" onClick={(e) => e.stopPropagation()}>
-            <div className="p-4 flex items-center justify-between border-b border-blue-400">
+          <div className="fixed left-0 top-0 h-full w-64 text-white z-50" style={{background: 'linear-gradient(to bottom, #3ea4f0, #2a8fd6)'}} onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 flex items-center justify-between" style={{borderBottom: '1px solid rgba(255,255,255,0.3)'}}>
               <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                <img src={logo} alt="MKL" className="h-12 bg-white p-1 rounded cursor-pointer hover:opacity-90 transition-opacity" />
+                <img src={logo} alt="MKL" className="h-16 bg-white p-1 rounded" />
               </Link>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-white">
                 <X size={20} />
@@ -96,9 +108,10 @@ const Layout = ({ children, setIsLoggedIn }) => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center gap-3 p-3 mb-2 rounded-lg transition-colors ${
                       location.pathname === item.path
-                        ? 'bg-blue-500 text-white'
-                        : 'hover:bg-blue-600 text-blue-50'
+                        ? 'text-white'
+                        : 'text-blue-50'
                     }`}
+                    style={location.pathname === item.path ? {background: '#3ea4f0'} : {}}
                   >
                     <Icon size={20} />
                     <span>{item.label}</span>
@@ -107,13 +120,13 @@ const Layout = ({ children, setIsLoggedIn }) => {
               })}
             </nav>
             
-            <div className="p-4 border-t border-blue-400">
+            <div className="p-4 border-t" style={{borderColor: 'rgba(255,255,255,0.3)'}}>
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   setShowLogoutConfirm(true);
                 }}
-                className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2 px-4 rounded-lg transition-colors"
               >
                 <LogOut size={18} />
                 Logout
@@ -127,20 +140,13 @@ const Layout = ({ children, setIsLoggedIn }) => {
       <main className="flex-1 overflow-auto">
         <header className="shadow-md p-4 flex items-center justify-between bg-white border-b border-gray-200">
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-blue-600">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden" style={{color: '#3ea4f0'}}>
               <Menu size={24} />
             </button>
             <h2 className="text-xl md:text-2xl font-bold text-gray-800">MKL Water Purifier Admin</h2>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600 hidden md:block">Admin Panel</span>
-            <button
-              onClick={() => setShowLogoutConfirm(true)}
-              className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold"
-            >
-              <LogOut size={16} />
-              <span className="hidden md:inline">Logout</span>
-            </button>
           </div>
         </header>
         <div className="p-4 md:p-6">

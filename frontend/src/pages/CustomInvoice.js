@@ -65,18 +65,18 @@ const CustomInvoice = () => {
     doc.rect(0, 0, pageWidth, 50, 'F');
     
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
+    doc.setFontSize(26);
     doc.setFont(undefined, 'bold');
     doc.text('MKL ENTERPRISES', pageWidth / 2, 15, { align: 'center' });
     
-    doc.setFontSize(9);
+    doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
-    doc.text('Sales & Service', pageWidth / 2, 23, { align: 'center' });
+    doc.text('Sales & Service', pageWidth / 2, 24, { align: 'center' });
     
-    doc.setFontSize(7);
-    doc.text('Address: D, 58-1-319, NAD Kotha Rd, opp. Bank of India, Nad Junction,', pageWidth / 2, 31, { align: 'center' });
-    doc.text('Buchirajupalem, Dungalavanipalem, Visakhapatnam, Andhra Pradesh 530027', pageWidth / 2, 37, { align: 'center' });
-    doc.text('Contact: 8179019929', pageWidth / 2, 44, { align: 'center' });
+    doc.setFontSize(8);
+    doc.text('Address: D, 58-1-319, NAD Kotha Rd, opp. Bank of India, Nad Junction, Buchirajupalem, Dungalavanipalem, Visakhapatnam, AP 530027', pageWidth / 2, 33, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Contact: 8179019929', pageWidth / 2, 43, { align: 'center' });
     
     // Title
     doc.setTextColor(0, 0, 0);

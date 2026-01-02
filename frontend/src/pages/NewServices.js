@@ -14,6 +14,7 @@ const NewServices = () => {
   const [showAddService, setShowAddService] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const [savedService, setSavedService] = useState(null);
+  const [customerServiceDates, setCustomerServiceDates] = useState({});
   const [serviceData, setServiceData] = useState({
     spareParts: {
       'Sediment': false,
@@ -40,9 +41,27 @@ const NewServices = () => {
     const loadData = async () => {
       const data = await getCustomers();
       setCustomers(data);
+      await loadAllServiceDates(data);
     };
     loadData();
   }, []);
+
+  const loadAllServiceDates = async (customerList) => {
+    const dates = {};
+    for (const customer of customerList) {
+      try {
+        const response = await fetch(`https://mkl-admin-backend.onrender.com/api/services/customer/${customer._id}`);
+        const serviceData = await response.json();
+        if (serviceData.length > 0) {
+          const latestService = serviceData.sort((a, b) => new Date(b.serviceDate) - new Date(a.serviceDate))[0];
+          dates[customer._id] = latestService.serviceDate;
+        }
+      } catch (error) {
+        console.error('Error loading service date:', error);
+      }
+    }
+    setCustomerServiceDates(dates);
+  };
 
   const filteredCustomers = customers.filter(c => {
     const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -144,8 +163,25 @@ const NewServices = () => {
         const newService = await response.json();
         console.log('Saved service:', newService);
         setSavedService(newService);
-        toast.success('Service saved successfully!');
+        
+        // Update customer's serviceDate and service period
+        const updateResponse = await fetch(`https://mkl-admin-backend.onrender.com/api/customers/${selectedCustomer._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            serviceDate: serviceData.serviceDate,
+            service: serviceData.reminderMonths
+          })
+        });
+        
+        if (updateResponse.ok) {
+          toast.success('Service saved and expiry date updated!');
+        } else {
+          toast.success('Service saved successfully!');
+        }
+        
         await loadServices(selectedCustomer._id);
+        await loadAllServiceDates(customers);
       }
     } catch (error) {
       console.error('Save error:', error);
@@ -162,18 +198,18 @@ const NewServices = () => {
     doc.rect(0, 0, pageWidth, 50, 'F');
     
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
+    doc.setFontSize(26);
     doc.setFont(undefined, 'bold');
     doc.text('MKL ENTERPRISES', pageWidth / 2, 15, { align: 'center' });
     
-    doc.setFontSize(9);
+    doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
-    doc.text('Sales & Service', pageWidth / 2, 23, { align: 'center' });
+    doc.text('Sales & Service', pageWidth / 2, 24, { align: 'center' });
     
-    doc.setFontSize(7);
-    doc.text('Address: D, 58-1-319, NAD Kotha Rd, opp. Bank of India, Nad Junction,', pageWidth / 2, 31, { align: 'center' });
-    doc.text('Buchirajupalem, Dungalavanipalem, Visakhapatnam, Andhra Pradesh 530027', pageWidth / 2, 37, { align: 'center' });
-    doc.text('Contact: 8179019929', pageWidth / 2, 44, { align: 'center' });
+    doc.setFontSize(8);
+    doc.text('Address: D, 58-1-319, NAD Kotha Rd, opp. Bank of India, Nad Junction, Buchirajupalem, Dungalavanipalem, Visakhapatnam, AP 530027', pageWidth / 2, 33, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Contact: 8179019929', pageWidth / 2, 43, { align: 'center' });
     
     // Title
     doc.setTextColor(0, 0, 0);
@@ -244,29 +280,18 @@ const NewServices = () => {
     doc.setFont(undefined, 'bold');
     doc.text(`Amount Paid: Rs.${savedService.totalBill} (${savedService.paymentMode})`, 25, yPos + 19);
     
-    // Terms & Conditions
-    yPos += 35;
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'italic');
-    doc.text('Terms & Conditions:', 20, yPos);
-    
-    doc.setFont(undefined, 'normal');
-    doc.setFontSize(8);
-    doc.text('1. Regular maintenance included as per plan', 20, yPos + 8);
-    doc.text('2. Customer must notify 7 days before plan expiry for renewal', 20, yPos + 15);
-    doc.text('3. Installation charges may apply for new connections', 20, yPos + 22);
-    
     // Footer Line
+    yPos += 35;
     doc.setLineWidth(0.5);
-    doc.line(20, 260, pageWidth - 20, 260);
+    doc.line(20, yPos, pageWidth - 20, yPos);
     
     // Footer
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
-    doc.text('Thank you for choosing MKL Enterprises!', pageWidth / 2, 270, { align: 'center' });
+    doc.text('Thank you for choosing MKL Enterprises!', pageWidth / 2, yPos + 10, { align: 'center' });
     doc.setFontSize(8);
-    doc.text('For support: Contact 8179019929', pageWidth / 2, 277, { align: 'center' });
+    doc.text('For support: Contact 8179019929', pageWidth / 2, yPos + 17, { align: 'center' });
     
     doc.save(`Service_Receipt_${selectedCustomer.name}_${Date.now()}.pdf`);
     toast.success('Invoice downloaded!');
@@ -281,19 +306,19 @@ const NewServices = () => {
 
       <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="relative">
-          <Search className="absolute left-3 top-3 text-blue-400" size={20} />
+          <Search className="absolute left-3 top-3" style={{color: '#3ea4f0'}} size={20} />
           <input
             type="text"
             placeholder="Search by name or phone number..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+            className="w-full pl-10 pr-4 py-3 bg-white border-2 rounded-lg focus:outline-none focus:ring-2 shadow-sm" style={{borderColor: '#3ea4f033'}}
           />
         </div>
         <select
           value={areaFilter}
           onChange={(e) => setAreaFilter(e.target.value)}
-          className="w-full px-4 py-3 bg-white border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+          className="w-full px-4 py-3 bg-white border-2 rounded-lg focus:outline-none focus:ring-2 shadow-sm" style={{borderColor: '#3ea4f033'}}
         >
           <option value="">All Areas</option>
           <option value="Pendurthi">Pendurthi</option>
@@ -315,9 +340,9 @@ const NewServices = () => {
       </div>
 
       <div className="rounded-xl shadow-lg overflow-hidden bg-white">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto" style={{maxHeight: '500px'}}>
           <table className="w-full">
-            <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+            <thead className="text-white sticky top-0 z-10" style={{background: '#3ea4f0'}}>
               <tr>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Name</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Phone</th>
@@ -325,6 +350,7 @@ const NewServices = () => {
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Address</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Service</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Brand</th>
+                <th className="px-4 md:px-6 py-3 text-left text-sm">Service Date</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Expire Date</th>
               </tr>
             </thead>
@@ -334,19 +360,21 @@ const NewServices = () => {
                 const expireDate = new Date(serviceDate);
                 expireDate.setMonth(expireDate.getMonth() + parseInt(customer.service || 0));
                 const formattedExpireDate = expireDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const latestServiceDate = customerServiceDates[customer._id] ? new Date(customerServiceDates[customer._id]).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'No service';
                 
                 return (
                   <tr 
                     key={customer._id || customer.id} 
                     onClick={() => handleRowClick(customer)}
-                    className={`transition-all hover:bg-blue-100 cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}`}
+                    className="cursor-pointer" style={{backgroundColor: index % 2 === 0 ? 'white' : '#3ea4f01A'}}
                   >
-                    <td className="px-4 md:px-6 py-4 text-sm font-semibold text-blue-700">{customer.name}</td>
+                    <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: '#3ea4f0'}}>{customer.name}</td>
                     <td className="px-4 md:px-6 py-4 text-sm">{customer.phone}</td>
                     <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.area}</td>
                     <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">{customer.address}</td>
                     <td className="px-4 md:px-6 py-4 text-sm">{customer.service}M</td>
                     <td className="px-4 md:px-6 py-4 text-sm">{customer.brand}</td>
+                    <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: '#3ea4f0'}}>{latestServiceDate}</td>
                     <td className="px-4 md:px-6 py-4 text-sm font-semibold text-red-600">{formattedExpireDate}</td>
                   </tr>
                 );
@@ -362,7 +390,7 @@ const NewServices = () => {
       {selectedCustomer && !showAddService && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedCustomer(null)}>
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center">
+            <div className="text-white p-6 flex justify-between items-center" style={{background: '#3ea4f0'}}>
               <h2 className="text-2xl font-bold">Service History - {selectedCustomer.name}</h2>
               <button onClick={() => setSelectedCustomer(null)} className="hover:bg-blue-500 p-2 rounded-lg transition-colors">
                 <X size={24} />
@@ -388,7 +416,7 @@ const NewServices = () => {
                     </select>
                     <button
                       onClick={handleAddService}
-                      className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm"
+                      className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors font-semibold text-sm" style={{background: '#3ea4f0'}}
                     >
                       <Plus size={18} />
                       Add New Service
@@ -426,7 +454,7 @@ const NewServices = () => {
       {showAddService && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setShowAddService(false)}>
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center">
+            <div className="text-white p-6 flex justify-between items-center" style={{background: '#3ea4f0'}}>
               <h2 className="text-2xl font-bold">{selectedService ? 'View Service' : 'Add New Service'}</h2>
               <button onClick={() => setShowAddService(false)} className="hover:bg-blue-500 p-2 rounded-lg transition-colors">
                 <X size={24} />
@@ -579,7 +607,7 @@ const NewServices = () => {
                         </button>
                         <button
                           onClick={() => { setShowAddService(false); setSavedService(null); }}
-                          className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                          className="flex-1 flex items-center justify-center gap-2 text-white py-3 rounded-lg transition-colors font-semibold" style={{background: '#3ea4f0'}}
                         >
                           Close
                         </button>

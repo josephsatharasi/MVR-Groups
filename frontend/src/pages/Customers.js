@@ -64,21 +64,21 @@ const Customers = () => {
 
       <div className="mb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-3 text-blue-400" size={20} />
+          <Search className="absolute left-3 top-3 text-primary" size={20} />
           <input
             type="text"
             placeholder="Search by name, phone, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+            className="w-full pl-10 pr-4 py-3 bg-white border-2 border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm"
           />
         </div>
       </div>
 
       <div className="rounded-xl shadow-lg overflow-hidden bg-white">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto" style={{maxHeight: '500px'}}>
           <table className="w-full">
-            <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+            <thead className="text-white sticky top-0 z-10" style={{background: '#3ea4f0'}}>
               <tr>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Name</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Phone</th>
@@ -93,14 +93,15 @@ const Customers = () => {
               {filteredCustomers.map((customer, index) => (
                 <tr 
                   key={customer.id} 
-                  className={`transition-all hover:bg-blue-100 hover:shadow-md cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}`}
+                  className="cursor-pointer"
+                  style={{backgroundColor: index % 2 !== 0 ? '#3ea4f01A' : 'white'}}
                   onClick={() => setSelectedCustomer(customer)}
                 >
-                  <td className="px-4 md:px-6 py-4 text-sm font-semibold text-blue-700">{customer.name}</td>
+                  <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: '#3ea4f0'}}>{customer.name}</td>
                   <td className="px-4 md:px-6 py-4 text-sm">{customer.phone}</td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.email}</td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">
-                    <span className="px-2 py-1 bg-blue-200 text-blue-700 rounded text-xs font-semibold">{customer.area}</span>
+                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#3ea4f0' + '33', color: '#3ea4f0'}}>{customer.area}</span>
                   </td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">{customer.brand}</td>
                   <td className="px-4 md:px-6 py-4 text-sm">{customer.service}M</td>
@@ -111,7 +112,8 @@ const Customers = () => {
                           e.stopPropagation();
                           setSelectedCustomer(customer);
                         }} 
-                        className="text-blue-600 hover:text-blue-800 hover:scale-110 transition-transform"
+                        className="hover:scale-110 transition-transform"
+                        style={{color: '#3ea4f0'}}
                         title="View Details"
                       >
                         <Eye size={18} />

@@ -80,7 +80,7 @@ const Dashboard = () => {
       <div className="rounded-xl shadow-lg p-6 bg-white border border-gray-200 max-w-md">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
         <div className="space-y-3">
-          <Link to="/admin/add-customer" className="flex items-center gap-2 w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md">
+          <Link to="/admin/add-customer" className="flex items-center gap-2 w-full text-white py-3 px-4 rounded-lg transition-colors font-semibold shadow-md" style={{background: '#3ea4f0'}}>
             <UserPlus size={20} />
             Add New Customer
           </Link>

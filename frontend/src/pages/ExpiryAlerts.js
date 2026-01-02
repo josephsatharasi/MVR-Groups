@@ -54,14 +54,14 @@ const ExpiryAlerts = () => {
       {expiringCustomers.length === 0 ? (
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
           <CheckCircle size={64} className="mx-auto text-green-500 mb-4" />
-          <h2 className="text-2xl font-bold text-teal-900 mt-4">All Clear!</h2>
-          <p className="text-teal-600 mt-2">No subscriptions requiring follow-up</p>
+          <h2 className="text-2xl font-bold text-blue-900 mt-4">All Clear!</h2>
+          <p className="text-blue-600 mt-2">No subscriptions requiring follow-up</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+              <thead className="text-white" style={{background: '#3ea4f0'}}>
                 <tr>
                   <th className="px-4 md:px-6 py-3 text-left text-sm whitespace-nowrap">Customer Name</th>
                   <th className="px-4 md:px-6 py-3 text-left text-sm">Phone</th>
@@ -74,9 +74,9 @@ const ExpiryAlerts = () => {
                 {expiringCustomers.map((customer, index) => (
                   <tr 
                     key={customer._id || customer.id} 
-                    className={`transition-all hover:bg-blue-100 ${index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}`}
+                    style={{backgroundColor: index % 2 === 0 ? 'white' : '#3ea4f01A'}}
                   >
-                    <td className="px-4 md:px-6 py-4 text-sm font-semibold text-blue-700 whitespace-nowrap">{customer.name}</td>
+                    <td className="px-4 md:px-6 py-4 text-sm font-semibold whitespace-nowrap" style={{color: '#3ea4f0'}}>{customer.name}</td>
                     <td className="px-4 md:px-6 py-4 text-sm whitespace-nowrap">{customer.phone}</td>
                     <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.email}</td>
                     <td className="px-4 md:px-6 py-4 text-sm">{customer.service}M</td>
@@ -84,7 +84,8 @@ const ExpiryAlerts = () => {
                       <div className="flex gap-2">
                         <button 
                           onClick={() => sendReminder(customer)} 
-                          className="text-blue-600 hover:text-blue-800 hover:scale-110 transition-transform"
+                          className="hover:scale-110 transition-transform"
+                          style={{color: '#3ea4f0'}}
                           title="Send Reminder"
                         >
                           <Send size={18} />

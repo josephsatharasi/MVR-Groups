@@ -14,35 +14,12 @@ import ExpiryAlerts from './pages/ExpiryAlerts';
 import NewServices from './pages/NewServices';
 import CustomInvoice from './pages/CustomInvoice';
 import Bin from './pages/Bin';
+import CurrentMonthCustomers from './pages/CurrentMonthCustomers';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem('isLoggedIn') === 'true';
   });
-
-  useEffect(() => {
-    const preventCopyPaste = (e) => {
-      e.preventDefault();
-      return false;
-    };
-
-    const preventContextMenu = (e) => {
-      e.preventDefault();
-      return false;
-    };
-
-    document.addEventListener('copy', preventCopyPaste);
-    document.addEventListener('cut', preventCopyPaste);
-    document.addEventListener('paste', preventCopyPaste);
-    document.addEventListener('contextmenu', preventContextMenu);
-
-    return () => {
-      document.removeEventListener('copy', preventCopyPaste);
-      document.removeEventListener('cut', preventCopyPaste);
-      document.removeEventListener('paste', preventCopyPaste);
-      document.removeEventListener('contextmenu', preventContextMenu);
-    };
-  }, []);
 
   useEffect(() => {
     localStorage.setItem('isLoggedIn', isLoggedIn);
@@ -64,6 +41,7 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/add-customer" element={<AddCustomer />} />
+                <Route path="/current-month-customers" element={<CurrentMonthCustomers />} />
                 <Route path="/expiry-alerts" element={<ExpiryAlerts />} />
                 <Route path="/new-services" element={<NewServices />} />
                 <Route path="/custom-invoice" element={<CustomInvoice />} />

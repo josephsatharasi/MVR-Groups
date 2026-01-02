@@ -16,13 +16,15 @@ const NewServices = () => {
   const [savedService, setSavedService] = useState(null);
   const [serviceData, setServiceData] = useState({
     spareParts: {
-      'Sediment Carbon': false,
+      'Sediment': false,
+      'Carbon': false,
+      'Tap': false,
       'Post/Carbon': false,
       'Membrane': false,
       'Membrane Housing': false,
       'SV': false,
       'Pump': false,
-      'SMTS': false,
+      'SMPS': false,
       'Float': false,
       'Diveter Wall': false,
       'Pipe': false
@@ -57,6 +59,7 @@ const NewServices = () => {
     try {
       const response = await fetch(`https://mkl-admin-backend.onrender.com/api/services/customer/${customerId}`);
       const data = await response.json();
+      console.log('Loaded services:', data);
       setServices(data);
     } catch (error) {
       console.error('Error loading services:', error);
@@ -68,13 +71,15 @@ const NewServices = () => {
     setSelectedService(null);
     setServiceData({
       spareParts: {
-        'Sediment Carbon': false,
+        'Sediment': false,
+        'Carbon': false,
+        'Tap': false,
         'Post/Carbon': false,
         'Membrane': false,
         'Membrane Housing': false,
         'SV': false,
         'Pump': false,
-        'SMTS': false,
+        'SMPS': false,
         'Float': false,
         'Diveter Wall': false,
         'Pipe': false
@@ -86,6 +91,7 @@ const NewServices = () => {
   };
 
   const handleViewService = (service) => {
+    console.log('Viewing service:', service);
     setSelectedService(service);
     setShowAddService(true);
   };
@@ -99,8 +105,14 @@ const NewServices = () => {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const imageUrls = files.map(file => URL.createObjectURL(file));
-    setServiceData(prev => ({ ...prev, images: [...prev.images, ...imageUrls] }));
+    
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setServiceData(prev => ({ ...prev, images: [...prev.images, reader.result] }));
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleSaveService = async () => {
@@ -111,8 +123,11 @@ const NewServices = () => {
         spareParts: serviceData.spareParts,
         totalBill: serviceData.totalBill,
         paymentMode: serviceData.paymentMode,
+        images: serviceData.images,
         serviceDate: new Date().toISOString()
       };
+      
+      console.log('Saving service with images:', serviceRecord.images.length);
       
       const response = await fetch('https://mkl-admin-backend.onrender.com/api/services', {
         method: 'POST',
@@ -122,11 +137,13 @@ const NewServices = () => {
       
       if (response.ok) {
         const newService = await response.json();
+        console.log('Saved service:', newService);
         setSavedService(newService);
         toast.success('Service saved successfully!');
         await loadServices(selectedCustomer._id);
       }
     } catch (error) {
+      console.error('Save error:', error);
       toast.error('Failed to save service');
     }
   };
@@ -190,7 +207,7 @@ const NewServices = () => {
     
     doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
-    doc.text(`Partner: ${selectedCustomer.brand}`, 20, 153);
+    doc.text(`Purifier Brand: ${selectedCustomer.brand}`, 20, 153);
     doc.text('Spare Parts Replaced:', 20, 161);
     
     let yPos = 169;
@@ -339,7 +356,7 @@ const NewServices = () => {
 
       {selectedCustomer && !showAddService && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedCustomer(null)}>
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center">
               <h2 className="text-2xl font-bold">Service History - {selectedCustomer.name}</h2>
               <button onClick={() => setSelectedCustomer(null)} className="hover:bg-blue-500 p-2 rounded-lg transition-colors">
@@ -428,6 +445,20 @@ const NewServices = () => {
                       ))}
                     </div>
                   </div>
+                  {selectedService.images && selectedService.images.length > 0 ? (
+                    <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+                      <h3 className="font-bold text-blue-900 mb-3">Service Images ({selectedService.images.length})</h3>
+                      <div className="grid grid-cols-3 gap-2">
+                        {selectedService.images.map((img, idx) => (
+                          <img key={idx} src={img} alt="Service" className="w-full h-32 object-cover rounded border" />
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+                      <p className="text-sm text-gray-500 text-center">No images uploaded for this service</p>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>

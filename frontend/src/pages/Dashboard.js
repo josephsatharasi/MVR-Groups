@@ -29,9 +29,9 @@ const Dashboard = () => {
 
   const cards = [
     { title: 'Total Customers', value: stats.total, icon: Users, color: 'bg-blue-50', link: '/admin/customers' },
-    { title: 'Active Subscriptions', value: stats.active, icon: CheckCircle, color: 'bg-blue-50', link: '/admin/customers' },
-    { title: 'Expiring Soon', value: stats.expiringSoon, icon: AlertTriangle, color: 'bg-blue-50', link: '/admin/expiry-alerts' },
-    { title: 'Expired', value: stats.expired, icon: XCircle, color: 'bg-blue-50', link: '/admin/customers' },
+    { title: 'Total Service Customers', value: stats.active, icon: CheckCircle, color: 'bg-blue-50', link: '/admin/current-month-customers' },
+    { title: 'Service Soon', value: stats.expiringSoon, icon: AlertTriangle, color: 'bg-blue-50', link: '/admin/expiry-alerts' },
+    { title: 'Service Delay', value: stats.expired, icon: XCircle, color: 'bg-blue-50', link: '/admin/customers' },
   ];
 
   return (

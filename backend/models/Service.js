@@ -6,6 +6,7 @@ const serviceSchema = new mongoose.Schema({
   spareParts: { type: Object, required: true },
   totalBill: { type: Number, required: true },
   paymentMode: { type: String, required: true },
+  images: { type: [String], default: [] },
   serviceDate: { type: Date, default: Date.now }
 });
 

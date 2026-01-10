@@ -8,15 +8,15 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import Customers from './pages/Customers';
-import AddCustomer from './pages/AddCustomer';
-import ExpiryAlerts from './pages/ExpiryAlerts';
-import NewServices from './pages/NewServices';
-import CustomInvoice from './pages/CustomInvoice';
-import Bin from './pages/Bin';
-import CurrentMonthCustomers from './pages/CurrentMonthCustomers';
-import ServiceSoon from './pages/ServiceSoon';
-import ServiceDelay from './pages/ServiceDelay';
+import CustomerForm from './pages/CustomerForm';
+import AgentForm from './pages/AgentForm';
+import Properties from './pages/Properties';
+import AddProperty from './pages/AddProperty';
+import Clients from './pages/Clients';
+import Caders from './pages/Caders';
+import Alerts from './pages/Alerts';
+import Reports from './pages/Reports';
+import RecycleBin from './pages/RecycleBin';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -41,15 +41,15 @@ function App() {
             <Layout setIsLoggedIn={setIsLoggedIn}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/customers" element={<Customers />} />
-                <Route path="/add-customer" element={<AddCustomer />} />
-                <Route path="/current-month-customers" element={<CurrentMonthCustomers />} />
-                <Route path="/expiry-alerts" element={<ExpiryAlerts />} />
-                <Route path="/service-soon" element={<ServiceSoon />} />
-                <Route path="/service-delay" element={<ServiceDelay />} />
-                <Route path="/new-services" element={<NewServices />} />
-                <Route path="/custom-invoice" element={<CustomInvoice />} />
-                <Route path="/bin" element={<Bin />} />
+                <Route path="/customer-form" element={<CustomerForm />} />
+                <Route path="/agent-form" element={<AgentForm />} />
+                <Route path="/properties" element={<Properties />} />
+                <Route path="/add-property" element={<AddProperty />} />
+                <Route path="/clients" element={<Clients />} />
+                <Route path="/caders" element={<Caders />} />
+                <Route path="/alerts" element={<Alerts />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/bin" element={<RecycleBin />} />
               </Routes>
             </Layout>
           ) : (

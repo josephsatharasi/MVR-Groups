@@ -1,104 +1,80 @@
-import React, { useState, useEffect } from 'react';
-import { Download, TrendingUp, Calendar } from 'lucide-react';
-import { getCustomers, getDaysUntilExpiry } from '../utils/storage';
-import jsPDF from 'jspdf';
+import React from 'react';
+import { FileText, Download, TrendingUp, TrendingDown } from 'lucide-react';
+import Card from '../components/Card';
+import Button from '../components/Button';
+import BarChart from '../components/BarChart';
+import LineChart from '../components/LineChart';
 
 const Reports = () => {
-  const [stats, setStats] = useState({
-    total: 0,
-    active: 0,
-    expiring: 0,
-    expired: 0,
-    revenue: 0,
-  });
+  const monthlyRevenue = [
+    { label: 'Jan', value: 45 },
+    { label: 'Feb', value: 52 },
+    { label: 'Mar', value: 48 },
+    { label: 'Apr', value: 61 },
+    { label: 'May', value: 55 },
+    { label: 'Jun', value: 67 },
+  ];
 
-  useEffect(() => {
-    const customers = getCustomers();
-    const active = customers.filter(c => getDaysUntilExpiry(c.endDate) > 7).length;
-    const expiring = customers.filter(c => {
-      const days = getDaysUntilExpiry(c.endDate);
-      return days > 0 && days <= 7;
-    }).length;
-    const expired = customers.filter(c => getDaysUntilExpiry(c.endDate) < 0).length;
-
-    setStats({
-      total: customers.length,
-      active,
-      expiring,
-      expired,
-      revenue: customers.length * 500,
-    });
-  }, []);
-
-  const generateReport = () => {
-    const doc = new jsPDF();
-    const customers = getCustomers();
-
-    doc.setFillColor(25, 55, 109);
-    doc.rect(0, 0, 210, 40, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.text('MKL ENTERPRISES', 105, 20, { align: 'center' });
-    doc.setFontSize(12);
-    doc.text('MONTHLY REPORT', 105, 30, { align: 'center' });
-
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(14);
-    doc.text('Summary Statistics', 20, 55);
-    doc.setFontSize(10);
-    doc.text(`Total Customers: ${stats.total}`, 20, 65);
-    doc.text(`Active: ${stats.active}`, 20, 72);
-    doc.text(`Expiring Soon: ${stats.expiring}`, 20, 79);
-    doc.text(`Expired: ${stats.expired}`, 20, 86);
-
-    doc.save(`MKL_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-  };
+  const propertySales = [
+    { label: 'Jan', value: 12 },
+    { label: 'Feb', value: 15 },
+    { label: 'Mar', value: 10 },
+    { label: 'Apr', value: 18 },
+    { label: 'May', value: 14 },
+    { label: 'Jun', value: 20 },
+  ];
 
   return (
-    <div>
-      <h1 className="text-2xl md:text-3xl font-bold text-[#19376D] mb-6">Reports</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Customers</p>
-              <p className="text-3xl font-bold text-[#19376D]">{stats.total}</p>
-            </div>
-            <TrendingUp size={40} className="text-[#576CBC]" />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Active Plans</p>
-              <p className="text-3xl font-bold text-green-600">{stats.active}</p>
-            </div>
-            <Calendar size={40} className="text-green-500" />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Est. Revenue</p>
-              <p className="text-3xl font-bold text-[#19376D]">₹{stats.revenue}</p>
-            </div>
-            <TrendingUp size={40} className="text-[#576CBC]" />
-          </div>
-        </div>
+    <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-0">Reports & Analytics</h1>
+        <Button variant="primary" icon={Download}>Export Report</Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold text-[#19376D] mb-4">Generate Report</h2>
-        <button
-          onClick={generateReport}
-          className="flex items-center gap-2 bg-[#576CBC] text-white px-6 py-3 rounded-lg hover:bg-[#19376D] transition-colors"
-        >
-          <Download size={20} />
-          Download PDF Report
-        </button>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Total Revenue</p>
+              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>₹3.28Cr</p>
+              <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
+                <TrendingUp size={14} /> +12.5%
+              </p>
+            </div>
+            <FileText size={40} style={{ color: '#2C7A7B' }} />
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Properties Sold</p>
+              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>89</p>
+              <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
+                <TrendingUp size={14} /> +8.3%
+              </p>
+            </div>
+            <FileText size={40} style={{ color: '#2C7A7B' }} />
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Avg. Deal Time</p>
+              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>45 days</p>
+              <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                <TrendingDown size={14} /> -5.2%
+              </p>
+            </div>
+            <FileText size={40} style={{ color: '#2C7A7B' }} />
+          </div>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LineChart data={monthlyRevenue} title="Monthly Revenue (in Lakhs)" color="#2C7A7B" />
+        <BarChart data={propertySales} title="Property Sales" color="#2C7A7B" />
       </div>
     </div>
   );

@@ -46,7 +46,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4" style={{
-      background: 'linear-gradient(to bottom, #f0f4f8 0%, #e8f0f7 50%, #ffffff 100%)'
+      background: 'linear-gradient(135deg, #2F4F4F 0%, #5F9EA0 50%, #7FCDCD 100%)'
     }}>
       <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 810" preserveAspectRatio="none">
         <path fill="#5b8fc7" fillOpacity="0.3" d="M0,400 C300,500 600,450 900,400 C1200,350 1350,380 1440,400 L1440,810 L0,810 Z"></path>
@@ -57,13 +57,13 @@ const ForgotPassword = () => {
       <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <img src={logo} alt="MKL Enterprises" className="h-24 w-auto mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-blue-700">Forgot Password</h1>
+          <h1 className="text-3xl font-bold" style={{ color: '#2F4F4F' }}>Forgot Password</h1>
           <p className="text-gray-600 mt-2">Enter your email to reset password</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-blue-700 mb-2">Email <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-semibold mb-2" style={{ color: '#2F4F4F' }}>Email <span className="text-red-500">*</span></label>
             <input
               type="email"
               value={email}
@@ -76,7 +76,8 @@ const ForgotPassword = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 text-white py-3 rounded-lg transition-colors font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: '#2F4F4F' }}
           >
             <Mail size={20} />
             {loading ? 'Sending...' : 'Send Reset Link'}
@@ -84,7 +85,7 @@ const ForgotPassword = () => {
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-6">
-          Remember your password? <Link to="/" className="text-blue-600 font-semibold hover:underline">Login here</Link>
+          Remember your password? <Link to="/" className="font-semibold hover:underline" style={{ color: '#2F4F4F' }}>Login here</Link>
         </p>
       </div>
     </div>

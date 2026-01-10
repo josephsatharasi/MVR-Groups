@@ -1,95 +1,95 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Users, CheckCircle, AlertTriangle, XCircle, UserPlus } from 'lucide-react';
-import { getCustomers } from '../utils/storage';
+import { IndianRupee, Home, Clock, Building2 } from 'lucide-react';
+import StatCard from '../components/StatCard';
+import LineChart from '../components/LineChart';
+import BarChart from '../components/BarChart';
+import CircularProgress from '../components/CircularProgress';
+import DateRangeFilter from '../components/DateRangeFilter';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({
-    total: 0,
-    active: 0,
-    expiringSoon: 0,
-    expired: 0,
-  });
+  const [rangeType, setRangeType] = useState('all');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
-  const [recentActivity, setRecentActivity] = useState([]);
+  // Dummy data for real estate
+  const stats = [
+    { title: 'Total Earnings', value: '₹1,46,000', icon: IndianRupee, trend: '+17%', link: '/admin/reports' },
+    { title: 'Total Bookings', value: '1400', icon: Home, trend: '+17%', link: '/admin/properties' },
+    { title: 'Total Days', value: '150,700', icon: Clock, trend: '+17%', link: '/admin/alerts' },
+    { title: 'Total Properties', value: '500', icon: Building2, trend: '+17%', link: '/admin/properties' },
+  ];
 
-  useEffect(() => {
-    const loadData = async () => {
-      const customers = await getCustomers();
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      let expiringSoon = 0;
-      let expired = 0;
-      
-      customers.forEach(customer => {
-        if (customer.followUpStatus === 'completed') return;
-        
-        const serviceDate = customer.serviceDate ? new Date(customer.serviceDate) : new Date(customer.createdAt);
-        const expireDate = new Date(serviceDate);
-        expireDate.setMonth(expireDate.getMonth() + parseInt(customer.service || 0));
-        expireDate.setHours(0, 0, 0, 0);
-        
-        const daysUntilExpiry = Math.floor((expireDate - today) / (1000 * 60 * 60 * 24));
-        
-        if (daysUntilExpiry < 0) {
-          expired++;
-        } else if (daysUntilExpiry <= 7) {
-          expiringSoon++;
-        }
-      });
-      
-      setStats({
-        total: customers.length,
-        active: customers.length,
-        expiringSoon,
-        expired,
-      });
-    };
-    loadData();
-  }, []);
+  // Dummy workflow data
+  const workflowData = [
+    { label: 'Jan', value: 10 },
+    { label: 'Feb', value: 15 },
+    { label: 'Mar', value: 8 },
+    { label: 'Apr', value: 18 },
+    { label: 'May', value: 20 },
+    { label: 'Jun', value: 22 },
+    { label: 'Jul', value: 18 },
+    { label: 'Aug', value: 25 },
+    { label: 'Sep', value: 28 },
+    { label: 'Oct', value: 32 },
+    { label: 'Nov', value: 35 },
+    { label: 'Dec', value: 40 },
+  ];
 
-  const cards = [
-    { title: 'Total Customers', value: stats.total, icon: Users, color: 'bg-blue-50', link: '/admin/customers' },
-    { title: 'Total Service Customers', value: stats.active, icon: CheckCircle, color: 'bg-blue-50', link: '/admin/current-month-customers' },
-    { title: 'Service Soon', value: stats.expiringSoon, icon: AlertTriangle, color: 'bg-blue-50', link: '/admin/service-soon' },
-    { title: 'Service Delay', value: stats.expired, icon: XCircle, color: 'bg-blue-50', link: '/admin/service-delay' },
+  // Dummy marketing data
+  const marketingData = [
+    { label: 'Jan', value: 5 },
+    { label: 'Feb', value: 8 },
+    { label: 'Mar', value: 12 },
+    { label: 'Apr', value: 10 },
+    { label: 'May', value: 15 },
+    { label: 'Jun', value: 18 },
+    { label: 'Jul', value: 16 },
+    { label: 'Aug', value: 22 },
+    { label: 'Sep', value: 28 },
+    { label: 'Oct', value: 32 },
+    { label: 'Nov', value: 38 },
+    { label: 'Dec', value: 45 },
   ];
 
   return (
-    <div>
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-        {cards.map((card, index) => {
-          const Icon = card.icon;
-          return (
-            <Link key={index} to={card.link}>
-              <div className={`${card.color} rounded-xl shadow-lg p-6 hover:scale-105 transition-transform cursor-pointer`} style={{backgroundColor: '#1e3a8a1A'}}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-700">{card.title}</p>
-                    <p className="text-4xl font-bold mt-2 text-gray-900">{card.value}</p>
-                  </div>
-                  <Icon size={48} className="text-gray-700" />
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+    <div className="min-h-screen" style={{ backgroundColor: '#5F9EA0' }}>
+      <div className="p-4 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-0">Overview</h1>
+          <DateRangeFilter
+            rangeType={rangeType}
+            fromDate={fromDate}
+            toDate={toDate}
+            onRangeTypeChange={setRangeType}
+            onFromDateChange={setFromDate}
+            onToDateChange={setToDate}
+          />
+        </div>
 
-      <div className="rounded-xl shadow-lg p-6 bg-white border border-gray-200 max-w-md">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
-        <div className="space-y-3">
-          <Link to="/admin/add-customer" className="flex items-center gap-2 w-full text-white py-3 px-4 rounded-lg transition-colors font-semibold shadow-md" style={{background: '#1e3a8a'}}>
-            <UserPlus size={20} />
-            Add New Customer
-          </Link>
-          <Link to="/admin/new-services" className="flex items-center gap-2 w-full bg-yellow-500 text-white py-3 px-4 rounded-lg hover:bg-yellow-600 transition-colors font-semibold shadow-md">
-            <AlertTriangle size={20} />
-            View Expiry Alerts
-          </Link>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <StatCard key={index} {...stat} />
+          ))}
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <LineChart data={workflowData} title="Recent Workflow" color="#2C7A7B" />
+          <BarChart data={marketingData} title="Recent Marketing" color="#E5E7EB" />
+        </div>
+
+        {/* Circular Progress */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 flex justify-center items-center">
+            <CircularProgress percentage={75} label="Property Occupancy Rate" color="#2C7A7B" />
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 flex justify-center items-center">
+            <CircularProgress percentage={71} label="Customer Satisfaction" color="#2C7A7B" />
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 flex justify-center items-center">
+            <CircularProgress percentage={46} label="Pending Approvals" color="#EF4444" />
+          </div>
         </div>
       </div>
     </div>

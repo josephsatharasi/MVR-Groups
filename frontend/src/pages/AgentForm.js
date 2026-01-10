@@ -30,7 +30,31 @@ const AgentForm = () => {
   };
 
   const handleChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+    // Handle mobile number fields - only allow numbers and limit to 10 digits
+    if (field === 'mobile' || field === 'whatsapp') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 10);
+      setFormData({ ...formData, [field]: numericValue });
+    }
+    // Handle Aadhar - 12 digits with space after every 4
+    else if (field === 'aadharNo') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 12);
+      const formatted = numericValue.match(/.{1,4}/g)?.join(' ') || numericValue;
+      setFormData({ ...formData, [field]: formatted });
+    }
+    // Handle PAN - 5 letters + 4 numbers + 1 letter
+    else if (field === 'panNo') {
+      let inputValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+      let formatted = '';
+      for (let i = 0; i < inputValue.length; i++) {
+        if (i < 5 && /[A-Z]/.test(inputValue[i])) formatted += inputValue[i];
+        else if (i >= 5 && i < 9 && /[0-9]/.test(inputValue[i])) formatted += inputValue[i];
+        else if (i === 9 && /[A-Z]/.test(inputValue[i])) formatted += inputValue[i];
+      }
+      setFormData({ ...formData, [field]: formatted });
+    }
+    else {
+      setFormData({ ...formData, [field]: value });
+    }
   };
 
   const handleFileChange = (e) => {

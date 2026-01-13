@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Search, Eye, Plus, X, UserPlus } from 'lucide-react';
+import { Trash2, Search, Eye, Plus, X, UserPlus, Download } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { getCustomers, deleteCustomer, addCustomer } from '../utils/storage';
 import CustomerDetails from '../components/CustomerDetails';
@@ -8,6 +8,8 @@ import { useSearchParams } from 'react-router-dom';
 import FormInput from '../components/FormInput';
 import Button from '../components/Button';
 import Card from '../components/Card';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Customers = () => {
   const [customers, setCustomers] = useState([
@@ -91,6 +93,34 @@ const Customers = () => {
   };
 
 
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text('Customers List', 14, 20);
+    
+    const tableData = customers.map((c, index) => [
+      index + 1,
+      c.name,
+      c.phone || c.mobile,
+      c.projectName || '-',
+      c.plotNo || '-',
+      `₹${c.totalAmount || '0'}`,
+      `₹${c.balanceAmount || '0'}`
+    ]);
+    
+    autoTable(doc, {
+      startY: 30,
+      head: [['S.NO', 'Name', 'Phone', 'Project', 'Plot No', 'Total Amount', 'Balance']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [47, 79, 79], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 9, cellPadding: 3 },
+    });
+    
+    doc.save('customers-list.pdf');
+    toast.success('PDF downloaded successfully!');
+  };
+
   const filteredCustomers = customers.filter(c => {
     const matchesSearch = 
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -122,9 +152,14 @@ const Customers = () => {
     <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold text-white">Customers</h1>
-        <Button variant="primary" icon={Plus} onClick={() => setShowFormModal(true)}>
-          Add Customer
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="primary" icon={Plus} onClick={() => setShowFormModal(true)}>
+            Add Customer
+          </Button>
+          <Button variant="secondary" icon={Download} onClick={downloadPDF}>
+            Download PDF
+          </Button>
+        </div>
       </div>
 
       <div className="mb-4">

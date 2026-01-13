@@ -1,7 +1,27 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import CountUp from './CountUp';
 
 const StatCard = ({ title, value, icon: Icon, trend, link, iconBg = '#2C7A7B' }) => {
+  const parseValue = (val) => {
+    const numStr = val.replace(/[^0-9.]/g, '');
+    return parseFloat(numStr) || 0;
+  };
+
+  const getPrefix = (val) => {
+    const match = val.match(/^[^0-9]+/);
+    return match ? match[0] : '';
+  };
+
+  const getSuffix = (val) => {
+    const match = val.match(/[^0-9.,]+$/);
+    return match ? match[0] : '';
+  };
+
+  const numericValue = parseValue(value);
+  const prefix = getPrefix(value);
+  const suffix = getSuffix(value);
+
   return (
     <Link to={link} className="block">
       <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all hover:-translate-y-1">
@@ -13,7 +33,9 @@ const StatCard = ({ title, value, icon: Icon, trend, link, iconBg = '#2C7A7B' })
         </div>
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
+            <p className="text-3xl font-bold text-gray-900">
+              <CountUp end={numericValue} duration={2000} prefix={prefix} suffix={suffix} />
+            </p>
             {trend && (
               <p className="text-sm mt-2" style={{ color: '#2C7A7B' }}>
                 ↑ {trend} Since last week

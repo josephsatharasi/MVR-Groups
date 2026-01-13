@@ -1,9 +1,10 @@
 import React from 'react';
-import { FileText, Download, TrendingUp, TrendingDown } from 'lucide-react';
+import { FileText, Download, TrendingUp, TrendingDown, Users, UserCheck } from 'lucide-react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import BarChart from '../components/BarChart';
 import LineChart from '../components/LineChart';
+import CountUp from '../components/CountUp';
 
 const Reports = () => {
   const monthlyRevenue = [
@@ -31,12 +32,14 @@ const Reports = () => {
         <Button variant="primary" icon={Download}>Export Report</Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
         <Card>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>₹3.28Cr</p>
+              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+                <CountUp end={3.28} duration={2000} prefix="₹" suffix="Cr" />
+              </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
                 <TrendingUp size={14} /> +12.5%
               </p>
@@ -49,7 +52,9 @@ const Reports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Properties Sold</p>
-              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>89</p>
+              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+                <CountUp end={89} duration={2000} />
+              </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
                 <TrendingUp size={14} /> +8.3%
               </p>
@@ -62,12 +67,44 @@ const Reports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Avg. Deal Time</p>
-              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>45 days</p>
+              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+                <CountUp end={45} duration={2000} suffix=" days" />
+              </p>
               <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
                 <TrendingDown size={14} /> -5.2%
               </p>
             </div>
             <FileText size={40} style={{ color: '#2C7A7B' }} />
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Total Customers</p>
+              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+                <CountUp end={156} duration={2000} />
+              </p>
+              <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
+                <TrendingUp size={14} /> +15.2%
+              </p>
+            </div>
+            <Users size={40} style={{ color: '#2C7A7B' }} />
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Total Agents</p>
+              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+                <CountUp end={24} duration={2000} />
+              </p>
+              <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
+                <TrendingUp size={14} /> +9.1%
+              </p>
+            </div>
+            <UserCheck size={40} style={{ color: '#2C7A7B' }} />
           </div>
         </Card>
       </div>

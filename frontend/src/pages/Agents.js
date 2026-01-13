@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { UserCheck, Plus, X, Upload } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { UserCheck, Plus, X, Upload, Download } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import Button from '../components/Button';
 import FormInput from '../components/FormInput';
 import { toast } from 'react-toastify';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Agents = () => {
   const [search, setSearch] = useState('');
@@ -11,16 +13,42 @@ const Agents = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [agents, setAgents] = useState([
+    { id: 1, name: 'Rajesh Kumar', mobile: '+91 98765 43210', email: 'rajesh@email.com', agentId: '100001', companyCode: '999', caderRole: 'FO' },
+    { id: 2, name: 'Priya Sharma', mobile: '+91 98765 43211', email: 'priya@email.com', agentId: '100002', companyCode: '999', caderRole: 'TL' },
+  ]);
   const [formData, setFormData] = useState({
     name: '', relationType: '', relation: '', mobile: '', whatsapp: '', email: '',
     dob: '', age: '', address: '', pinCode: '', aadharNo: '',
     panNo: '', agentId: '', companyCode: '999', caderRole: '', agentDhamaka: '', photo: null,
   });
 
-  const [agents, setAgents] = useState([
-    { id: 1, name: 'Rajesh Kumar', mobile: '+91 98765 43210', email: 'rajesh@email.com', agentId: '100001', companyCode: '999', caderRole: 'FO' },
-    { id: 2, name: 'Priya Sharma', mobile: '+91 98765 43211', email: 'priya@email.com', agentId: '100002', companyCode: '999', caderRole: 'TL' },
-  ]);
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text('Agents List', 14, 20);
+    
+    const tableData = agents.map((a, index) => [
+      index + 1,
+      a.name,
+      a.mobile,
+      a.email || '-',
+      a.agentId,
+      a.caderRole
+    ]);
+    
+    autoTable(doc, {
+      startY: 30,
+      head: [['S.NO', 'Name', 'Mobile', 'Email', 'Agent ID', 'Cader Role']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [47, 79, 79], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 10, cellPadding: 4 },
+    });
+    
+    doc.save('agents-list.pdf');
+    toast.success('PDF downloaded successfully!');
+  };
 
   const caderRoles = [
     { value: 'FO', label: 'FIELD OFFICER (FO)' },
@@ -62,8 +90,9 @@ const Agents = () => {
   };
 
   const handleDelete = (row) => {
+    if (!window.confirm(`Delete ${row.name}? This will move the agent to recycle bin.`)) return;
     setAgents(agents.filter(a => a.id !== row.id));
-    toast.success('Agent deleted successfully!');
+    toast.success('Agent moved to recycle bin!');
   };
 
   const handleRowClick = (row) => {
@@ -110,9 +139,14 @@ const Agents = () => {
     <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-0">Agents</h1>
-        <Button variant="primary" icon={Plus} onClick={() => setShowFormModal(true)}>
-          Add Agent
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="primary" icon={Plus} onClick={() => setShowFormModal(true)}>
+            Add Agent
+          </Button>
+          <Button variant="secondary" icon={Download} onClick={downloadPDF}>
+            Download PDF
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6">

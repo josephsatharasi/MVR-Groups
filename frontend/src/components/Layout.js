@@ -18,13 +18,9 @@ const Layout = ({ children, setIsLoggedIn }) => {
 
   const menuItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/admin/customer-form', icon: UserPlus, label: 'Customer Form' },
-    { path: '/admin/agent-form', icon: UserCheck, label: 'Agent Form' },
-    { path: '/admin/add-property', icon: UserPlus, label: 'Add Property' },
-    { path: '/admin/properties', icon: Users, label: 'Properties' },
-    { path: '/admin/clients', icon: Users, label: 'Clients' },
+    { path: '/admin/customers', icon: Users, label: 'Customers' },
+    { path: '/admin/agents', icon: UserCheck, label: 'Agents' },
     { path: '/admin/caders', icon: UserCheck, label: 'Caders' },
-    { path: '/admin/alerts', icon: AlertTriangle, label: 'Alerts' },
     { path: '/admin/reports', icon: FileText, label: 'Reports' },
     { path: '/admin/bin', icon: Trash2, label: 'Recycle Bin' },
   ];

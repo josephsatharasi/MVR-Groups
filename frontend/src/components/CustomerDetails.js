@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Phone, Mail, MapPin, Package, Calendar, Edit2 } from 'lucide-react';
+import { X, User, Phone, MapPin, Home, DollarSign, Edit2, CreditCard } from 'lucide-react';
 import { updateCustomer } from '../utils/storage';
 import { toast } from 'react-toastify';
 
@@ -7,12 +7,14 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: customer.name || '',
-    phone: customer.phone || '',
-    email: customer.email || '',
+    mobile: customer.phone || customer.mobile || '',
+    whatsapp: customer.whatsapp || '',
     address: customer.address || '',
-    area: customer.area || '',
-    brand: customer.brand || '',
-    service: customer.service || ''
+    projectName: customer.projectName || '',
+    plotNo: customer.plotNo || '',
+    totalAmount: customer.totalAmount || '',
+    bookingAmount: customer.bookingAmount || '',
+    balanceAmount: customer.balanceAmount || ''
   });
 
   const handleInputChange = (e) => {
@@ -31,172 +33,163 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
     }
   };
 
-  const parseDate = (dateStr) => {
-    if (!dateStr) return null;
-    const [year, month, day] = dateStr.split('-');
-    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  };
-
-  const serviceDate = customer.serviceDate 
-    ? parseDate(customer.serviceDate) 
-    : (customer.createdAt ? new Date(customer.createdAt) : new Date());
-  const expireDate = new Date(serviceDate);
-  expireDate.setMonth(expireDate.getMonth() + parseInt(customer.service || 0));
-  const formattedExpireDate = expireDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="text-white p-6 flex justify-between items-center" style={{background: '#1e3a8a'}}>
-          <h2 className="text-2xl font-bold">{isEditing ? 'Edit Customer' : 'Customer Profile'}</h2>
+      <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="text-white p-6 flex justify-between items-center" style={{background: '#2F4F4F'}}>
+          <h2 className="text-2xl font-bold">{isEditing ? 'Edit Customer' : 'Customer Details'}</h2>
           <div className="flex gap-2">
             {!isEditing && (
-              <button onClick={() => setIsEditing(true)} className="p-2 rounded-lg transition-colors" style={{backgroundColor: 'rgba(62, 164, 240, 0.2)'}} title="Edit Customer">
+              <button onClick={() => setIsEditing(true)} className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors" title="Edit Customer">
                 <Edit2 size={24} />
               </button>
             )}
-            <button onClick={onClose} className="p-2 rounded-lg transition-colors" style={{backgroundColor: 'rgba(62, 164, 240, 0.2)'}}>
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors">
               <X size={24} />
             </button>
           </div>
         </div>
 
         <div className="p-6 space-y-6">
-          <div className="flex justify-center">
-            <div className="w-32 h-32 rounded-full border-4 overflow-hidden bg-gray-100" style={{borderColor: '#1e3a8a'}}>
-              {customer.profilePic ? (
-                <img src={customer.profilePic} alt={customer.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <User size={60} className="text-gray-400" />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-start gap-3">
-              <User className="mt-1" style={{color: '#1e3a8a'}} size={20} />
+              <User className="mt-1" style={{color: '#2F4F4F'}} size={20} />
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Customer Name</p>
                 {isEditing ? (
-                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full px-2 py-1 border rounded" />
+                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
                 ) : (
-                  <p className="font-semibold text-blue-900">{customer.name}</p>
+                  <p className="font-semibold" style={{color: '#2F4F4F'}}>{customer.name}</p>
                 )}
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Phone className="mt-1" style={{color: '#1e3a8a'}} size={20} />
+              <Phone className="mt-1" style={{color: '#2F4F4F'}} size={20} />
               <div className="flex-1">
-                <p className="text-sm text-gray-600">Phone Number</p>
+                <p className="text-sm text-gray-600">Mobile Number</p>
                 {isEditing ? (
-                  <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-2 py-1 border rounded" />
+                  <input type="text" name="mobile" value={formData.mobile} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
                 ) : (
-                  <p className="font-semibold text-blue-900">{customer.phone}</p>
+                  <p className="font-semibold" style={{color: '#2F4F4F'}}>{customer.phone || customer.mobile}</p>
                 )}
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Mail className="mt-1" style={{color: '#1e3a8a'}} size={20} />
+              <Phone className="mt-1" style={{color: '#2F4F4F'}} size={20} />
               <div className="flex-1">
-                <p className="text-sm text-gray-600">Email</p>
+                <p className="text-sm text-gray-600">WhatsApp Number</p>
                 {isEditing ? (
-                  <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-2 py-1 border rounded" />
+                  <input type="text" name="whatsapp" value={formData.whatsapp} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
                 ) : (
-                  <p className="font-semibold text-blue-900">{customer.email}</p>
+                  <p className="font-semibold" style={{color: '#2F4F4F'}}>{customer.whatsapp || '-'}</p>
                 )}
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Package className="mt-1" style={{color: '#1e3a8a'}} size={20} />
+              <Home className="mt-1" style={{color: '#2F4F4F'}} size={20} />
               <div className="flex-1">
-                <p className="text-sm text-gray-600">Area</p>
+                <p className="text-sm text-gray-600">Project Name</p>
                 {isEditing ? (
-                  <input type="text" name="area" value={formData.area} onChange={handleInputChange} className="w-full px-2 py-1 border rounded" />
+                  <input type="text" name="projectName" value={formData.projectName} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
                 ) : (
-                  <p className="font-semibold text-blue-900">{customer.area}</p>
+                  <p className="font-semibold" style={{color: '#2F4F4F'}}>{customer.projectName || '-'}</p>
                 )}
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Package className="mt-1" style={{color: '#1e3a8a'}} size={20} />
+              <Home className="mt-1" style={{color: '#2F4F4F'}} size={20} />
               <div className="flex-1">
-                <p className="text-sm text-gray-600">Brand</p>
+                <p className="text-sm text-gray-600">Plot No</p>
                 {isEditing ? (
-                  <input type="text" name="brand" value={formData.brand} onChange={handleInputChange} className="w-full px-2 py-1 border rounded" />
+                  <input type="text" name="plotNo" value={formData.plotNo} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
                 ) : (
-                  <p className="font-semibold text-blue-900">{customer.brand}</p>
+                  <p className="font-semibold" style={{color: '#2F4F4F'}}>{customer.plotNo || '-'}</p>
                 )}
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Package className="mt-1" style={{color: '#1e3a8a'}} size={20} />
+              <MapPin className="mt-1" style={{color: '#2F4F4F'}} size={20} />
               <div className="flex-1">
-                <p className="text-sm text-gray-600">Service (Months)</p>
-                {isEditing ? (
-                  <input type="number" name="service" value={formData.service} onChange={handleInputChange} className="w-full px-2 py-1 border rounded" />
-                ) : (
-                  <p className="font-semibold text-blue-900">{customer.service}M</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Package className="mt-1" style={{color: '#1e3a8a'}} size={20} />
-              <div>
-                <p className="text-sm text-gray-600">Customer Registered</p>
-                <p className="font-semibold text-blue-900">
-                  {customer.serviceDate 
-                    ? (() => {
-                        const [year, month, day] = customer.serviceDate.split('-');
-                        return `${day}/${month}/${year}`;
-                      })()
-                    : (customer.createdAt ? new Date(customer.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A')}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Calendar className="text-red-600 mt-1" size={20} />
-              <div>
-                <p className="text-sm text-gray-600">Expire Date</p>
-                <p className="font-semibold text-red-600">{formattedExpireDate}</p>
+                <p className="text-sm text-gray-600">Location</p>
+                <p className="font-semibold" style={{color: '#2F4F4F'}}>{customer.location || '-'}</p>
               </div>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <MapPin className="mt-1" style={{color: '#1e3a8a'}} size={20} />
+            <MapPin className="mt-1" style={{color: '#2F4F4F'}} size={20} />
             <div className="flex-1">
               <p className="text-sm text-gray-600">Address</p>
               {isEditing ? (
-                <textarea name="address" value={formData.address} onChange={handleInputChange} className="w-full px-2 py-1 border rounded" rows="2" />
+                <textarea name="address" value={formData.address} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" rows="2" />
               ) : (
-                <p className="font-semibold text-blue-900">{customer.address}</p>
+                <p className="font-semibold" style={{color: '#2F4F4F'}}>{customer.address || '-'}</p>
               )}
             </div>
           </div>
 
+          <div className="border-t pt-4">
+            <h3 className="font-bold mb-4" style={{color: '#2F4F4F'}}>Payment Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="flex items-start gap-3">
+                <DollarSign className="mt-1" style={{color: '#2F4F4F'}} size={20} />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">Total Amount</p>
+                  {isEditing ? (
+                    <input type="number" name="totalAmount" value={formData.totalAmount} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
+                  ) : (
+                    <p className="font-semibold text-lg" style={{color: '#2F4F4F'}}>₹{customer.totalAmount || '0'}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <CreditCard className="mt-1 text-green-600" size={20} />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">Booking Amount</p>
+                  {isEditing ? (
+                    <input type="number" name="bookingAmount" value={formData.bookingAmount} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
+                  ) : (
+                    <p className="font-semibold text-lg text-green-600">₹{customer.bookingAmount || '0'}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <CreditCard className="mt-1 text-red-600" size={20} />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">Balance Amount</p>
+                  {isEditing ? (
+                    <input type="number" name="balanceAmount" value={formData.balanceAmount} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
+                  ) : (
+                    <p className="font-semibold text-lg text-red-600">₹{customer.balanceAmount || '0'}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="font-bold text-blue-900 mb-2">Additional Information</h3>
-            <div className="text-sm text-gray-600">
-              <p>Customer ID: #{customer._id || customer.id}</p>
-              <p>Registered: {new Date(customer.createdAt).toLocaleDateString()}</p>
+            <h3 className="font-bold mb-2" style={{color: '#2F4F4F'}}>Additional Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
+              <p><span className="font-semibold">Customer ID:</span> #{customer._id || customer.id}</p>
+              <p><span className="font-semibold">Aadhar No:</span> {customer.aadharNo || '-'}</p>
+              <p><span className="font-semibold">Pin Code:</span> {customer.pinCode || '-'}</p>
+              <p><span className="font-semibold">Payment Type:</span> {customer.paymentType || '-'}</p>
             </div>
           </div>
 
           {isEditing && (
             <div className="flex gap-3 justify-end">
-              <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+              <button onClick={() => setIsEditing(false)} className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSave} className="px-4 py-2 text-white rounded-lg transition-colors" style={{background: '#1e3a8a'}}>
+              <button onClick={handleSave} className="px-6 py-2 text-white rounded-lg transition-colors" style={{background: '#2F4F4F'}}>
                 Save Changes
               </button>
             </div>

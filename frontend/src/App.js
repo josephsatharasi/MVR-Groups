@@ -8,13 +8,9 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import CustomerForm from './pages/CustomerForm';
-import AgentForm from './pages/AgentForm';
-import Properties from './pages/Properties';
-import AddProperty from './pages/AddProperty';
-import Clients from './pages/Clients';
+import Customers from './pages/Customers';
+import Agents from './pages/Agents';
 import Caders from './pages/Caders';
-import Alerts from './pages/Alerts';
 import Reports from './pages/Reports';
 import RecycleBin from './pages/RecycleBin';
 
@@ -41,13 +37,9 @@ function App() {
             <Layout setIsLoggedIn={setIsLoggedIn}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/customer-form" element={<CustomerForm />} />
-                <Route path="/agent-form" element={<AgentForm />} />
-                <Route path="/properties" element={<Properties />} />
-                <Route path="/add-property" element={<AddProperty />} />
-                <Route path="/clients" element={<Clients />} />
+                <Route path="/customers" element={<Customers />} />
+                <Route path="/agents" element={<Agents />} />
                 <Route path="/caders" element={<Caders />} />
-                <Route path="/alerts" element={<Alerts />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/bin" element={<RecycleBin />} />
               </Routes>

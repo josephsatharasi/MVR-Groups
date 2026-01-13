@@ -1,10 +1,10 @@
-const API_URL = 'https://mkl-admin-backend.onrender.com/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+// Frontend-only customer management using localStorage
 export const getCustomers = async () => {
   try {
-    const response = await fetch(`${API_URL}/customers`);
-    if (!response.ok) throw new Error('Failed to fetch customers');
-    return response.json();
+    const customers = localStorage.getItem('customers');
+    return customers ? JSON.parse(customers) : [];
   } catch (error) {
     console.error('Error fetching customers:', error);
     return [];
@@ -13,16 +13,11 @@ export const getCustomers = async () => {
 
 export const addCustomer = async (customer) => {
   try {
-    const response = await fetch(`${API_URL}/customers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(customer),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to add customer');
-    }
-    return response.json();
+    const customers = await getCustomers();
+    const newCustomer = { ...customer, id: Date.now().toString(), _id: Date.now().toString(), createdAt: new Date().toISOString() };
+    customers.push(newCustomer);
+    localStorage.setItem('customers', JSON.stringify(customers));
+    return newCustomer;
   } catch (error) {
     console.error('Error adding customer:', error);
     throw error;
@@ -31,13 +26,14 @@ export const addCustomer = async (customer) => {
 
 export const updateCustomer = async (id, data) => {
   try {
-    const response = await fetch(`${API_URL}/customers/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to update customer');
-    return response.json();
+    const customers = await getCustomers();
+    const index = customers.findIndex(c => c.id === id || c._id === id);
+    if (index !== -1) {
+      customers[index] = { ...customers[index], ...data };
+      localStorage.setItem('customers', JSON.stringify(customers));
+      return customers[index];
+    }
+    throw new Error('Customer not found');
   } catch (error) {
     console.error('Error updating customer:', error);
     throw error;
@@ -46,11 +42,10 @@ export const updateCustomer = async (id, data) => {
 
 export const deleteCustomer = async (id) => {
   try {
-    const response = await fetch(`${API_URL}/customers/${id}`, {
-      method: 'DELETE',
-    });
-    if (!response.ok) throw new Error('Failed to delete customer');
-    return response.json();
+    const customers = await getCustomers();
+    const filtered = customers.filter(c => c.id !== id && c._id !== id);
+    localStorage.setItem('customers', JSON.stringify(filtered));
+    return { message: 'Customer deleted' };
   } catch (error) {
     console.error('Error deleting customer:', error);
     throw error;
@@ -59,16 +54,10 @@ export const deleteCustomer = async (id) => {
 
 export const searchCustomers = async (name) => {
   try {
-    const response = await fetch(`${API_URL}/customers/search/${name}`);
-    if (!response.ok) throw new Error('Failed to search customers');
-    return response.json();
+    const customers = await getCustomers();
+    return customers.filter(c => c.name.toLowerCase().includes(name.toLowerCase()));
   } catch (error) {
     console.error('Error searching customers:', error);
     return [];
   }
 };
-
-
-
-
-

@@ -10,10 +10,22 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://mvr-groups.onrender.com', '*'],
+  origin: ['http://localhost:3000', 'https://mvr-groups-frontned.onrender.com'],
   credentials: true
 }));
 app.use(express.json());
+
+// CORS headers for preflight
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));

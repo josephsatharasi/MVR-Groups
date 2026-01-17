@@ -10,7 +10,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/cadres';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const Caders = () => {
   const [search, setSearch] = useState('');
@@ -51,7 +51,7 @@ const Caders = () => {
 
   const fetchCadres = async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(`${API_URL}/cadres`);
       setCaders(response.data);
     } catch (error) {
       toast.error('Failed to fetch cadres');
@@ -95,10 +95,10 @@ const Caders = () => {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(`${API_URL}/${editingId}`, formData);
+        await axios.put(`${API_URL}/cadres/${editingId}`, formData);
         toast.success('Cadre updated successfully!');
       } else {
-        await axios.post(API_URL, formData);
+        await axios.post(`${API_URL}/cadres`, formData);
         toast.success('Cadre added successfully!');
       }
       fetchCadres();
@@ -133,7 +133,7 @@ const Caders = () => {
   const handleDelete = async (row) => {
     if (window.confirm('Are you sure you want to delete this cadre?')) {
       try {
-        await axios.delete(`${API_URL}/${row._id}`);
+        await axios.delete(`${API_URL}/cadres/${row._id}`);
         toast.success('Cadre deleted successfully!');
         fetchCadres();
       } catch (error) {
@@ -151,7 +151,7 @@ const Caders = () => {
   const handleRecruitSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(API_URL, recruitFormData);
+      await axios.post(`${API_URL}/cadres`, recruitFormData);
       toast.success(`${recruitFormData.username} recruited successfully!`);
       fetchCadres();
       setShowRecruitModal(false);

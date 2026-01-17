@@ -8,8 +8,8 @@ const Settings = () => {
     alertDays: 7,
     emailNotifications: true,
     smsNotifications: false,
-    companyName: 'MKL Enterprises',
-    companyEmail: 'support@mklenterprises.com',
+    companyName: 'MVR Groups',
+    companyEmail: 'support@mvrgroups.com',
     companyPhone: '+91 1234567890',
   });
 

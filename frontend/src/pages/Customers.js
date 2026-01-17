@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Search, Eye, Plus, X, UserPlus, Download } from 'lucide-react';
+import { Trash2, Search, Eye, Plus, X, UserPlus, Download, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { getCustomers, deleteCustomer, addCustomer } from '../utils/storage';
+import { getCustomers, deleteCustomer, addCustomer, getAgents } from '../utils/storage';
 import CustomerDetails from '../components/CustomerDetails';
 import ConfirmModal from '../components/ConfirmModal';
 import { useSearchParams } from 'react-router-dom';
@@ -12,29 +12,26 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const Customers = () => {
-  const [customers, setCustomers] = useState([
-    { id: 1, name: 'Rajesh Kumar', phone: '9876543210', mobile: '9876543210', projectName: 'Green Valley', plotNo: 'A-101', totalAmount: '5000000', balanceAmount: '1500000', bookingAmount: '3500000' },
-    { id: 2, name: 'Priya Sharma', phone: '9123456789', mobile: '9123456789', projectName: 'Sunrise Heights', plotNo: 'B-205', totalAmount: '7500000', balanceAmount: '2000000', bookingAmount: '5500000' },
-    { id: 3, name: 'Amit Patel', phone: '9988776655', mobile: '9988776655', projectName: 'Royal Gardens', plotNo: 'C-310', totalAmount: '4500000', balanceAmount: '0', bookingAmount: '4500000' },
-    { id: 4, name: 'Sneha Reddy', phone: '9876512345', mobile: '9876512345', projectName: 'Palm Residency', plotNo: 'D-150', totalAmount: '6000000', balanceAmount: '3000000', bookingAmount: '3000000' },
-    { id: 5, name: 'Vikram Singh', phone: '9123498765', mobile: '9123498765', projectName: 'Green Valley', plotNo: 'A-220', totalAmount: '5500000', balanceAmount: '500000', bookingAmount: '5000000' },
-  ]);
+  const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerToDelete, setCustomerToDelete] = useState(null);
   const [searchParams] = useSearchParams();
   const [showFormModal, setShowFormModal] = useState(false);
+  const [agents, setAgents] = useState([]);
+  const [agentValidation, setAgentValidation] = useState({ valid: false, agent: null, checked: false });
   const [formData, setFormData] = useState({
     name: '', relationType: '', relation: '', mobile: '', whatsapp: '',
     dob: '', age: '', address: '', pinCode: '', aadharNo: '', plotNo: '',
     gadhiAnkanamSqft: '', price: '',
     projectName: '', location: '',
     totalAmount: '', bookingAmount: '', balanceAmount: '', paymentType: '', chequeDD: '', chequeNo: '',
-    bankName: '', agentCode: '', bookingDhamaka: '',
+    bankName: '', agentCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: '',
   });
 
   useEffect(() => {
     loadCustomers();
+    loadAgents();
   }, []);
 
   const loadCustomers = async () => {
@@ -42,6 +39,18 @@ const Customers = () => {
     if (data.length > 0) {
       setCustomers(data);
     }
+  };
+
+  const loadAgents = async () => {
+    const data = await getAgents();
+    setAgents(data);
+  };
+
+  const formatIndianNumber = (num) => {
+    if (!num) return '0';
+    const number = parseFloat(num);
+    if (isNaN(number)) return '0';
+    return number.toLocaleString('en-IN');
   };
 
   const handleDelete = async () => {
@@ -62,11 +71,25 @@ const Customers = () => {
         gadhiAnkanamSqft: '', price: '',
         projectName: '', location: '',
         totalAmount: '', bookingAmount: '', balanceAmount: '', paymentType: '', chequeDD: '', chequeNo: '',
-        bankName: '', agentCode: '', bookingDhamaka: '',
+        bankName: '', agentCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: '',
       });
+      setAgentValidation({ valid: false, agent: null, checked: false });
       loadCustomers();
     } catch (error) {
       toast.error('Failed to add customer');
+    }
+  };
+
+  const validateAgent = (agentId) => {
+    if (!agentId || agentId.length !== 6) {
+      setAgentValidation({ valid: false, agent: null, checked: false });
+      return;
+    }
+    const agent = agents.find(a => a.agentId === agentId);
+    if (agent) {
+      setAgentValidation({ valid: true, agent, checked: true });
+    } else {
+      setAgentValidation({ valid: false, agent: null, checked: true });
     }
   };
 
@@ -78,6 +101,13 @@ const Customers = () => {
       const numericValue = value.replace(/\D/g, '').slice(0, 12);
       const formatted = numericValue.match(/.{1,4}/g)?.join(' ') || numericValue;
       setFormData({ ...formData, [field]: formatted });
+    } else if (field === 'pinCode') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 6);
+      setFormData({ ...formData, [field]: numericValue });
+    } else if (field === 'agentCode') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 6);
+      setFormData({ ...formData, [field]: numericValue });
+      validateAgent(numericValue);
     } else if (field === 'bookingDhamaka') {
       const numericValue = value.replace(/\D/g, '');
       setFormData({ ...formData, [field]: numericValue });
@@ -95,8 +125,19 @@ const Customers = () => {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('Customers List', 14, 20);
+    
+    // Company Header
+    doc.setFontSize(22);
+    doc.setFont(undefined, 'bold');
+    doc.text('MVR Groups', 105, 15, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text('Real Estate Management', 105, 22, { align: 'center' });
+    
+    // Title
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('Customers List', 14, 35);
     
     const tableData = customers.map((c, index) => [
       index + 1,
@@ -104,12 +145,12 @@ const Customers = () => {
       c.phone || c.mobile,
       c.projectName || '-',
       c.plotNo || '-',
-      `₹${c.totalAmount || '0'}`,
-      `₹${c.balanceAmount || '0'}`
+      formatIndianNumber(c.totalAmount),
+      formatIndianNumber(c.balanceAmount)
     ]);
     
     autoTable(doc, {
-      startY: 30,
+      startY: 42,
       head: [['S.NO', 'Name', 'Phone', 'Project', 'Plot No', 'Total Amount', 'Balance']],
       body: tableData,
       theme: 'grid',
@@ -126,24 +167,6 @@ const Customers = () => {
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.phone.includes(searchTerm) ||
       (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    if (searchParams.get('filter') === 'expired') {
-      const parseDate = (dateStr) => {
-        if (!dateStr) return null;
-        const [year, month, day] = dateStr.split('-');
-        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      };
-      
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const serviceDate = c.serviceDate ? parseDate(c.serviceDate) : new Date(c.createdAt);
-      const expireDate = new Date(serviceDate);
-      expireDate.setMonth(expireDate.getMonth() + parseInt(c.service || 0));
-      expireDate.setHours(0, 0, 0, 0);
-      
-      const isExpired = expireDate < today;
-      return matchesSearch && isExpired;
-    }
     
     return matchesSearch;
   });
@@ -203,8 +226,8 @@ const Customers = () => {
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">
                     <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#5F9EA0', color: 'white'}}>{customer.plotNo || '-'}</span>
                   </td>
-                  <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">₹{customer.totalAmount || '0'}</td>
-                  <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: customer.balanceAmount > 0 ? '#dc2626' : '#16a34a'}}>₹{customer.balanceAmount || '0'}</td>
+                  <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">₹{formatIndianNumber(customer.totalAmount)}</td>
+                  <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: customer.balanceAmount > 0 ? '#dc2626' : '#16a34a'}}>₹{formatIndianNumber(customer.balanceAmount)}</td>
                   <td className="px-4 md:px-6 py-4 text-sm">
                     <div className="flex gap-2">
                       <button 
@@ -276,7 +299,7 @@ const Customers = () => {
               </div>
               <FormInput label="Address" type="textarea" value={formData.address} onChange={(e) => handleChange('address', e.target.value)} rows={2} placeholder="Enter full address" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput label="Pin Code" value={formData.pinCode} onChange={(e) => handleChange('pinCode', e.target.value)} placeholder="Enter pin code" />
+                <FormInput label="Pin Code (6 digits)" value={formData.pinCode} onChange={(e) => handleChange('pinCode', e.target.value)} placeholder="Enter 6-digit pin code" maxLength={6} />
                 <FormInput label="Aadhar No" value={formData.aadharNo} onChange={(e) => handleChange('aadharNo', e.target.value)} placeholder="Enter Aadhar number" />
               </div>
               <h3 className="text-lg font-bold" style={{ color: '#2F4F4F' }}>Plot Details</h3>
@@ -294,7 +317,7 @@ const Customers = () => {
               </div>
               <h3 className="text-lg font-bold" style={{ color: '#2F4F4F' }}>Payment Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput label="Payment Type" type="select" value={formData.paymentType} onChange={(e) => handleChange('paymentType', e.target.value)} options={['Cash', 'Cheque/DD']} />
+                <FormInput label="Payment Type" type="select" value={formData.paymentType} onChange={(e) => handleChange('paymentType', e.target.value)} options={['Cash', 'Cheque/DD', 'UPI']} />
                 {formData.paymentType === 'Cheque/DD' && (
                   <>
                     <FormInput label="Cheque/DD" value={formData.chequeDD} onChange={(e) => handleChange('chequeDD', e.target.value)} placeholder="Enter cheque/DD details" />
@@ -302,8 +325,29 @@ const Customers = () => {
                     <FormInput label="Name of the Bank" value={formData.bankName} onChange={(e) => handleChange('bankName', e.target.value)} placeholder="Enter bank name" />
                   </>
                 )}
-                <FormInput label="Agent ID" value={formData.agentCode} onChange={(e) => handleChange('agentCode', e.target.value)} placeholder="Enter 6-digit agent ID" />
+                {formData.paymentType === 'UPI' && (
+                  <FormInput label="UPI ID" value={formData.upiId} onChange={(e) => handleChange('upiId', e.target.value)} placeholder="Enter UPI ID" />
+                )}
+                <div>
+                  <FormInput label="Agent ID (6 digits)" value={formData.agentCode} onChange={(e) => handleChange('agentCode', e.target.value)} placeholder="Enter 6-digit agent ID" maxLength={6} />
+                  {agentValidation.checked && (
+                    <div className={`mt-1 text-sm flex items-center gap-1 ${agentValidation.valid ? 'text-green-600' : 'text-red-600'}`}>
+                      {agentValidation.valid ? (
+                        <>
+                          <CheckCircle size={16} />
+                          <span>Agent Found: {agentValidation.agent.name} ({agentValidation.agent.caderRole})</span>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle size={16} />
+                          <span>Agent not found in system</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <FormInput label="Booking Dhamaka" type="number" value={formData.bookingDhamaka} onChange={(e) => handleChange('bookingDhamaka', e.target.value)} placeholder="Enter booking dhamaka" />
+                <FormInput label="Registration Dhamaka" type="number" value={formData.registrationDhamaka} onChange={(e) => handleChange('registrationDhamaka', e.target.value)} placeholder="Enter registration dhamaka" />
               </div>
               <div className="flex gap-2 pt-4">
                 <Button type="submit" variant="primary" icon={UserPlus}>Add Customer</Button>

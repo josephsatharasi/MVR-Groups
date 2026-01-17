@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Plus, Download, Edit, Trash2, X } from 'lucide-react';
 import Table from '../components/Table';
 import SearchBar from '../components/SearchBar';
@@ -8,6 +8,9 @@ import FormInput from '../components/FormInput';
 import { toast } from 'react-toastify';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api/cadres';
 
 const Caders = () => {
   const [search, setSearch] = useState('');
@@ -24,44 +27,37 @@ const Caders = () => {
   const [selectedCader, setSelectedCader] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
-    username: '',
-    role: '',
+    name: '',
+    relationType: '',
+    relation: '',
+    mobile: '',
+    whatsapp: '',
     email: '',
-    contact: '',
-    percentage: '',
-    recruiterRole: '',
+    dob: '',
+    age: '',
+    address: '',
+    pinCode: '',
+    aadharNo: '',
+    panNo: '',
+    cadreRole: '',
+    cadreDhamaka: '',
   });
 
-  const [caders, setCaders] = useState([
-    { id: 1, username: 'Rahul Sharma', role: 'FO', email: 'rahul@email.com', contact: '+91 98765 43210', percentage: 4, history: [
-      { date: '2024-01-15', action: 'Created', details: 'Initial registration' },
-      { date: '2024-02-10', action: 'Updated', details: 'Percentage changed from 3% to 4%' },
-    ]},
-    { id: 2, username: 'Priya Patel', role: 'TL', email: 'priya@email.com', contact: '+91 98765 43211', percentage: 2, history: [
-      { date: '2024-01-20', action: 'Created', details: 'Initial registration' },
-    ]},
-    { id: 3, username: 'Amit Kumar', role: 'STL', email: 'amit@email.com', contact: '+91 98765 43212', percentage: 1, history: [
-      { date: '2024-01-25', action: 'Created', details: 'Initial registration' },
-    ]},
-    { id: 4, username: 'Sneha Reddy', role: 'DO', email: 'sneha@email.com', contact: '+91 98765 43213', percentage: 1, history: [
-      { date: '2024-02-01', action: 'Created', details: 'Initial registration' },
-    ]},
-    { id: 5, username: 'Vikram Singh', role: 'SDO', email: 'vikram@email.com', contact: '+91 98765 43214', percentage: 1, history: [
-      { date: '2024-02-05', action: 'Created', details: 'Initial registration' },
-    ]},
-    { id: 6, username: 'Anjali Verma', role: 'MM', email: 'anjali@email.com', contact: '+91 98765 43215', percentage: 1, history: [
-      { date: '2024-02-10', action: 'Created', details: 'Initial registration' },
-    ]},
-    { id: 7, username: 'Karan Mehta', role: 'SMM', email: 'karan@email.com', contact: '+91 98765 43216', percentage: 1, history: [
-      { date: '2024-02-15', action: 'Created', details: 'Initial registration' },
-    ]},
-    { id: 8, username: 'Joseph Thomas', role: 'GM', email: 'joseph@email.com', contact: '+91 98765 43217', percentage: 1, history: [
-      { date: '2024-02-20', action: 'Created', details: 'Initial registration' },
-    ]},
-    { id: 9, username: 'Ravi Gupta', role: 'SGM', email: 'ravi@email.com', contact: '+91 98765 43218', percentage: 1, history: [
-      { date: '2024-02-25', action: 'Created', details: 'Initial registration' },
-    ]},
-  ]);
+  const [caders, setCaders] = useState([]);
+
+  useEffect(() => {
+    fetchCadres();
+  }, []);
+
+  const fetchCadres = async () => {
+    try {
+      const response = await axios.get(API_URL);
+      setCaders(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch cadres');
+      console.error(error);
+    }
+  };
 
   const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
 
@@ -89,33 +85,62 @@ const Caders = () => {
   };
 
   const filtered = caders.filter(c => 
-    c.username.toLowerCase().includes(search.toLowerCase()) ||
-    c.email.toLowerCase().includes(search.toLowerCase()) ||
-    c.contact.includes(search) ||
-    c.role.toLowerCase().includes(search.toLowerCase())
+    c.name?.toLowerCase().includes(search.toLowerCase()) ||
+    c.email?.toLowerCase().includes(search.toLowerCase()) ||
+    c.mobile?.includes(search) ||
+    c.cadreRole?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      setCaders(caders.map(c => c.id === editingId ? { ...formData, id: editingId, history: [...c.history, { date: new Date().toISOString().split('T')[0], action: 'Updated', details: 'Profile updated' }] } : c));
-      toast.success('Cader updated successfully!');
-    } else {
-      setCaders([...caders, { ...formData, id: Date.now(), history: [{ date: new Date().toISOString().split('T')[0], action: 'Created', details: 'Initial registration' }] }]);
-      toast.success('Cader added successfully!');
+    try {
+      if (editingId) {
+        await axios.put(`${API_URL}/${editingId}`, formData);
+        toast.success('Cadre updated successfully!');
+      } else {
+        await axios.post(API_URL, formData);
+        toast.success('Cadre added successfully!');
+      }
+      fetchCadres();
+      resetForm();
+    } catch (error) {
+      toast.error(editingId ? 'Failed to update cadre' : 'Failed to add cadre');
+      console.error(error);
     }
-    resetForm();
   };
 
   const handleEdit = (row) => {
-    setFormData({ username: row.username, role: row.role, email: row.email, contact: row.contact, percentage: row.percentage });
-    setEditingId(row.id);
+    setFormData({
+      name: row.name || '',
+      relationType: row.relationType || '',
+      relation: row.relation || '',
+      mobile: row.mobile || '',
+      whatsapp: row.whatsapp || '',
+      email: row.email || '',
+      dob: row.dob || '',
+      age: row.age || '',
+      address: row.address || '',
+      pinCode: row.pinCode || '',
+      aadharNo: row.aadharNo || '',
+      panNo: row.panNo || '',
+      cadreRole: row.cadreRole || '',
+      cadreDhamaka: row.cadreDhamaka || '',
+    });
+    setEditingId(row._id);
     setShowFormModal(true);
   };
 
-  const handleDelete = (row) => {
-    setCaders(caders.filter(c => c.id !== row.id));
-    toast.success('Cader deleted successfully!');
+  const handleDelete = async (row) => {
+    if (window.confirm('Are you sure you want to delete this cadre?')) {
+      try {
+        await axios.delete(`${API_URL}/${row._id}`);
+        toast.success('Cadre deleted successfully!');
+        fetchCadres();
+      } catch (error) {
+        toast.error('Failed to delete cadre');
+        console.error(error);
+      }
+    }
   };
 
   const handleRowClick = (row) => {
@@ -123,23 +148,37 @@ const Caders = () => {
     setShowDetailsModal(true);
   };
 
-  const handleRecruitSubmit = (e) => {
+  const handleRecruitSubmit = async (e) => {
     e.preventDefault();
-    const newCader = {
-      ...recruitFormData,
-      id: Date.now(),
-      history: [
-        { date: new Date().toISOString().split('T')[0], action: 'Created', details: `Recruited by ${selectedCader.username} (${selectedCader.role})` }
-      ]
-    };
-    setCaders([...caders, newCader]);
-    toast.success(`${recruitFormData.username} recruited successfully!`);
-    setShowRecruitModal(false);
-    setRecruitFormData({ username: '', role: '', email: '', contact: '', percentage: '' });
+    try {
+      await axios.post(API_URL, recruitFormData);
+      toast.success(`${recruitFormData.username} recruited successfully!`);
+      fetchCadres();
+      setShowRecruitModal(false);
+      setRecruitFormData({ username: '', role: '', email: '', contact: '', percentage: '' });
+    } catch (error) {
+      toast.error('Failed to recruit member');
+      console.error(error);
+    }
   };
 
   const resetForm = () => {
-    setFormData({ username: '', role: '', email: '', contact: '', percentage: '', recruiterRole: '' });
+    setFormData({
+      name: '',
+      relationType: '',
+      relation: '',
+      mobile: '',
+      whatsapp: '',
+      email: '',
+      dob: '',
+      age: '',
+      address: '',
+      pinCode: '',
+      aadharNo: '',
+      panNo: '',
+      cadreRole: '',
+      cadreDhamaka: '',
+    });
     setEditingId(null);
     setShowFormModal(false);
   };
@@ -147,48 +186,48 @@ const Caders = () => {
   const downloadPDF = () => {
     const doc = new jsPDF();
     
-    doc.setFontSize(18);
-    doc.text('Caders List', 14, 20);
+    // Company Header
+    doc.setFontSize(22);
+    doc.setFont(undefined, 'bold');
+    doc.text('MVR Groups', 105, 15, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text('Real Estate Management', 105, 22, { align: 'center' });
+    
+    // Title
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('Cadres List', 14, 35);
     
     const tableData = caders.map((c, index) => [
       index + 1,
-      getRoleFullName(c.role),
-      `${c.percentage}%`
+      c.name,
+      c.mobile,
+      getRoleFullName(c.cadreRole),
+      c.address || '-'
     ]);
     
     autoTable(doc, {
-      startY: 30,
-      head: [['S.NO', 'CADER NAME', 'PERCENTAGE %']],
+      startY: 42,
+      head: [['S.NO', 'Name', 'Mobile', 'Cadre Role', 'Address']],
       body: tableData,
       theme: 'grid',
       headStyles: { fillColor: [47, 79, 79], textColor: 255, fontStyle: 'bold' },
       styles: { fontSize: 10, cellPadding: 5 },
-      columnStyles: {
-        0: { halign: 'center', cellWidth: 20 },
-        1: { halign: 'left', cellWidth: 130 },
-        2: { halign: 'center', cellWidth: 40 }
-      }
     });
     
-    doc.save('caders-list.pdf');
+    doc.save('cadres-list.pdf');
     toast.success('PDF downloaded successfully!');
   };
 
   const columns = [
-    { header: 'Username', field: 'username', render: (row) => (
-      <span className="font-semibold">{row.username} ({row.role})</span>
+    { header: 'Name', field: 'name', render: (row) => (
+      <span className="font-semibold">{row.name} ({row.cadreRole})</span>
     )},
-    { header: 'Role', field: 'role', render: (row) => getRoleFullName(row.role) },
+    { header: 'Role', field: 'cadreRole', render: (row) => getRoleFullName(row.cadreRole) },
+    { header: 'Mobile', field: 'mobile' },
     { header: 'Email', field: 'email' },
-    { header: 'Contact', field: 'contact' },
-    { header: 'Percentage', field: 'percentage', render: (row) => (
-      <div className="flex items-center gap-2">
-        <div className="w-24 bg-gray-200 rounded-full h-2">
-          <div className="h-2 rounded-full" style={{ width: `${row.percentage}%`, backgroundColor: '#2C7A7B' }}></div>
-        </div>
-        <span className="text-sm font-semibold">{row.percentage}%</span>
-      </div>
-    )},
+    { header: 'Address', field: 'address' },
   ];
 
   return (
@@ -271,52 +310,100 @@ const Caders = () => {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput
-                  label="Recruiter Role"
-                  type="select"
-                  value={formData.recruiterRole}
-                  onChange={(e) => setFormData({ ...formData, recruiterRole: e.target.value, role: '' })}
-                  options={roleOptions}
+                  label="Name (Mr/Mrs/Ms/Dr)"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
+                  placeholder="Enter full name"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <FormInput
+                    label="Relation"
+                    type="select"
+                    value={formData.relationType}
+                    onChange={(e) => setFormData({ ...formData, relationType: e.target.value })}
+                    options={['S/o', 'W/o', 'D/o']}
+                    placeholder="Select"
+                  />
+                  <FormInput
+                    label="Name"
+                    value={formData.relation}
+                    onChange={(e) => setFormData({ ...formData, relation: e.target.value })}
+                    placeholder="Enter name"
+                  />
+                </div>
+                <FormInput
+                  label="Mobile"
+                  type="tel"
+                  value={formData.mobile}
+                  onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                  required
+                  placeholder="Enter mobile number"
                 />
                 <FormInput
-                  label="Role"
-                  type="select"
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  options={getAvailableRoles(formData.recruiterRole)}
-                  required
-                  disabled={!formData.recruiterRole}
-                />
-                <FormInput
-                  label="Username"
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  required
-                  placeholder="Enter username"
+                  label="WhatsApp"
+                  type="tel"
+                  value={formData.whatsapp}
+                  onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                  placeholder="Enter WhatsApp number"
                 />
                 <FormInput
                   label="Email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
                   placeholder="Enter email"
                 />
                 <FormInput
-                  label="Contact"
-                  type="tel"
-                  value={formData.contact}
-                  onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-                  required
-                  placeholder="Enter contact"
+                  label="Date of Birth"
+                  type="date"
+                  value={formData.dob}
+                  onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
                 />
                 <FormInput
-                  label="Percentage"
+                  label="Age"
                   type="number"
-                  value={formData.percentage}
-                  onChange={(e) => setFormData({ ...formData, percentage: e.target.value })}
-                  required
-                  placeholder="Enter percentage (0-100)"
+                  value={formData.age}
+                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                  placeholder="Enter age"
+                />
+                <FormInput
+                  label="Address"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Enter address"
+                />
+                <FormInput
+                  label="Pin Code"
+                  value={formData.pinCode}
+                  onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
+                  placeholder="Enter pin code"
+                />
+                <FormInput
+                  label="Aadhar No"
+                  value={formData.aadharNo}
+                  onChange={(e) => setFormData({ ...formData, aadharNo: e.target.value })}
+                  placeholder="Enter Aadhar number"
+                />
+                <FormInput
+                  label="PAN No"
+                  value={formData.panNo}
+                  onChange={(e) => setFormData({ ...formData, panNo: e.target.value })}
+                  placeholder="Enter PAN number"
+                />
+                <FormInput
+                  label="Cadre Role"
+                  type="select"
+                  value={formData.cadreRole}
+                  onChange={(e) => setFormData({ ...formData, cadreRole: e.target.value })}
+                  options={roleOptions}
+                  placeholder="Select role"
+                />
+                <FormInput
+                  label="Cadre Dhamaka"
+                  value={formData.cadreDhamaka}
+                  onChange={(e) => setFormData({ ...formData, cadreDhamaka: e.target.value })}
+                  placeholder="Enter cadre dhamaka"
                 />
               </div>
               <div className="flex gap-2 pt-4">

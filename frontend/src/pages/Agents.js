@@ -6,6 +6,7 @@ import FormInput from '../components/FormInput';
 import { toast } from 'react-toastify';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { getAgents, addAgent, updateAgent, deleteAgent } from '../utils/storage';
 
 const Agents = () => {
   const [search, setSearch] = useState('');
@@ -13,20 +14,39 @@ const Agents = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [agents, setAgents] = useState([
-    { id: 1, name: 'Rajesh Kumar', mobile: '+91 98765 43210', email: 'rajesh@email.com', agentId: '100001', companyCode: '999', caderRole: 'FO' },
-    { id: 2, name: 'Priya Sharma', mobile: '+91 98765 43211', email: 'priya@email.com', agentId: '100002', companyCode: '999', caderRole: 'TL' },
-  ]);
+  const [agents, setAgents] = useState([]);
   const [formData, setFormData] = useState({
     name: '', relationType: '', relation: '', mobile: '', whatsapp: '', email: '',
     dob: '', age: '', address: '', pinCode: '', aadharNo: '',
-    panNo: '', agentId: '', companyCode: '999', caderRole: '', agentDhamaka: '', photo: null,
+    panNo: '', agentId: '', companyCode: '', caderRole: '', percentage: '', agentDhamaka: '', registrationDhamaka: '', photo: null,
   });
+  const [companyCodeChecked, setCompanyCodeChecked] = useState(false);
+  const [companyAgents, setCompanyAgents] = useState([]);
+
+  useEffect(() => {
+    loadAgents();
+  }, []);
+
+  const loadAgents = async () => {
+    const data = await getAgents();
+    setAgents(data);
+  };
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('Agents List', 14, 20);
+    
+    // Company Header
+    doc.setFontSize(22);
+    doc.setFont(undefined, 'bold');
+    doc.text('MVR Groups', 105, 15, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text('Real Estate Management', 105, 22, { align: 'center' });
+    
+    // Title
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('Agents List', 14, 35);
     
     const tableData = agents.map((a, index) => [
       index + 1,
@@ -38,7 +58,7 @@ const Agents = () => {
     ]);
     
     autoTable(doc, {
-      startY: 30,
+      startY: 42,
       head: [['S.NO', 'Name', 'Mobile', 'Email', 'Agent ID', 'Cader Role']],
       body: tableData,
       theme: 'grid',
@@ -51,48 +71,71 @@ const Agents = () => {
   };
 
   const caderRoles = [
-    { value: 'FO', label: 'FIELD OFFICER (FO)' },
-    { value: 'TL', label: 'TEAM LEADER (TL)' },
-    { value: 'STL', label: 'SENIOR TEAM LEADER (STL)' },
-    { value: 'DO', label: 'DEVELOPMENT OFFICE (DO)' },
-    { value: 'SDO', label: 'SENIOR DEVELOPMENT OFFICE (SDO)' },
-    { value: 'MM', label: 'MARKETING MANAGER (MM)' },
-    { value: 'SMM', label: 'SENIOR MARKETING MANAGER (SMM)' },
-    { value: 'GM', label: 'GENERAL MANAGER (GM)' },
-    { value: 'SGM', label: 'SENIOR GENERAL MANAGER (SGM)' },
+    { value: 'FO', label: 'FIELD OFFICER (FO)', percentage: 4 },
+    { value: 'TL', label: 'TEAM LEADER (TL)', percentage: 2 },
+    { value: 'STL', label: 'SENIOR TEAM LEADER (STL)', percentage: 1 },
+    { value: 'DO', label: 'DEVELOPMENT OFFICE (DO)', percentage: 1 },
+    { value: 'SDO', label: 'SENIOR DEVELOPMENT OFFICE (SDO)', percentage: 1 },
+    { value: 'MM', label: 'MARKETING MANAGER (MM)', percentage: 1 },
+    { value: 'SMM', label: 'SENIOR MARKETING MANAGER (SMM)', percentage: 1 },
+    { value: 'SGM', label: 'SENIOR GENERAL MANAGER (SGM)', percentage: 1 },
   ];
 
   const filtered = agents.filter(a => 
-    a.name.toLowerCase().includes(search.toLowerCase()) ||
-    a.email.toLowerCase().includes(search.toLowerCase()) ||
-    a.mobile.includes(search) ||
-    a.agentId.toLowerCase().includes(search.toLowerCase())
+    (a.name && a.name.toLowerCase().includes(search.toLowerCase())) ||
+    (a.email && a.email.toLowerCase().includes(search.toLowerCase())) ||
+    (a.mobile && a.mobile.includes(search)) ||
+    (a.agentId && a.agentId.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      setAgents(agents.map(a => a.id === editingId ? { ...formData, id: editingId } : a));
-      toast.success('Agent updated successfully!');
-    } else {
-      const maxAgentId = agents.length > 0 ? Math.max(...agents.map(a => parseInt(a.agentId))) : 100000;
-      const newAgentId = (maxAgentId + 1).toString();
-      setAgents([...agents, { ...formData, id: Date.now(), agentId: newAgentId }]);
-      toast.success(`Agent added successfully! Agent ID: ${newAgentId}`);
+    
+    if (!formData.name || !formData.mobile || !formData.companyCode) {
+      toast.error('Please fill required fields: Name, Mobile, and Company Code');
+      return;
     }
-    resetForm();
+    
+    if (!companyCodeChecked) {
+      toast.error('Please check the company code first');
+      return;
+    }
+    
+    try {
+      if (editingId) {
+        await updateAgent(editingId, formData);
+        toast.success('Agent updated successfully!');
+      } else {
+        const maxAgentId = agents.length > 0 && agents.some(a => a.agentId) 
+          ? Math.max(...agents.map(a => parseInt(a.agentId) || 100000)) 
+          : 100000;
+        const newAgentId = (maxAgentId + 1).toString();
+        await addAgent({ ...formData, agentId: newAgentId });
+        toast.success(`Agent added successfully! Agent ID: ${newAgentId}`);
+      }
+      resetForm();
+      loadAgents();
+    } catch (error) {
+      console.error('Error saving agent:', error);
+      toast.error('Failed to save agent: ' + (error.message || 'Unknown error'));
+    }
   };
 
   const handleEdit = (row) => {
     setFormData({ ...row });
-    setEditingId(row.id);
+    setEditingId(row._id);
     setShowFormModal(true);
   };
 
-  const handleDelete = (row) => {
+  const handleDelete = async (row) => {
     if (!window.confirm(`Delete ${row.name}? This will move the agent to recycle bin.`)) return;
-    setAgents(agents.filter(a => a.id !== row.id));
-    toast.success('Agent moved to recycle bin!');
+    try {
+      await deleteAgent(row._id);
+      toast.success('Agent moved to recycle bin!');
+      loadAgents();
+    } catch (error) {
+      toast.error('Failed to delete agent');
+    }
   };
 
   const handleRowClick = (row) => {
@@ -104,10 +147,12 @@ const Agents = () => {
     setFormData({
       name: '', relationType: '', relation: '', mobile: '', whatsapp: '', email: '',
       dob: '', age: '', address: '', pinCode: '', aadharNo: '',
-      panNo: '', agentId: '', companyCode: '999', caderRole: '', agentDhamaka: '', photo: null,
+      panNo: '', agentId: '', companyCode: '', caderRole: '', percentage: '', agentDhamaka: '', registrationDhamaka: '', photo: null,
     });
     setEditingId(null);
     setShowFormModal(false);
+    setCompanyCodeChecked(false);
+    setCompanyAgents([]);
   };
 
   const handleChange = (field, value) => {
@@ -127,12 +172,30 @@ const Agents = () => {
         else if (i === 9 && /[A-Z]/.test(inputValue[i])) formatted += inputValue[i];
       }
       setFormData({ ...formData, [field]: formatted });
-    } else if (field === 'agentDhamaka') {
+    } else if (field === 'agentDhamaka' || field === 'registrationDhamaka') {
       const numericValue = value.replace(/\D/g, '');
       setFormData({ ...formData, [field]: numericValue });
+    } else if (field === 'caderRole') {
+      const role = caderRoles.find(r => r.value === value);
+      setFormData({ ...formData, [field]: value, percentage: role ? role.percentage : '' });
+    } else if (field === 'companyCode') {
+      setFormData({ ...formData, [field]: value });
+      setCompanyCodeChecked(false);
+      setCompanyAgents([]);
     } else {
       setFormData({ ...formData, [field]: value });
     }
+  };
+
+  const handleCheckCompanyCode = () => {
+    if (!formData.companyCode) {
+      toast.error('Please enter company code');
+      return;
+    }
+    const agentsInCompany = agents.filter(a => a.companyCode === formData.companyCode);
+    setCompanyAgents(agentsInCompany);
+    setCompanyCodeChecked(true);
+    toast.success(`Found ${agentsInCompany.length} agent(s) in company code ${formData.companyCode}`);
   };
 
   return (
@@ -245,20 +308,55 @@ const Agents = () => {
                   <div>
                     <label className="block text-sm font-medium mb-2" style={{color: '#2F4F4F'}}>Agent ID</label>
                     <input type="text" value={(() => {
-                      const maxId = agents.length > 0 ? Math.max(...agents.map(a => parseInt(a.agentId))) : 100000;
+                      const maxId = agents.length > 0 && agents.some(a => a.agentId) 
+                        ? Math.max(...agents.map(a => parseInt(a.agentId) || 100000)) 
+                        : 100000;
                       return (maxId + 1).toString();
                     })()} readOnly className="w-full px-3 py-2 border rounded-lg bg-gray-100" />
                   </div>
                 )}
                 {editingId && <FormInput label="Agent ID" value={formData.agentId} readOnly />}
                 <div>
-                  <label className="flex items-center gap-2 cursor-not-allowed">
-                    <input type="checkbox" checked disabled className="w-4 h-4" />
-                    <span className="text-sm font-medium" style={{color: '#2F4F4F'}}>Company Code 999</span>
-                  </label>
+                  <label className="block text-sm font-medium mb-2" style={{color: '#2F4F4F'}}>Company Code <span className="text-red-500">*</span></label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={formData.companyCode}
+                      onChange={(e) => handleChange('companyCode', e.target.value)}
+                      className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                      placeholder="Enter company code"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCheckCompanyCode}
+                      className="px-4 py-2 text-white rounded-lg text-sm"
+                      style={{backgroundColor: '#2F4F4F'}}
+                    >
+                      Check
+                    </button>
+                  </div>
+                  {companyCodeChecked && (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-600 mb-1">Agents in this company ({companyAgents.length}):</p>
+                      {companyAgents.length > 0 ? (
+                        <select className="w-full px-3 py-2 border rounded-lg text-sm" size="3">
+                          {companyAgents.map((agent, idx) => (
+                            <option key={idx} value={agent.agentId}>
+                              {agent.name} - {agent.agentId} ({agent.caderRole})
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="text-sm text-gray-500">No agents found in this company</p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <FormInput label="Select Cader" type="select" value={formData.caderRole} onChange={(e) => handleChange('caderRole', e.target.value)} options={caderRoles} placeholder="Select cader role" />
+                <FormInput label="Select Cader" type="select" value={formData.caderRole} onChange={(e) => handleChange('caderRole', e.target.value)} options={caderRoles} placeholder="Select cader role" required />
+                <FormInput label="Commission %" value={formData.percentage} readOnly placeholder="Auto-calculated" />
                 <FormInput label="Agent Dhamaka" type="number" value={formData.agentDhamaka} onChange={(e) => handleChange('agentDhamaka', e.target.value)} placeholder="Enter agent dhamaka" />
+                <FormInput label="Registration Dhamaka" type="number" value={formData.registrationDhamaka} onChange={(e) => handleChange('registrationDhamaka', e.target.value)} placeholder="Enter registration dhamaka" />
               </div>
 
               <div className="flex gap-2 pt-4">

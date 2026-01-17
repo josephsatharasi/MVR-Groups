@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const agentSchema = new mongoose.Schema({
+const cadreSchema = new mongoose.Schema({
   name: { type: String, required: true },
   relationType: String,
   relation: String,
@@ -13,12 +13,12 @@ const agentSchema = new mongoose.Schema({
   pinCode: String,
   aadharNo: String,
   panNo: String,
-  agentId: { type: String, unique: true, sparse: true },
+  cadreId: { type: String, unique: true, sparse: true },
   companyCode: { type: String, default: '999' },
-  caderRole: String,
-  agentDhamaka: String,
+  cadreRole: String,
+  cadreDhamaka: String,
   photo: String,
   createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Agent', agentSchema);
+module.exports = mongoose.model('Cadre', cadreSchema);

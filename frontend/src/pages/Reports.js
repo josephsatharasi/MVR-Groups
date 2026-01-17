@@ -1,29 +1,90 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Download, TrendingUp, TrendingDown, Users, UserCheck } from 'lucide-react';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import BarChart from '../components/BarChart';
 import LineChart from '../components/LineChart';
 import CountUp from '../components/CountUp';
+import { getCustomers } from '../utils/storage';
+import { getAgents } from '../utils/storage';
 
 const Reports = () => {
-  const monthlyRevenue = [
-    { label: 'Jan', value: 45 },
-    { label: 'Feb', value: 52 },
-    { label: 'Mar', value: 48 },
-    { label: 'Apr', value: 61 },
-    { label: 'May', value: 55 },
-    { label: 'Jun', value: 67 },
-  ];
+  const [customers, setCustomers] = useState([]);
+  const [agents, setAgents] = useState([]);
+  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
+  const [propertySales, setPropertySales] = useState([]);
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    propertiesSold: 0,
+    avgDealTime: 0,
+    totalCustomers: 0,
+    totalAgents: 0
+  });
 
-  const propertySales = [
-    { label: 'Jan', value: 12 },
-    { label: 'Feb', value: 15 },
-    { label: 'Mar', value: 10 },
-    { label: 'Apr', value: 18 },
-    { label: 'May', value: 14 },
-    { label: 'Jun', value: 20 },
-  ];
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    const customerData = await getCustomers();
+    const agentData = await getAgents();
+    setCustomers(customerData);
+    setAgents(agentData);
+    calculateStats(customerData, agentData);
+    calculateMonthlyRevenue(customerData);
+    calculatePropertySales(customerData);
+  };
+
+  const calculateStats = (customerData, agentData) => {
+    const totalRevenue = customerData.reduce((sum, c) => sum + (parseFloat(c.bookingAmount) || 0), 0);
+    const propertiesSold = customerData.length;
+    const totalCustomers = customerData.length;
+    const totalAgents = agentData.length;
+
+    setStats({
+      totalRevenue: totalRevenue / 10000000,
+      propertiesSold,
+      avgDealTime: 45,
+      totalCustomers,
+      totalAgents
+    });
+  };
+
+  const calculateMonthlyRevenue = (data) => {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentYear = new Date().getFullYear();
+    const monthlyRevenue = Array(12).fill(0);
+
+    data.forEach(customer => {
+      const date = new Date(customer.createdAt);
+      if (date.getFullYear() === currentYear) {
+        monthlyRevenue[date.getMonth()] += parseFloat(customer.bookingAmount) || 0;
+      }
+    });
+
+    setMonthlyRevenue(monthNames.map((label, index) => ({
+      label,
+      value: Math.round(monthlyRevenue[index] / 100000)
+    })));
+  };
+
+  const calculatePropertySales = (data) => {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentYear = new Date().getFullYear();
+    const monthlySales = Array(12).fill(0);
+
+    data.forEach(customer => {
+      const date = new Date(customer.createdAt);
+      if (date.getFullYear() === currentYear) {
+        monthlySales[date.getMonth()]++;
+      }
+    });
+
+    setPropertySales(monthNames.map((label, index) => ({
+      label,
+      value: monthlySales[index]
+    })));
+  };
 
   return (
     <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
@@ -38,10 +99,10 @@ const Reports = () => {
             <div>
               <p className="text-sm text-gray-600">Total Revenue</p>
               <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
-                <CountUp end={3.28} duration={2000} prefix="₹" suffix="Cr" />
+                <CountUp end={stats.totalRevenue} duration={2000} prefix="₹" suffix="Cr" decimals={2} />
               </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                <TrendingUp size={14} /> +12.5%
+                <TrendingUp size={14} /> Total booking amount
               </p>
             </div>
             <FileText size={40} style={{ color: '#2C7A7B' }} />
@@ -53,10 +114,10 @@ const Reports = () => {
             <div>
               <p className="text-sm text-gray-600">Properties Sold</p>
               <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
-                <CountUp end={89} duration={2000} />
+                <CountUp end={stats.propertiesSold} duration={2000} />
               </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                <TrendingUp size={14} /> +8.3%
+                <TrendingUp size={14} /> Total bookings
               </p>
             </div>
             <FileText size={40} style={{ color: '#2C7A7B' }} />
@@ -68,10 +129,10 @@ const Reports = () => {
             <div>
               <p className="text-sm text-gray-600">Avg. Deal Time</p>
               <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
-                <CountUp end={45} duration={2000} suffix=" days" />
+                <CountUp end={stats.avgDealTime} duration={2000} suffix=" days" />
               </p>
-              <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                <TrendingDown size={14} /> -5.2%
+              <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                Average processing time
               </p>
             </div>
             <FileText size={40} style={{ color: '#2C7A7B' }} />
@@ -83,10 +144,10 @@ const Reports = () => {
             <div>
               <p className="text-sm text-gray-600">Total Customers</p>
               <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
-                <CountUp end={156} duration={2000} />
+                <CountUp end={stats.totalCustomers} duration={2000} />
               </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                <TrendingUp size={14} /> +15.2%
+                <TrendingUp size={14} /> Active customers
               </p>
             </div>
             <Users size={40} style={{ color: '#2C7A7B' }} />
@@ -98,10 +159,10 @@ const Reports = () => {
             <div>
               <p className="text-sm text-gray-600">Total Agents</p>
               <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
-                <CountUp end={24} duration={2000} />
+                <CountUp end={stats.totalAgents} duration={2000} />
               </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                <TrendingUp size={14} /> +9.1%
+                <TrendingUp size={14} /> Active agents
               </p>
             </div>
             <UserCheck size={40} style={{ color: '#2C7A7B' }} />
@@ -110,8 +171,18 @@ const Reports = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LineChart data={monthlyRevenue} title="Monthly Revenue (in Lakhs)" color="#2C7A7B" />
-        <BarChart data={propertySales} title="Property Sales" color="#2C7A7B" />
+        <LineChart 
+          data={monthlyRevenue} 
+          title="Monthly Revenue (in Lakhs)" 
+          subtitle="Total booking amount collected per month in current year"
+          color="#2C7A7B" 
+        />
+        <BarChart 
+          data={propertySales} 
+          title="Property Sales" 
+          subtitle="Number of properties sold per month in current year"
+          color="#2C7A7B" 
+        />
       </div>
     </div>
   );

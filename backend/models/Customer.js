@@ -27,12 +27,7 @@ const customerSchema = new mongoose.Schema({
   bookingDhamaka: String,
   phone: String,
   email: String,
-  area: String,
-  service: String,
-  brand: String,
   profilePic: String,
-  serviceDate: String,
-  followUpStatus: { type: String, enum: ['pending', 'completed'], default: 'pending' },
   createdAt: { type: Date, default: Date.now }
 });
 

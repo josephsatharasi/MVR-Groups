@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Customer = require('../models/Customer');
+const DeletedCustomer = require('../models/DeletedCustomer');
 
 // Get all customers
 router.get('/', async (req, res) => {
@@ -12,11 +13,19 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get customers by name (search)
-router.get('/search/:name', async (req, res) => {
+// Search customers
+router.get('/search', async (req, res) => {
   try {
-    const customers = await Customer.find({ 
-      name: { $regex: req.params.name, $options: 'i' } 
+    const { q } = req.query;
+    if (!q) return res.json([]);
+    
+    const customers = await Customer.find({
+      $or: [
+        { name: { $regex: q, $options: 'i' } },
+        { phone: { $regex: q, $options: 'i' } },
+        { mobile: { $regex: q, $options: 'i' } },
+        { email: { $regex: q, $options: 'i' } }
+      ]
     }).sort({ createdAt: -1 });
     res.json(customers);
   } catch (error) {
@@ -37,8 +46,8 @@ router.get('/:id', async (req, res) => {
 
 // Create customer
 router.post('/', async (req, res) => {
-  const customer = new Customer(req.body);
   try {
+    const customer = new Customer(req.body);
     const newCustomer = await customer.save();
     res.status(201).json(newCustomer);
   } catch (error) {
@@ -49,21 +58,10 @@ router.post('/', async (req, res) => {
 // Update customer
 router.put('/:id', async (req, res) => {
   try {
-    const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!customer) return res.status(404).json({ message: 'Customer not found' });
-    res.json(customer);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// Update follow-up status
-router.patch('/:id/status', async (req, res) => {
-  try {
     const customer = await Customer.findByIdAndUpdate(
       req.params.id,
-      { followUpStatus: req.body.status },
-      { new: true }
+      req.body,
+      { new: true, runValidators: true }
     );
     if (!customer) return res.status(404).json({ message: 'Customer not found' });
     res.json(customer);
@@ -75,38 +73,28 @@ router.patch('/:id/status', async (req, res) => {
 // Delete customer (move to bin)
 router.delete('/:id', async (req, res) => {
   try {
-    console.log('Deleting customer with ID:', req.params.id);
     const customer = await Customer.findById(req.params.id);
-    if (!customer) {
-      console.log('Customer not found');
-      return res.status(404).json({ message: 'Customer not found' });
-    }
+    if (!customer) return res.status(404).json({ message: 'Customer not found' });
     
-    console.log('Customer found:', customer.name);
-    
-    // Save to DeletedCustomer collection
-    const DeletedCustomer = require('../models/DeletedCustomer');
     const deletedCustomer = new DeletedCustomer({
       name: customer.name,
-      phone: customer.phone,
+      phone: customer.phone || customer.mobile,
+      mobile: customer.mobile,
       email: customer.email,
       address: customer.address,
-      area: customer.area,
-      service: customer.service,
-      brand: customer.brand,
+      projectName: customer.projectName,
+      plotNo: customer.plotNo,
+      totalAmount: customer.totalAmount,
+      balanceAmount: customer.balanceAmount,
       originalId: customer._id.toString(),
       createdAt: customer.createdAt
     });
     
     await deletedCustomer.save();
-    console.log('Saved to bin:', deletedCustomer._id);
-    
     await Customer.findByIdAndDelete(req.params.id);
-    console.log('Deleted from customers');
     
     res.json({ message: 'Customer moved to bin' });
   } catch (error) {
-    console.error('Error deleting customer:', error);
     res.status(500).json({ message: error.message });
   }
 });

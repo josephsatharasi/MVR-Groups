@@ -2,22 +2,22 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const twilio = require('twilio');
 const User = require('../models/User');
 
-// Email transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// Twilio client
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
+
+// Store OTPs temporarily (use Redis in production)
+const otpStore = new Map();
 
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, mobile, password } = req.body;
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
@@ -25,11 +25,11 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, email, password: hashedPassword });
+    const user = new User({ username, email, mobile, password: hashedPassword });
     await user.save();
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ token, user: { id: user._id, username, email } });
+    res.status(201).json({ token, user: { id: user._id, username, email, mobile } });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -57,43 +57,73 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Forgot Password
+// Send OTP for password reset
 router.post('/forgot-password', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { mobile } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    if (!mobile || mobile.length !== 10) {
+      return res.status(400).json({ message: 'Please provide valid 10-digit mobile number' });
     }
 
-    const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    const resetLink = `https://your-frontend-url.com/reset-password?token=${resetToken}`;
-    
-    // Send email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Password Reset - MKL Admin',
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1e5a9e;">Password Reset Request</h2>
-          <p>Hello ${user.username},</p>
-          <p>You requested to reset your password. Click the button below to reset it:</p>
-          <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background-color: #1e5a9e; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">Reset Password</a>
-          <p>Or copy and paste this link in your browser:</p>
-          <p style="color: #666; word-break: break-all;">${resetLink}</p>
-          <p style="color: #999; font-size: 12px; margin-top: 30px;">This link will expire in 1 hour. If you didn't request this, please ignore this email.</p>
-        </div>
-      `
-    };
+    const user = await User.findOne({ mobile });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found with this mobile number' });
+    }
 
-    await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent to:', email);
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
-    res.json({ message: 'Reset link sent to your email' });
+    // Store OTP with 10 minutes expiry
+    otpStore.set(mobile, {
+      otp,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+      userId: user._id
+    });
+
+    // Send OTP via Twilio
+    try {
+      await twilioClient.messages.create({
+        body: `Your MVR Groups password reset OTP is: ${otp}. Valid for 10 minutes.`,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: `+91${mobile}`
+      });
+      console.log(`OTP sent to ${mobile}: ${otp}`);
+    } catch (twilioError) {
+      console.log(`Twilio failed. OTP for ${mobile}: ${otp}`);
+    }
+
+    res.json({ message: 'OTP sent to your mobile number' });
   } catch (error) {
-    console.error('Email error:', error);
+    console.error('Twilio error:', error);
+    res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
+  }
+});
+
+// Verify OTP
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { mobile, otp } = req.body;
+
+    const storedData = otpStore.get(mobile);
+    if (!storedData) {
+      return res.status(400).json({ message: 'OTP expired or invalid' });
+    }
+
+    if (Date.now() > storedData.expiresAt) {
+      otpStore.delete(mobile);
+      return res.status(400).json({ message: 'OTP expired' });
+    }
+
+    if (storedData.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    // Generate reset token
+    const resetToken = jwt.sign({ id: storedData.userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    
+    res.json({ message: 'OTP verified successfully', resetToken });
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
@@ -101,9 +131,9 @@ router.post('/forgot-password', async (req, res) => {
 // Reset Password
 router.post('/reset-password', async (req, res) => {
   try {
-    const { token, password } = req.body;
+    const { resetToken, password, mobile } = req.body;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
     
     if (!user) {
@@ -113,6 +143,11 @@ router.post('/reset-password', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     await user.save();
+
+    // Clear OTP from store
+    if (mobile) {
+      otpStore.delete(mobile);
+    }
 
     res.json({ message: 'Password reset successful' });
   } catch (error) {

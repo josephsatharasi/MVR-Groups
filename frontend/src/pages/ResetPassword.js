@@ -61,7 +61,7 @@ const ResetPassword = () => {
       </svg>
       <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <img src={logo} alt="MKL Enterprises" className="h-24 w-auto mx-auto mb-4" />
+          <img src={logo} alt="MVR Groups" className="h-24 w-auto mx-auto mb-4" />
           <h1 className="text-3xl font-bold" style={{ color: '#2F4F4F' }}>Reset Password</h1>
           <p className="text-gray-600 mt-2">Enter your new password</p>
         </div>

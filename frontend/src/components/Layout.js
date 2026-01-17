@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, UserPlus, AlertTriangle, Trash2, Menu, X, LogOut, FileText, UserCheck } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, Trash2, Menu, X, LogOut, FileText, UserCog, DollarSign } from 'lucide-react';
 // import logo from '../assets/logo.JPG';
 import ConfirmModal from './ConfirmModal';
 
@@ -19,8 +19,9 @@ const Layout = ({ children, setIsLoggedIn }) => {
   const menuItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/customers', icon: Users, label: 'Customers' },
-    { path: '/admin/agents', icon: UserCheck, label: 'Agents' },
-    { path: '/admin/caders', icon: UserCheck, label: 'Caders' },
+    { path: '/admin/agents', icon: UserPlus, label: 'Agents' },
+    { path: '/admin/caders', icon: UserCog, label: 'Caders' },
+    { path: '/admin/commission', icon: DollarSign, label: 'Commission' },
     { path: '/admin/reports', icon: FileText, label: 'Reports' },
     { path: '/admin/bin', icon: Trash2, label: 'Recycle Bin' },
   ];
@@ -49,13 +50,19 @@ const Layout = ({ children, setIsLoggedIn }) => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 p-3 mb-2 rounded-lg transition-colors ${
+                className={`flex items-center gap-3 p-3 mb-2 rounded-lg transition-colors relative group ${
                   isActive ? 'text-white' : 'text-gray-300 hover:text-white hover:bg-opacity-20 hover:bg-white'
                 }`}
                 style={isActive ? { backgroundColor: '#5F9EA0' } : {}}
+                title={!isSidebarOpen ? item.label : ''}
               >
                 <Icon size={20} />
                 {isSidebarOpen && <span>{item.label}</span>}
+                {!isSidebarOpen && (
+                  <span className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    {item.label}
+                  </span>
+                )}
               </Link>
             );
           })}

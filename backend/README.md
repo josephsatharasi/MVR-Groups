@@ -1,14 +1,36 @@
-# Backend Setup Instructions
+# MVR Groups Backend
 
-## Clear Old Database Schema
+Backend API for MVR Groups Real Estate Management System.
 
-If you're getting validation errors about old fields (plan, startDate, endDate, amount), run:
+## Features
+
+- Customer management API
+- Agent management API
+- Authentication and authorization
+- MongoDB database integration
+- Recycle bin functionality
+
+## Setup Instructions
+
+### Environment Variables
+
+Create a `.env` file with:
+
+```
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+PORT=5000
+```
+
+### Clear Old Database Schema
+
+If you're getting validation errors about old fields, run:
 
 ```bash
 node clearDB.js
 ```
 
-This will drop the old customers collection and allow the new schema to work.
+This will drop the old collections and allow the new schema to work.
 
 ## Start Backend Server
 
@@ -17,3 +39,11 @@ npm start
 ```
 
 The server will run on http://localhost:5000
+
+## Technologies
+
+- Node.js
+- Express.js
+- MongoDB with Mongoose
+- JWT Authentication
+- bcryptjs for password hashing

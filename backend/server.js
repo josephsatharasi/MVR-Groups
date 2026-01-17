@@ -19,12 +19,12 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/customers', require('./routes/customers'));
 app.use('/api/agents', require('./routes/agents'));
+app.use('/api/cadres', require('./routes/cadres'));
 app.use('/api/bin', require('./routes/bin'));
-app.use('/api/services', require('./routes/services'));
 
 // Health check
 app.get('/', (req, res) => {
-  res.json({ message: 'MKL Admin API is running' });
+  res.json({ message: 'MVR Groups Real Estate API is running' });
 });
 
 const PORT = process.env.PORT || 5000;

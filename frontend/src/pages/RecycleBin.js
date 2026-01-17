@@ -1,53 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trash2, RotateCcw } from 'lucide-react';
-import Table from '../components/Table';
 import Card from '../components/Card';
 import { toast } from 'react-toastify';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const RecycleBin = () => {
-  const [deletedCustomers, setDeletedCustomers] = useState([
-    { id: 1, name: 'Rajesh Kumar', phone: '+91 9876543210', email: 'rajesh@email.com', deletedAt: new Date('2024-01-15') },
-    { id: 2, name: 'Priya Sharma', phone: '+91 9123456789', email: 'priya@email.com', deletedAt: new Date('2024-01-10') },
-  ]);
-  const [deletedAgents, setDeletedAgents] = useState([
-    { id: 1, name: 'Amit Patel', mobile: '+91 9988776655', agentId: '100001', caderRole: 'FO', deletedAt: new Date('2024-01-12') },
-    { id: 2, name: 'Sneha Reddy', mobile: '+91 9876512345', agentId: '100002', caderRole: 'TL', deletedAt: new Date('2024-01-08') },
-  ]);
+  const [deletedCustomers, setDeletedCustomers] = useState([]);
+  const [deletedAgents, setDeletedAgents] = useState([]);
+  const [deletedCadres, setDeletedCadres] = useState([]);
   const [activeTab, setActiveTab] = useState('customers');
 
-  const handleRestore = (row, type) => {
-    if (type === 'customer') {
-      setDeletedCustomers(deletedCustomers.filter(c => c.id !== row.id));
-    } else {
-      setDeletedAgents(deletedAgents.filter(a => a.id !== row.id));
+  useEffect(() => {
+    loadDeletedItems();
+  }, []);
+
+  const loadDeletedItems = async () => {
+    try {
+      const response = await fetch(`${API_URL}/bin`);
+      const data = await response.json();
+      setDeletedCustomers(data.customers || []);
+      setDeletedAgents(data.agents || []);
+      setDeletedCadres(data.cadres || []);
+    } catch (error) {
+      console.error('Error loading deleted items:', error);
+      toast.error('Failed to load deleted items');
     }
-    toast.success(`${row.name} restored successfully!`);
   };
 
-  const handlePermanentDelete = (row, type) => {
+  const handleRestore = async (row, type) => {
+    try {
+      const response = await fetch(`${API_URL}/bin/restore/${type}/${row._id}`, {
+        method: 'POST',
+      });
+      if (response.ok) {
+        toast.success(`${row.name} restored successfully!`);
+        loadDeletedItems();
+      } else {
+        toast.error('Failed to restore');
+      }
+    } catch (error) {
+      toast.error('Failed to restore');
+    }
+  };
+
+  const handlePermanentDelete = async (row, type) => {
     if (!window.confirm(`Permanently delete ${row.name}? This cannot be undone.`)) return;
-    if (type === 'customer') {
-      setDeletedCustomers(deletedCustomers.filter(c => c.id !== row.id));
-    } else {
-      setDeletedAgents(deletedAgents.filter(a => a.id !== row.id));
+    try {
+      const response = await fetch(`${API_URL}/bin/${type}/${row._id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        toast.error(`${row.name} permanently deleted!`);
+        loadDeletedItems();
+      } else {
+        toast.error('Failed to delete');
+      }
+    } catch (error) {
+      toast.error('Failed to delete');
     }
-    toast.error(`${row.name} permanently deleted!`);
   };
-
-  const customerColumns = [
-    { header: 'Name', field: 'name' },
-    { header: 'Phone', field: 'phone' },
-    { header: 'Email', field: 'email' },
-    { header: 'Deleted Date', field: (row) => new Date(row.deletedAt).toLocaleDateString() },
-  ];
-
-  const agentColumns = [
-    { header: 'Name', field: 'name' },
-    { header: 'Mobile', field: 'mobile' },
-    { header: 'Agent ID', field: 'agentId' },
-    { header: 'Cader Role', field: 'caderRole' },
-    { header: 'Deleted Date', field: (row) => new Date(row.deletedAt).toLocaleDateString() },
-  ];
 
   return (
     <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
@@ -69,10 +81,16 @@ const RecycleBin = () => {
         >
           Agents ({deletedAgents.length})
         </button>
+        <button
+          onClick={() => setActiveTab('cadres')}
+          className={`px-4 py-2 rounded-lg font-semibold ${activeTab === 'cadres' ? 'bg-white text-gray-800' : 'bg-gray-200 text-gray-600'}`}
+        >
+          Cadres ({deletedCadres.length})
+        </button>
       </div>
 
       <Card>
-        {activeTab === 'customers' ? (
+        {activeTab === 'customers' && (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead style={{ backgroundColor: '#2F4F4F' }}>
@@ -86,10 +104,10 @@ const RecycleBin = () => {
               </thead>
               <tbody>
                 {deletedCustomers.map((row, idx) => (
-                  <tr key={idx} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
+                  <tr key={row._id} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
                     <td className="px-4 py-3 text-sm font-semibold" style={{color: '#2F4F4F'}}>{row.name}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{row.phone}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{row.email}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{row.phone || row.mobile}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{row.email || '-'}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{new Date(row.deletedAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex gap-2">
@@ -112,8 +130,12 @@ const RecycleBin = () => {
                 ))}
               </tbody>
             </table>
+            {deletedCustomers.length === 0 && (
+              <div className="text-center py-8 text-gray-500">No deleted customers</div>
+            )}
           </div>
-        ) : (
+        )}
+        {activeTab === 'agents' && (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead style={{ backgroundColor: '#2F4F4F' }}>
@@ -128,12 +150,12 @@ const RecycleBin = () => {
               </thead>
               <tbody>
                 {deletedAgents.map((row, idx) => (
-                  <tr key={idx} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
+                  <tr key={row._id} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
                     <td className="px-4 py-3 text-sm font-semibold" style={{color: '#2F4F4F'}}>{row.name}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{row.mobile}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{row.agentId}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{row.agentId || '-'}</td>
                     <td className="px-4 py-3 text-sm">
-                      <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#5F9EA0', color: 'white'}}>{row.caderRole}</span>
+                      <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#5F9EA0', color: 'white'}}>{row.caderRole || '-'}</span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">{new Date(row.deletedAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-sm">
@@ -157,6 +179,58 @@ const RecycleBin = () => {
                 ))}
               </tbody>
             </table>
+            {deletedAgents.length === 0 && (
+              <div className="text-center py-8 text-gray-500">No deleted agents</div>
+            )}
+          </div>
+        )}
+        {activeTab === 'cadres' && (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead style={{ backgroundColor: '#2F4F4F' }}>
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Name</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Mobile</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Cadre ID</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Cadre Role</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Deleted Date</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deletedCadres.map((row, idx) => (
+                  <tr key={row._id} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
+                    <td className="px-4 py-3 text-sm font-semibold" style={{color: '#2F4F4F'}}>{row.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{row.mobile}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{row.cadreId || '-'}</td>
+                    <td className="px-4 py-3 text-sm">
+                      <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#5F9EA0', color: 'white'}}>{row.cadreRole || '-'}</span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{new Date(row.deletedAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-sm">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleRestore(row, 'cadre')}
+                          className="px-3 py-1 rounded text-white text-xs flex items-center gap-1"
+                          style={{ backgroundColor: '#2C7A7B' }}
+                        >
+                          <RotateCcw size={12} /> Restore
+                        </button>
+                        <button
+                          onClick={() => handlePermanentDelete(row, 'cadre')}
+                          className="px-3 py-1 bg-red-500 rounded text-white text-xs"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {deletedCadres.length === 0 && (
+              <div className="text-center py-8 text-gray-500">No deleted cadres</div>
+            )}
           </div>
         )}
       </Card>

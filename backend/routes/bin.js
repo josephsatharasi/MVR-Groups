@@ -2,19 +2,23 @@ const express = require('express');
 const router = express.Router();
 const DeletedCustomer = require('../models/DeletedCustomer');
 const DeletedAgent = require('../models/DeletedAgent');
+const DeletedCadre = require('../models/DeletedCadre');
 const Customer = require('../models/Customer');
 const Agent = require('../models/Agent');
+const Cadre = require('../models/Cadre');
 
-// Get all deleted items (customers and agents)
+// Get all deleted items (customers, agents, and cadres)
 router.get('/', async (req, res) => {
   try {
     const deletedCustomers = await DeletedCustomer.find().sort({ deletedAt: -1 });
     const deletedAgents = await DeletedAgent.find().sort({ deletedAt: -1 });
+    const deletedCadres = await DeletedCadre.find().sort({ deletedAt: -1 });
     
     const customers = deletedCustomers.map(c => ({ ...c.toObject(), type: 'Customer' }));
     const agents = deletedAgents.map(a => ({ ...a.toObject(), type: 'Agent' }));
+    const cadres = deletedCadres.map(c => ({ ...c.toObject(), type: 'Cadre' }));
     
-    res.json({ customers, agents });
+    res.json({ customers, agents, cadres });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -89,6 +93,43 @@ router.delete('/agent/:id', async (req, res) => {
     const deletedAgent = await DeletedAgent.findByIdAndDelete(req.params.id);
     if (!deletedAgent) return res.status(404).json({ message: 'Agent not found' });
     res.json({ message: 'Agent permanently deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Restore deleted cadre
+router.post('/restore/cadre/:id', async (req, res) => {
+  try {
+    const deletedCadre = await DeletedCadre.findById(req.params.id);
+    if (!deletedCadre) return res.status(404).json({ message: 'Cadre not found in bin' });
+    
+    const restoredCadre = new Cadre({
+      name: deletedCadre.name,
+      mobile: deletedCadre.mobile,
+      email: deletedCadre.email,
+      cadreId: deletedCadre.cadreId,
+      companyCode: deletedCadre.companyCode,
+      cadreRole: deletedCadre.cadreRole,
+      address: deletedCadre.address,
+      createdAt: deletedCadre.createdAt
+    });
+    
+    await restoredCadre.save();
+    await DeletedCadre.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Cadre restored successfully', cadre: restoredCadre });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Permanently delete cadre
+router.delete('/cadre/:id', async (req, res) => {
+  try {
+    const deletedCadre = await DeletedCadre.findByIdAndDelete(req.params.id);
+    if (!deletedCadre) return res.status(404).json({ message: 'Cadre not found' });
+    res.json({ message: 'Cadre permanently deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

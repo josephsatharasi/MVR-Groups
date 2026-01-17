@@ -13,6 +13,7 @@ import Agents from './pages/Agents';
 import Caders from './pages/Caders';
 import Reports from './pages/Reports';
 import RecycleBin from './pages/RecycleBin';
+import Commission from './pages/Commission';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -40,6 +41,7 @@ function App() {
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/agents" element={<Agents />} />
                 <Route path="/caders" element={<Caders />} />
+                <Route path="/commission" element={<Commission />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/bin" element={<RecycleBin />} />
               </Routes>

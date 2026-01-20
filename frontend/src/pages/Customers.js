@@ -172,9 +172,9 @@ const Customers = () => {
   });
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
+    <div className="min-h-screen p-4 md:p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-white">Customers</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Customers</h1>
         <div className="flex gap-2">
           <Button variant="primary" icon={Plus} onClick={() => setShowFormModal(true)}>
             Add Customer
@@ -187,13 +187,13 @@ const Customers = () => {
 
       <div className="mb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-3 text-white" size={20} />
+          <Search className="absolute left-3 top-3 text-primary" size={20} />
           <input
             type="text"
             placeholder="Search by name, phone, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border-2 border-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white shadow-sm"
+            className="w-full pl-10 pr-4 py-3 bg-white border-2 border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm"
           />
         </div>
       </div>
@@ -201,7 +201,7 @@ const Customers = () => {
       <div className="rounded-xl shadow-lg overflow-hidden bg-white">
         <div className="overflow-x-auto overflow-y-auto" style={{maxHeight: '500px'}}>
           <table className="w-full">
-            <thead className="text-white sticky top-0 z-10" style={{background: '#2F4F4F'}}>
+            <thead className="text-white sticky top-0 z-10" style={{background: '#1e3a8a'}}>
               <tr>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Name</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Phone</th>
@@ -220,11 +220,11 @@ const Customers = () => {
                   style={{backgroundColor: index % 2 !== 0 ? '#f9fafb' : 'white'}}
                   onClick={() => setSelectedCustomer(customer)}
                 >
-                  <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: '#2F4F4F'}}>{customer.name}</td>
+                  <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: '#1e3a8a'}}>{customer.name}</td>
                   <td className="px-4 md:px-6 py-4 text-sm">{customer.phone || customer.mobile}</td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.projectName || '-'}</td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">
-                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#5F9EA0', color: 'white'}}>{customer.plotNo || '-'}</span>
+                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '33', color: '#1e3a8a'}}>{customer.plotNo || '-'}</span>
                   </td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">₹{formatIndianNumber(customer.totalAmount)}</td>
                   <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: customer.balanceAmount > 0 ? '#dc2626' : '#16a34a'}}>₹{formatIndianNumber(customer.balanceAmount)}</td>
@@ -236,7 +236,7 @@ const Customers = () => {
                           setSelectedCustomer(customer);
                         }} 
                         className="hover:scale-110 transition-transform"
-                        style={{color: '#5F9EA0'}}
+                        style={{color: '#1e3a8a'}}
                         title="View Details"
                       >
                         <Eye size={18} />
@@ -280,7 +280,7 @@ const Customers = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold" style={{ color: '#2F4F4F' }}>Add New Customer</h2>
+              <h2 className="text-xl font-bold text-gray-800">Add New Customer</h2>
               <button onClick={() => setShowFormModal(false)} className="text-gray-500 hover:text-gray-700">
                 <X size={24} />
               </button>
@@ -302,7 +302,7 @@ const Customers = () => {
                 <FormInput label="Pin Code (6 digits)" value={formData.pinCode} onChange={(e) => handleChange('pinCode', e.target.value)} placeholder="Enter 6-digit pin code" maxLength={6} />
                 <FormInput label="Aadhar No" value={formData.aadharNo} onChange={(e) => handleChange('aadharNo', e.target.value)} placeholder="Enter Aadhar number" />
               </div>
-              <h3 className="text-lg font-bold" style={{ color: '#2F4F4F' }}>Plot Details</h3>
+              <h3 className="text-lg font-bold text-gray-800">Plot Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormInput label="Plot / Flat No" value={formData.plotNo} onChange={(e) => handleChange('plotNo', e.target.value)} placeholder="Plot No" />
                 <FormInput label="Gadhi/Ankanam/Sqft" value={formData.gadhiAnkanamSqft} onChange={(e) => handleChange('gadhiAnkanamSqft', e.target.value)} placeholder="Enter area" />
@@ -315,7 +315,7 @@ const Customers = () => {
                 <FormInput label="Total Amount" type="number" value={formData.totalAmount} onChange={(e) => handleChange('totalAmount', e.target.value)} placeholder="Enter total amount" />
                 <FormInput label="Balance Amount" type="number" value={formData.balanceAmount} readOnly placeholder="Auto calculated" />
               </div>
-              <h3 className="text-lg font-bold" style={{ color: '#2F4F4F' }}>Payment Details</h3>
+              <h3 className="text-lg font-bold text-gray-800">Payment Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput label="Payment Type" type="select" value={formData.paymentType} onChange={(e) => handleChange('paymentType', e.target.value)} options={['Cash', 'Cheque/DD', 'UPI']} />
                 {formData.paymentType === 'Cheque/DD' && (

@@ -199,9 +199,9 @@ const Agents = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
+    <div className="min-h-screen p-4 md:p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-0">Agents</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-0">Agents</h1>
         <div className="flex gap-2">
           <Button variant="primary" icon={Plus} onClick={() => setShowFormModal(true)}>
             Add Agent
@@ -218,7 +218,7 @@ const Agents = () => {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead style={{ backgroundColor: '#2F4F4F' }}>
+            <thead style={{ backgroundColor: '#1e3a8a' }}>
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-white">Name</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-white">Mobile</th>
@@ -237,17 +237,17 @@ const Agents = () => {
                   style={{backgroundColor: rowIdx % 2 !== 0 ? '#f9fafb' : 'white'}}
                   onClick={() => handleRowClick(row)}
                 >
-                  <td className="px-4 py-3 text-sm font-semibold" style={{color: '#2F4F4F'}}>{row.name}</td>
+                  <td className="px-4 py-3 text-sm font-semibold" style={{color: '#1e3a8a'}}>{row.name}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{row.mobile}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{row.email}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{row.agentId}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{row.companyCode}</td>
                   <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#5F9EA0', color: 'white'}}>{row.caderRole}</span>
+                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '33', color: '#1e3a8a'}}>{row.caderRole}</span>
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                      <button onClick={() => handleEdit(row)} className="px-3 py-1 rounded text-white text-xs" style={{backgroundColor: '#5F9EA0'}}>
+                      <button onClick={() => handleEdit(row)} className="px-3 py-1 rounded text-white text-xs" style={{backgroundColor: '#1e3a8a'}}>
                         Edit
                       </button>
                       <button onClick={() => handleDelete(row)} className="px-3 py-1 bg-red-500 rounded text-white text-xs">
@@ -267,7 +267,7 @@ const Agents = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold" style={{ color: '#2F4F4F' }}>
+              <h2 className="text-xl font-bold text-gray-800">
                 {editingId ? 'Edit Agent' : 'Add New Agent'}
               </h2>
               <button onClick={resetForm} className="text-gray-500 hover:text-gray-700">
@@ -306,7 +306,7 @@ const Agents = () => {
                 <FormInput label="PAN No" value={formData.panNo} onChange={(e) => handleChange('panNo', e.target.value)} placeholder="Enter PAN number" />
                 {!editingId && (
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{color: '#2F4F4F'}}>Agent ID</label>
+                    <label className="block text-sm font-medium mb-2 text-gray-800">Agent ID</label>
                     <input type="text" value={(() => {
                       const maxId = agents.length > 0 && agents.some(a => a.agentId) 
                         ? Math.max(...agents.map(a => parseInt(a.agentId) || 100000)) 
@@ -317,7 +317,7 @@ const Agents = () => {
                 )}
                 {editingId && <FormInput label="Agent ID" value={formData.agentId} readOnly />}
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{color: '#2F4F4F'}}>Company Code <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium mb-2 text-gray-800">Company Code <span className="text-red-500">*</span></label>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -330,8 +330,7 @@ const Agents = () => {
                     <button
                       type="button"
                       onClick={handleCheckCompanyCode}
-                      className="px-4 py-2 text-white rounded-lg text-sm"
-                      style={{backgroundColor: '#2F4F4F'}}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                     >
                       Check
                     </button>
@@ -377,7 +376,7 @@ const Agents = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold" style={{ color: '#2F4F4F' }}>
+              <h2 className="text-xl font-bold text-gray-800">
                 Agent Details - {selectedAgent.name}
               </h2>
               <button onClick={() => setShowDetailsModal(false)} className="text-gray-500 hover:text-gray-700">

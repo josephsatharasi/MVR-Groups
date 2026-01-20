@@ -25,7 +25,7 @@ const StatCard = ({ title, value, icon: Icon, trend, iconBg = '#2C7A7B' }) => {
     <div className="bg-white rounded-xl shadow-lg p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-medium text-gray-600">{title}</h3>
-        <div className="p-3 rounded-full" style={{ backgroundColor: '#1a1a1a' }}>
+        <div className="p-3 rounded-full" style={{ backgroundColor: '#1e3a8a' }}>
           <Icon size={24} className="text-white" />
         </div>
       </div>
@@ -35,7 +35,7 @@ const StatCard = ({ title, value, icon: Icon, trend, iconBg = '#2C7A7B' }) => {
             <CountUp end={numericValue} duration={2000} prefix={prefix} suffix={suffix} />
           </p>
           {trend && (
-            <p className="text-sm mt-2" style={{ color: '#2C7A7B' }}>
+            <p className="text-sm mt-2" style={{ color: '#1e3a8a' }}>
               ↑ {trend} Since last week
             </p>
           )}

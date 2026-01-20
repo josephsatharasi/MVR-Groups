@@ -2,8 +2,8 @@ import React from 'react';
 
 const Button = ({ children, onClick, variant = 'primary', type = 'button', disabled, icon: Icon }) => {
   const styles = {
-    primary: { backgroundColor: '#2F4F4F', color: 'white' },
-    secondary: { backgroundColor: '#5F9EA0', color: 'white' },
+    primary: { backgroundColor: '#1e3a8a', color: 'white' },
+    secondary: { backgroundColor: '#3b82f6', color: 'white' },
     danger: { backgroundColor: '#EF4444', color: 'white' },
     success: { backgroundColor: '#10B981', color: 'white' },
   };

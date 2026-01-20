@@ -102,25 +102,31 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{
-      background: 'linear-gradient(135deg, #2F4F4F 0%, #5F9EA0 50%, #7FCDCD 100%)'
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4" style={{
+      background: 'linear-gradient(to bottom, #f0f4f8 0%, #e8f0f7 50%, #ffffff 100%)'
     }}>
-      <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
+      <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 810" preserveAspectRatio="none">
+        <path fill="#5b8fc7" fillOpacity="0.3" d="M0,400 C300,500 600,450 900,400 C1200,350 1350,380 1440,400 L1440,810 L0,810 Z"></path>
+        <path fill="#4a7bb7" fillOpacity="0.5" d="M0,450 C350,550 650,500 950,450 C1250,400 1380,430 1440,450 L1440,810 L0,810 Z"></path>
+        <path fill="#1e5a9e" fillOpacity="0.7" d="M0,500 C400,600 700,550 1000,500 C1300,450 1400,480 1440,500 L1440,810 L0,810 Z"></path>
+        <path fill="#0d4a8f" d="M0,550 C450,650 750,600 1050,550 C1350,500 1420,530 1440,550 L1440,810 L0,810 Z"></path>
+      </svg>
+      <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <KeyRound size={48} className="mx-auto mb-4" style={{ color: '#2F4F4F' }} />
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#2F4F4F' }}>Reset Password</h1>
+          <KeyRound size={48} className="mx-auto mb-4 text-blue-700" />
+          <h1 className="text-3xl font-bold mb-2 text-blue-700">Reset Password</h1>
           <p className="text-gray-600">Step {step} of 3</p>
         </div>
 
         {step === 1 && (
           <form onSubmit={handleSendOTP} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: '#2F4F4F' }}>Mobile Number</label>
+              <label className="block text-sm font-semibold mb-2 text-blue-700">Mobile Number</label>
               <input
                 type="tel"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter 10-digit mobile number"
                 maxLength={10}
                 required
@@ -129,8 +135,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full text-white py-3 rounded-lg font-semibold disabled:opacity-50"
-              style={{ backgroundColor: '#2F4F4F' }}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold disabled:opacity-50"
             >
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
@@ -140,12 +145,12 @@ const ForgotPassword = () => {
         {step === 2 && (
           <form onSubmit={handleVerifyOTP} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: '#2F4F4F' }}>Enter OTP</label>
+              <label className="block text-sm font-semibold mb-2 text-blue-700">Enter OTP</label>
               <input
                 type="text"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-center text-2xl tracking-widest"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-2xl tracking-widest"
                 placeholder="000000"
                 maxLength={6}
                 required
@@ -155,8 +160,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full text-white py-3 rounded-lg font-semibold disabled:opacity-50"
-              style={{ backgroundColor: '#2F4F4F' }}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold disabled:opacity-50"
             >
               {loading ? 'Verifying...' : 'Verify OTP'}
             </button>
@@ -173,23 +177,23 @@ const ForgotPassword = () => {
         {step === 3 && (
           <form onSubmit={handleResetPassword} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: '#2F4F4F' }}>New Password</label>
+              <label className="block text-sm font-semibold mb-2 text-blue-700">New Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter new password"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: '#2F4F4F' }}>Confirm Password</label>
+              <label className="block text-sm font-semibold mb-2 text-blue-700">Confirm Password</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Confirm new password"
                 required
               />
@@ -197,8 +201,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full text-white py-3 rounded-lg font-semibold disabled:opacity-50"
-              style={{ backgroundColor: '#2F4F4F' }}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold disabled:opacity-50"
             >
               {loading ? 'Resetting...' : 'Reset Password'}
             </button>
@@ -206,7 +209,7 @@ const ForgotPassword = () => {
         )}
 
         <div className="text-center mt-6">
-          <Link to="/" className="text-sm flex items-center justify-center gap-2" style={{ color: '#2F4F4F' }}>
+          <Link to="/" className="text-sm flex items-center justify-center gap-2 text-blue-600">
             <ArrowLeft size={16} /> Back to Login
           </Link>
         </div>

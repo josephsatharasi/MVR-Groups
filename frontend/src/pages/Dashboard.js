@@ -98,10 +98,10 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#5F9EA0' }}>
+    <div className="min-h-screen">
       <div className="p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-0">Overview</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-0">Overview</h1>
           <DateRangeFilter
             rangeType={rangeType}
             fromDate={fromDate}
@@ -125,24 +125,24 @@ const Dashboard = () => {
             data={monthlyBookings} 
             title="Monthly Bookings" 
             subtitle="Number of property bookings per month in current year"
-            color="#2C7A7B" 
+            color="#1e3a8a" 
           />
           <BarChart 
             data={projectWiseData} 
             title="Project-wise Bookings" 
             subtitle="Top 6 projects by number of bookings"
-            color="#2C7A7B" 
+            color="#1e3a8a" 
           />
         </div>
 
         {/* Circular Progress */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-center items-center">
-            <CircularProgress percentage={calculateOccupancyRate()} label="Fully Paid Properties" color="#2C7A7B" />
+            <CircularProgress percentage={calculateOccupancyRate()} label="Fully Paid Properties" color="#1e3a8a" />
             <p className="text-xs text-gray-500 mt-2 text-center">Percentage of customers with zero balance</p>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-center items-center">
-            <CircularProgress percentage={calculatePaymentProgress()} label="Payment Collection" color="#2C7A7B" />
+            <CircularProgress percentage={calculatePaymentProgress()} label="Payment Collection" color="#1e3a8a" />
             <p className="text-xs text-gray-500 mt-2 text-center">Total booking amount vs total property value</p>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-center items-center">

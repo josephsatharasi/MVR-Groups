@@ -62,10 +62,10 @@ const RecycleBin = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
+    <div className="min-h-screen p-4 md:p-6">
       <div className="flex items-center gap-3 mb-6">
-        <Trash2 className="text-white" size={32} />
-        <h1 className="text-2xl md:text-3xl font-bold text-white">Recycle Bin</h1>
+        <Trash2 className="text-gray-800" size={32} />
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Recycle Bin</h1>
       </div>
 
       <div className="mb-4 flex gap-2">
@@ -93,7 +93,7 @@ const RecycleBin = () => {
         {activeTab === 'customers' && (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead style={{ backgroundColor: '#2F4F4F' }}>
+              <thead style={{ backgroundColor: '#1e3a8a' }}>
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-white">Name</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-white">Phone</th>
@@ -105,7 +105,7 @@ const RecycleBin = () => {
               <tbody>
                 {deletedCustomers.map((row, idx) => (
                   <tr key={row._id} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
-                    <td className="px-4 py-3 text-sm font-semibold" style={{color: '#2F4F4F'}}>{row.name}</td>
+                    <td className="px-4 py-3 text-sm font-semibold text-blue-700">{row.name}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{row.phone || row.mobile}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{row.email || '-'}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{new Date(row.deletedAt).toLocaleDateString()}</td>
@@ -113,8 +113,7 @@ const RecycleBin = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleRestore(row, 'customer')}
-                          className="px-3 py-1 rounded text-white text-xs flex items-center gap-1"
-                          style={{ backgroundColor: '#2C7A7B' }}
+                          className="px-3 py-1 bg-blue-600 rounded text-white text-xs flex items-center gap-1 hover:bg-blue-700"
                         >
                           <RotateCcw size={12} /> Restore
                         </button>
@@ -138,7 +137,7 @@ const RecycleBin = () => {
         {activeTab === 'agents' && (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead style={{ backgroundColor: '#2F4F4F' }}>
+              <thead style={{ backgroundColor: '#1e3a8a' }}>
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-white">Name</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-white">Mobile</th>
@@ -151,19 +150,18 @@ const RecycleBin = () => {
               <tbody>
                 {deletedAgents.map((row, idx) => (
                   <tr key={row._id} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
-                    <td className="px-4 py-3 text-sm font-semibold" style={{color: '#2F4F4F'}}>{row.name}</td>
+                    <td className="px-4 py-3 text-sm font-semibold text-blue-700">{row.name}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{row.mobile}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{row.agentId || '-'}</td>
                     <td className="px-4 py-3 text-sm">
-                      <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#5F9EA0', color: 'white'}}>{row.caderRole || '-'}</span>
+                      <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '33', color: '#1e3a8a'}}>{row.caderRole || '-'}</span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">{new Date(row.deletedAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleRestore(row, 'agent')}
-                          className="px-3 py-1 rounded text-white text-xs flex items-center gap-1"
-                          style={{ backgroundColor: '#2C7A7B' }}
+                          className="px-3 py-1 bg-blue-600 rounded text-white text-xs flex items-center gap-1 hover:bg-blue-700"
                         >
                           <RotateCcw size={12} /> Restore
                         </button>
@@ -187,7 +185,7 @@ const RecycleBin = () => {
         {activeTab === 'cadres' && (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead style={{ backgroundColor: '#2F4F4F' }}>
+              <thead style={{ backgroundColor: '#1e3a8a' }}>
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-white">Name</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-white">Mobile</th>
@@ -200,19 +198,18 @@ const RecycleBin = () => {
               <tbody>
                 {deletedCadres.map((row, idx) => (
                   <tr key={row._id} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
-                    <td className="px-4 py-3 text-sm font-semibold" style={{color: '#2F4F4F'}}>{row.name}</td>
+                    <td className="px-4 py-3 text-sm font-semibold text-blue-700">{row.name}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{row.mobile}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{row.cadreId || '-'}</td>
                     <td className="px-4 py-3 text-sm">
-                      <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#5F9EA0', color: 'white'}}>{row.cadreRole || '-'}</span>
+                      <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '33', color: '#1e3a8a'}}>{row.cadreRole || '-'}</span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">{new Date(row.deletedAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleRestore(row, 'cadre')}
-                          className="px-3 py-1 rounded text-white text-xs flex items-center gap-1"
-                          style={{ backgroundColor: '#2C7A7B' }}
+                          className="px-3 py-1 bg-blue-600 rounded text-white text-xs flex items-center gap-1 hover:bg-blue-700"
                         >
                           <RotateCcw size={12} /> Restore
                         </button>

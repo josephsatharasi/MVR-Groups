@@ -103,15 +103,15 @@ const Commission = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
+    <div className="min-h-screen p-4 md:p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-0">Commission & Advance</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-0">Commission & Advance</h1>
       </div>
 
       <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead style={{ backgroundColor: '#2F4F4F' }}>
+            <thead style={{ backgroundColor: '#1e3a8a' }}>
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-white">Name</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-white">Type</th>
@@ -127,9 +127,9 @@ const Commission = () => {
             <tbody>
               {commissionData.map((person, idx) => (
                 <tr key={idx} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
-                  <td className="px-4 py-3 text-sm font-semibold" style={{color: '#2F4F4F'}}>{person.name}</td>
+                  <td className="px-4 py-3 text-sm font-semibold text-blue-700">{person.name}</td>
                   <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: person.type === 'Agent' ? '#5F9EA0' : '#2C7A7B', color: 'white'}}>
+                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: person.type === 'Agent' ? '#1e3a8a' + '33' : '#3b82f6' + '33', color: person.type === 'Agent' ? '#1e3a8a' : '#3b82f6'}}>
                       {person.type}
                     </span>
                   </td>
@@ -147,8 +147,7 @@ const Commission = () => {
                         setSelectedPerson(person);
                         setShowAdvanceModal(true);
                       }}
-                      className="px-3 py-1 rounded text-white text-xs flex items-center gap-1"
-                      style={{ backgroundColor: '#2C7A7B' }}
+                      className="px-3 py-1 bg-blue-600 rounded text-white text-xs flex items-center gap-1 hover:bg-blue-700"
                     >
                       <Plus size={12} /> Give Advance
                     </button>
@@ -168,7 +167,7 @@ const Commission = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold" style={{ color: '#2F4F4F' }}>
+              <h2 className="text-xl font-bold text-gray-800">
                 Give Advance to {selectedPerson.name}
               </h2>
               <button onClick={() => setShowAdvanceModal(false)} className="text-gray-500 hover:text-gray-700">
@@ -188,7 +187,7 @@ const Commission = () => {
                   </div>
                   <div className="col-span-2">
                     <p className="text-gray-600">Available Balance:</p>
-                    <p className="font-semibold text-lg" style={{color: '#2F4F4F'}}>₹{selectedPerson.balance.toLocaleString()}</p>
+                    <p className="font-semibold text-lg text-blue-700">₹{selectedPerson.balance.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -221,7 +220,7 @@ const Commission = () => {
 
               {selectedPerson.advances.length > 0 && (
                 <div className="mt-6 border-t pt-4">
-                  <h3 className="font-semibold mb-2" style={{color: '#2F4F4F'}}>Advance History</h3>
+                  <h3 className="font-semibold mb-2 text-gray-800">Advance History</h3>
                   <div className="space-y-2 max-h-40 overflow-y-auto">
                     {selectedPerson.advances.map((adv, idx) => (
                       <div key={idx} className="bg-gray-50 p-2 rounded text-sm">

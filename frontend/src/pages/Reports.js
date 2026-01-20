@@ -87,9 +87,9 @@ const Reports = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
+    <div className="min-h-screen p-4 md:p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-0">Reports & Analytics</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-0">Reports & Analytics</h1>
         <Button variant="primary" icon={Download}>Export Report</Button>
       </div>
 
@@ -98,14 +98,14 @@ const Reports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+              <p className="text-2xl font-bold text-blue-700">
                 <CountUp end={stats.totalRevenue} duration={2000} prefix="₹" suffix="Cr" decimals={2} />
               </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
                 <TrendingUp size={14} /> Total booking amount
               </p>
             </div>
-            <FileText size={40} style={{ color: '#2C7A7B' }} />
+            <FileText size={40} className="text-blue-600" />
           </div>
         </Card>
 
@@ -113,14 +113,14 @@ const Reports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Properties Sold</p>
-              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+              <p className="text-2xl font-bold text-blue-700">
                 <CountUp end={stats.propertiesSold} duration={2000} />
               </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
                 <TrendingUp size={14} /> Total bookings
               </p>
             </div>
-            <FileText size={40} style={{ color: '#2C7A7B' }} />
+            <FileText size={40} className="text-blue-600" />
           </div>
         </Card>
 
@@ -128,14 +128,14 @@ const Reports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Avg. Deal Time</p>
-              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+              <p className="text-2xl font-bold text-blue-700">
                 <CountUp end={stats.avgDealTime} duration={2000} suffix=" days" />
               </p>
               <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
                 Average processing time
               </p>
             </div>
-            <FileText size={40} style={{ color: '#2C7A7B' }} />
+            <FileText size={40} className="text-blue-600" />
           </div>
         </Card>
 
@@ -143,14 +143,14 @@ const Reports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Customers</p>
-              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+              <p className="text-2xl font-bold text-blue-700">
                 <CountUp end={stats.totalCustomers} duration={2000} />
               </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
                 <TrendingUp size={14} /> Active customers
               </p>
             </div>
-            <Users size={40} style={{ color: '#2C7A7B' }} />
+            <Users size={40} className="text-blue-600" />
           </div>
         </Card>
 
@@ -158,14 +158,14 @@ const Reports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Agents</p>
-              <p className="text-2xl font-bold" style={{ color: '#2F4F4F' }}>
+              <p className="text-2xl font-bold text-blue-700">
                 <CountUp end={stats.totalAgents} duration={2000} />
               </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
                 <TrendingUp size={14} /> Active agents
               </p>
             </div>
-            <UserCheck size={40} style={{ color: '#2C7A7B' }} />
+            <UserCheck size={40} className="text-blue-600" />
           </div>
         </Card>
       </div>
@@ -175,13 +175,13 @@ const Reports = () => {
           data={monthlyRevenue} 
           title="Monthly Revenue (in Lakhs)" 
           subtitle="Total booking amount collected per month in current year"
-          color="#2C7A7B" 
+          color="#1e3a8a" 
         />
         <BarChart 
           data={propertySales} 
           title="Property Sales" 
           subtitle="Number of properties sold per month in current year"
-          color="#2C7A7B" 
+          color="#1e3a8a" 
         />
       </div>
     </div>

@@ -231,9 +231,9 @@ const Caders = () => {
   ];
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: '#5F9EA0' }}>
+    <div className="min-h-screen p-4 md:p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-0">Caders List</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-0">Caders List</h1>
         <div className="flex gap-2">
           <Button variant="primary" icon={Plus} onClick={() => setShowFormModal(true)}>
             Add Cader
@@ -250,7 +250,7 @@ const Caders = () => {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead style={{ backgroundColor: '#2F4F4F' }}>
+            <thead style={{ backgroundColor: '#1e3a8a' }}>
               <tr>
                 {columns.map((col, idx) => (
                   <th key={idx} className="px-4 py-3 text-left text-sm font-semibold text-white">
@@ -300,7 +300,7 @@ const Caders = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold" style={{ color: '#2F4F4F' }}>
+              <h2 className="text-xl font-bold text-gray-800">
                 {editingId ? 'Edit Cader' : 'Add New Cader'}
               </h2>
               <button onClick={resetForm} className="text-gray-500 hover:text-gray-700">
@@ -424,7 +424,7 @@ const Caders = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold" style={{ color: '#2F4F4F' }}>
+              <h2 className="text-xl font-bold text-gray-800">
                 Cader Details - {selectedCader.username}
               </h2>
               <button onClick={() => setShowDetailsModal(false)} className="text-gray-500 hover:text-gray-700">
@@ -457,10 +457,10 @@ const Caders = () => {
 
               <div className="border-t pt-4 mb-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold" style={{ color: '#2F4F4F' }}>Recruitment Hierarchy & Commission</h3>
+                  <h3 className="text-lg font-bold text-gray-800">Recruitment Hierarchy & Commission</h3>
                   <button
                     onClick={() => setShowRecruitModal(true)}
-                    className="px-4 py-2 text-white rounded-lg text-sm font-medium hover:opacity-90" style={{ backgroundColor: '#2F4F4F' }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
                   >
                     + Recruit Team Member
                   </button>
@@ -472,7 +472,7 @@ const Caders = () => {
                     return caders.filter((_, idx) => idx <= currentIndex).map((cader, idx) => {
                       const roleData = roleOptions.find(r => r.value === cader.role);
                       return (
-                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: cader.role === selectedCader.role ? '#2F4F4F' : '#5F9EA0' }}>
+                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: cader.role === selectedCader.role ? '#1e3a8a' : '#3b82f6' }}>
                           <span className="text-white font-medium">{roleData?.label || cader.role}</span>
                           <span className="text-white font-bold">{cader.percentage}%</span>
                         </div>
@@ -496,24 +496,24 @@ const Caders = () => {
               </div>
 
               <div className="border-t pt-4 mb-6">
-                <h3 className="text-lg font-bold mb-4" style={{ color: '#2F4F4F' }}>Commission Calculation</h3>
+                <h3 className="text-lg font-bold mb-4 text-gray-800">Commission Calculation</h3>
                 <p className="text-sm text-gray-600 mb-4">Based on role: {getRoleFullName(selectedCader.role)} - {selectedCader.percentage}%</p>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600 mb-2">Example: If booking amount is ₹10,000</p>
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Commission:</span>
-                    <span className="font-bold text-lg" style={{ color: '#2F4F4F' }}>₹{(10000 * selectedCader.percentage / 100).toFixed(2)}</span>
+                    <span className="font-bold text-lg text-blue-700">₹{(10000 * selectedCader.percentage / 100).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="text-lg font-bold mb-4" style={{ color: '#2F4F4F' }}>Activity History</h3>
+                <h3 className="text-lg font-bold mb-4 text-gray-800">Activity History</h3>
                 <div className="space-y-3">
                   {selectedCader.history?.map((item, idx) => (
                     <div key={idx} className="flex gap-4 p-3 bg-gray-50 rounded-lg">
                       <div className="flex-shrink-0">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2C7A7B' }}>
+                        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
                           <span className="text-white text-xs font-bold">{idx + 1}</span>
                         </div>
                       </div>
@@ -538,7 +538,7 @@ const Caders = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold" style={{ color: '#2F4F4F' }}>
+              <h2 className="text-xl font-bold text-gray-800">
                 Recruit Team Member
               </h2>
               <button onClick={() => setShowRecruitModal(false)} className="text-gray-500 hover:text-gray-700">
@@ -547,7 +547,7 @@ const Caders = () => {
             </div>
             <form onSubmit={handleRecruitSubmit} className="p-6 space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                <p className="text-sm text-gray-600">Recruiting as: <span className="font-semibold" style={{ color: '#2F4F4F' }}>{selectedCader.username} ({getRoleFullName(selectedCader.role)})</span></p>
+                <p className="text-sm text-gray-600">Recruiting as: <span className="font-semibold text-blue-700">{selectedCader.username} ({getRoleFullName(selectedCader.role)})</span></p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput

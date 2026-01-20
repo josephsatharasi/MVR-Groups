@@ -5,7 +5,7 @@ const Table = ({ columns, data, onEdit, onDelete, onView }) => {
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead style={{ backgroundColor: '#2F4F4F' }}>
+          <thead style={{ backgroundColor: '#1e3a8a' }}>
             <tr>
               {columns.map((col, idx) => (
                 <th key={idx} className="px-4 py-3 text-left text-sm font-semibold text-white">
@@ -32,7 +32,7 @@ const Table = ({ columns, data, onEdit, onDelete, onView }) => {
                         <button
                           onClick={() => onView(row)}
                           className="px-3 py-1 rounded text-white text-xs"
-                          style={{ backgroundColor: '#2C7A7B' }}
+                          style={{ backgroundColor: '#1e3a8a' }}
                         >
                           View
                         </button>

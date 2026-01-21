@@ -9,7 +9,6 @@ import ResetPassword from './pages/ResetPassword';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
-import Agents from './pages/Agents';
 import Caders from './pages/Caders';
 import Reports from './pages/Reports';
 import RecycleBin from './pages/RecycleBin';
@@ -39,7 +38,6 @@ function App() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/customers" element={<Customers />} />
-                <Route path="/agents" element={<Agents />} />
                 <Route path="/caders" element={<Caders />} />
                 <Route path="/commission" element={<Commission />} />
                 <Route path="/reports" element={<Reports />} />

@@ -66,71 +66,63 @@ export const searchCustomers = async (query) => {
   }
 };
 
-// Agent API calls
-export const getAgents = async () => {
+
+
+
+// Cadre API calls
+export const getCadres = async () => {
   try {
-    const response = await fetch(`${API_URL}/agents`);
-    if (!response.ok) throw new Error('Failed to fetch agents');
+    const response = await fetch(`${API_URL}/cadres`);
+    if (!response.ok) throw new Error('Failed to fetch cadres');
     return await response.json();
   } catch (error) {
-    console.error('Error fetching agents:', error);
+    console.error('Error fetching cadres:', error);
     return [];
   }
 };
 
-export const addAgent = async (agent) => {
+export const addCadre = async (cadre) => {
   try {
-    const response = await fetch(`${API_URL}/agents`, {
+    const response = await fetch(`${API_URL}/cadres`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(agent)
+      body: JSON.stringify(cadre)
     });
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to add agent');
+      throw new Error(errorData.message || 'Failed to add cadre');
     }
     return await response.json();
   } catch (error) {
-    console.error('Error adding agent:', error);
+    console.error('Error adding cadre:', error);
     throw error;
   }
 };
 
-export const updateAgent = async (id, data) => {
+export const updateCadre = async (id, data) => {
   try {
-    const response = await fetch(`${API_URL}/agents/${id}`, {
+    const response = await fetch(`${API_URL}/cadres/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Failed to update agent');
+    if (!response.ok) throw new Error('Failed to update cadre');
     return await response.json();
   } catch (error) {
-    console.error('Error updating agent:', error);
+    console.error('Error updating cadre:', error);
     throw error;
   }
 };
 
-export const deleteAgent = async (id) => {
+export const deleteCadre = async (id) => {
   try {
-    const response = await fetch(`${API_URL}/agents/${id}`, {
+    const response = await fetch(`${API_URL}/cadres/${id}`, {
       method: 'DELETE'
     });
-    if (!response.ok) throw new Error('Failed to delete agent');
+    if (!response.ok) throw new Error('Failed to delete cadre');
     return await response.json();
   } catch (error) {
-    console.error('Error deleting agent:', error);
+    console.error('Error deleting cadre:', error);
     throw error;
-  }
-};
-
-export const searchAgents = async (query) => {
-  try {
-    const response = await fetch(`${API_URL}/agents/search?q=${encodeURIComponent(query)}`);
-    if (!response.ok) throw new Error('Failed to search agents');
-    return await response.json();
-  } catch (error) {
-    console.error('Error searching agents:', error);
-    return [];
   }
 };

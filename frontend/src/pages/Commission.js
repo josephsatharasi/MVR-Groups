@@ -4,11 +4,10 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import FormInput from '../components/FormInput';
 import { toast } from 'react-toastify';
-import { getAgents, getCustomers } from '../utils/storage';
+import { getCadres, getCustomers } from '../utils/storage';
 import axios from 'axios';
 
 const Commission = () => {
-  const [agents, setAgents] = useState([]);
   const [cadres, setCadres] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [commissionData, setCommissionData] = useState([]);
@@ -35,32 +34,31 @@ const Commission = () => {
 
   const loadData = async () => {
     try {
-      const agentData = await getAgents();
+      const cadreData = await getCadres();
       const customerData = await getCustomers();
-      const cadreResponse = await axios.get('http://localhost:5000/api/cadres');
       
-      setAgents(agentData);
-      setCadres(cadreResponse.data);
+      setCadres(cadreData);
       setCustomers(customerData);
-      calculateCommissions(agentData, cadreResponse.data, customerData);
+      calculateCommissions(cadreData, customerData);
     } catch (error) {
       console.error('Error loading data:', error);
     }
   };
 
-  const calculateCommissions = (agentData, cadreData, customerData) => {
-    const allPersons = [
-      ...agentData.map(a => ({ ...a, type: 'Agent', role: a.caderRole, id: a.agentId })),
-      ...cadreData.map(c => ({ ...c, type: 'Cadre', role: c.cadreRole, id: c.cadreId }))
-    ];
+  const calculateCommissions = (cadreData, customerData) => {
+    const allPersons = cadreData.map(c => ({ ...c, type: 'Cadre', role: c.cadreRole, id: c.cadreId }));
 
     const commissions = allPersons.map(person => {
       const percentage = rolePercentages[person.role] || 0;
       
-      // Calculate total earnings from all customers
-      const totalEarnings = customerData.reduce((sum, customer) => {
-        const bookingAmount = parseFloat(customer.bookingAmount) || 0;
-        return sum + (bookingAmount * percentage / 100);
+      // Calculate total earnings from customers linked to this cadre
+      const linkedCustomers = customerData.filter(customer => 
+        customer.cadreCode === person.id || customer.agentCode === person.id
+      );
+      
+      const totalEarnings = linkedCustomers.reduce((sum, customer) => {
+        const amount = parseFloat(customer.totalAmount) || 0;
+        return sum + (amount * percentage / 100);
       }, 0);
 
       // Get advances (stored in localStorage for now)
@@ -158,7 +156,7 @@ const Commission = () => {
           </table>
         </div>
         {commissionData.length === 0 && (
-          <div className="text-center py-8 text-gray-500">No agents or cadres found</div>
+          <div className="text-center py-8 text-gray-500">No cadres found</div>
         )}
       </Card>
 

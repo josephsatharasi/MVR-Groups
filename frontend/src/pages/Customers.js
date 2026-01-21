@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Search, Eye, Plus, X, UserPlus, Download, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { getCustomers, deleteCustomer, addCustomer, getAgents } from '../utils/storage';
+import { getCustomers, deleteCustomer, addCustomer, getCadres } from '../utils/storage';
 import CustomerDetails from '../components/CustomerDetails';
 import ConfirmModal from '../components/ConfirmModal';
 import { useSearchParams } from 'react-router-dom';
@@ -18,20 +18,20 @@ const Customers = () => {
   const [customerToDelete, setCustomerToDelete] = useState(null);
   const [searchParams] = useSearchParams();
   const [showFormModal, setShowFormModal] = useState(false);
-  const [agents, setAgents] = useState([]);
-  const [agentValidation, setAgentValidation] = useState({ valid: false, agent: null, checked: false });
+  const [cadres, setCadres] = useState([]);
+  const [cadreValidation, setCadreValidation] = useState({ valid: false, cadre: null, checked: false, percentage: 0 });
   const [formData, setFormData] = useState({
     name: '', relationType: '', relation: '', mobile: '', whatsapp: '',
     dob: '', age: '', address: '', pinCode: '', aadharNo: '', plotNo: '',
     gadhiAnkanamSqft: '', price: '',
     projectName: '', location: '',
     totalAmount: '', bookingAmount: '', balanceAmount: '', paymentType: '', chequeDD: '', chequeNo: '',
-    bankName: '', agentCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: '',
+    bankName: '', cadreCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: '',
   });
 
   useEffect(() => {
     loadCustomers();
-    loadAgents();
+    loadCadres();
   }, []);
 
   const loadCustomers = async () => {
@@ -41,9 +41,17 @@ const Customers = () => {
     }
   };
 
-  const loadAgents = async () => {
-    const data = await getAgents();
-    setAgents(data);
+  const loadCadres = async () => {
+    const data = await getCadres();
+    setCadres(data);
+  };
+
+  const getRolePercentage = (role) => {
+    const percentages = {
+      'FO': 4, 'TL': 2, 'STL': 1, 'DO': 1,
+      'SDO': 1, 'MM': 1, 'SMM': 1, 'GM': 1, 'SGM': 1
+    };
+    return percentages[role] || 0;
   };
 
   const formatIndianNumber = (num) => {
@@ -62,7 +70,7 @@ const Customers = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
-      await addCustomer({ ...formData, phone: formData.mobile });
+      await addCustomer({ ...formData, phone: formData.mobile, agentCode: formData.cadreCode });
       toast.success('Customer added successfully!');
       setShowFormModal(false);
       setFormData({
@@ -71,25 +79,26 @@ const Customers = () => {
         gadhiAnkanamSqft: '', price: '',
         projectName: '', location: '',
         totalAmount: '', bookingAmount: '', balanceAmount: '', paymentType: '', chequeDD: '', chequeNo: '',
-        bankName: '', agentCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: '',
+        bankName: '', cadreCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: '',
       });
-      setAgentValidation({ valid: false, agent: null, checked: false });
+      setCadreValidation({ valid: false, cadre: null, checked: false, percentage: 0 });
       loadCustomers();
     } catch (error) {
       toast.error('Failed to add customer');
     }
   };
 
-  const validateAgent = (agentId) => {
-    if (!agentId || agentId.length !== 6) {
-      setAgentValidation({ valid: false, agent: null, checked: false });
+  const validateCadre = (cadreId) => {
+    if (!cadreId || cadreId.length !== 6) {
+      setCadreValidation({ valid: false, cadre: null, checked: false, percentage: 0 });
       return;
     }
-    const agent = agents.find(a => a.agentId === agentId);
-    if (agent) {
-      setAgentValidation({ valid: true, agent, checked: true });
+    const cadre = cadres.find(c => c.cadreId === cadreId);
+    if (cadre) {
+      const percentage = getRolePercentage(cadre.cadreRole);
+      setCadreValidation({ valid: true, cadre, checked: true, percentage });
     } else {
-      setAgentValidation({ valid: false, agent: null, checked: true });
+      setCadreValidation({ valid: false, cadre: null, checked: true, percentage: 0 });
     }
   };
 
@@ -104,10 +113,10 @@ const Customers = () => {
     } else if (field === 'pinCode') {
       const numericValue = value.replace(/\D/g, '').slice(0, 6);
       setFormData({ ...formData, [field]: numericValue });
-    } else if (field === 'agentCode') {
+    } else if (field === 'cadreCode') {
       const numericValue = value.replace(/\D/g, '').slice(0, 6);
       setFormData({ ...formData, [field]: numericValue });
-      validateAgent(numericValue);
+      validateCadre(numericValue);
     } else if (field === 'bookingDhamaka') {
       const numericValue = value.replace(/\D/g, '');
       setFormData({ ...formData, [field]: numericValue });
@@ -329,20 +338,28 @@ const Customers = () => {
                   <FormInput label="UPI ID" value={formData.upiId} onChange={(e) => handleChange('upiId', e.target.value)} placeholder="Enter UPI ID" />
                 )}
                 <div>
-                  <FormInput label="Agent ID (6 digits)" value={formData.agentCode} onChange={(e) => handleChange('agentCode', e.target.value)} placeholder="Enter 6-digit agent ID" maxLength={6} />
-                  {agentValidation.checked && (
-                    <div className={`mt-1 text-sm flex items-center gap-1 ${agentValidation.valid ? 'text-green-600' : 'text-red-600'}`}>
-                      {agentValidation.valid ? (
+                  <FormInput label="Cadre ID (6 digits)" value={formData.cadreCode} onChange={(e) => handleChange('cadreCode', e.target.value)} placeholder="Enter 6-digit cadre ID" maxLength={6} />
+                  {cadreValidation.checked && (
+                    <div className={`mt-1 text-sm flex items-center gap-1 ${cadreValidation.valid ? 'text-green-600' : 'text-red-600'}`}>
+                      {cadreValidation.valid ? (
                         <>
                           <CheckCircle size={16} />
-                          <span>Agent Found: {agentValidation.agent.name} ({agentValidation.agent.caderRole})</span>
+                          <span>Cadre Found: {cadreValidation.cadre.name} ({cadreValidation.cadre.cadreRole}) - {cadreValidation.percentage}% Commission</span>
                         </>
                       ) : (
                         <>
                           <XCircle size={16} />
-                          <span>Agent not found in system</span>
+                          <span>Cadre not found in system</span>
                         </>
                       )}
+                    </div>
+                  )}
+                  {cadreValidation.valid && formData.totalAmount && (
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-xs text-gray-600 mb-1">Commission Calculation:</p>
+                      <p className="text-sm font-semibold text-green-700">
+                        ₹{formatIndianNumber(formData.totalAmount)} × {cadreValidation.percentage}% = ₹{formatIndianNumber((parseFloat(formData.totalAmount) * cadreValidation.percentage / 100).toFixed(2))}
+                      </p>
                     </div>
                   )}
                 </div>

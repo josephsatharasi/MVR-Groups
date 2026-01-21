@@ -5,6 +5,7 @@ import SearchBar from '../components/SearchBar';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import FormInput from '../components/FormInput';
+
 import { toast } from 'react-toastify';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -25,6 +26,8 @@ const Caders = () => {
     percentage: '',
   });
   const [selectedCader, setSelectedCader] = useState(null);
+  const [linkedCustomers, setLinkedCustomers] = useState([]);
+  const [totalCommission, setTotalCommission] = useState(0);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -39,8 +42,11 @@ const Caders = () => {
     pinCode: '',
     aadharNo: '',
     panNo: '',
+    cadreId: '',
     cadreRole: '',
     cadreDhamaka: '',
+    introducerRole: '',
+    introducerId: '',
   });
 
   const [caders, setCaders] = useState([]);
@@ -67,6 +73,12 @@ const Caders = () => {
     return roleOptions.filter((_, index) => index <= recruiterIndex);
   };
 
+  const getAvailableRolesForNew = (introducerRole) => {
+    if (!introducerRole) return roleOptions;
+    const introducerIndex = roleHierarchy.indexOf(introducerRole);
+    return roleOptions.filter((_, index) => index <= introducerIndex);
+  };
+
   const roleOptions = [
     { value: 'FO', label: 'FIELD OFFICER (FO)' },
     { value: 'TL', label: 'TEAM LEADER (TL)' },
@@ -88,6 +100,7 @@ const Caders = () => {
     c.name?.toLowerCase().includes(search.toLowerCase()) ||
     c.email?.toLowerCase().includes(search.toLowerCase()) ||
     c.mobile?.includes(search) ||
+    c.cadreId?.includes(search) ||
     c.cadreRole?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -98,8 +111,13 @@ const Caders = () => {
         await axios.put(`${API_URL}/cadres/${editingId}`, formData);
         toast.success('Cadre updated successfully!');
       } else {
-        await axios.post(`${API_URL}/cadres`, formData);
-        toast.success('Cadre added successfully!');
+        // Auto-generate cadreId
+        const maxCadreId = caders.length > 0 && caders.some(c => c.cadreId) 
+          ? Math.max(...caders.map(c => parseInt(c.cadreId) || 200000)) 
+          : 200000;
+        const newCadreId = (maxCadreId + 1).toString();
+        await axios.post(`${API_URL}/cadres`, { ...formData, cadreId: newCadreId });
+        toast.success(`Cadre added successfully! Cadre ID: ${newCadreId}`);
       }
       fetchCadres();
       resetForm();
@@ -123,8 +141,11 @@ const Caders = () => {
       pinCode: row.pinCode || '',
       aadharNo: row.aadharNo || '',
       panNo: row.panNo || '',
+      cadreId: row.cadreId || '',
       cadreRole: row.cadreRole || '',
       cadreDhamaka: row.cadreDhamaka || '',
+      introducerRole: row.introducerRole || '',
+      introducerId: row.introducerId || '',
     });
     setEditingId(row._id);
     setShowFormModal(true);
@@ -143,9 +164,28 @@ const Caders = () => {
     }
   };
 
-  const handleRowClick = (row) => {
+  const handleRowClick = async (row) => {
     setSelectedCader(row);
     setShowDetailsModal(true);
+    
+    try {
+      const response = await axios.get(`${API_URL}/customers`);
+      const customers = response.data;
+      const linked = customers.filter(c => c.cadreCode === row.cadreId || c.agentCode === row.cadreId);
+      setLinkedCustomers(linked);
+      
+      const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
+      const percentage = percentages[row.cadreRole] || 0;
+      const total = linked.reduce((sum, customer) => {
+        const amount = parseFloat(customer.totalAmount) || 0;
+        return sum + (amount * percentage / 100);
+      }, 0);
+      setTotalCommission(total);
+    } catch (error) {
+      console.error('Failed to fetch customers:', error);
+      setLinkedCustomers([]);
+      setTotalCommission(0);
+    }
   };
 
   const handleRecruitSubmit = async (e) => {
@@ -176,8 +216,11 @@ const Caders = () => {
       pinCode: '',
       aadharNo: '',
       panNo: '',
+      cadreId: '',
       cadreRole: '',
       cadreDhamaka: '',
+      introducerRole: '',
+      introducerId: '',
     });
     setEditingId(null);
     setShowFormModal(false);
@@ -224,10 +267,10 @@ const Caders = () => {
     { header: 'Name', field: 'name', render: (row) => (
       <span className="font-semibold">{row.name} ({row.cadreRole})</span>
     )},
+    { header: 'Cadre ID', field: 'cadreId' },
     { header: 'Role', field: 'cadreRole', render: (row) => getRoleFullName(row.cadreRole) },
     { header: 'Mobile', field: 'mobile' },
     { header: 'Email', field: 'email' },
-    { header: 'Address', field: 'address' },
   ];
 
   return (
@@ -396,9 +439,55 @@ const Caders = () => {
                   type="select"
                   value={formData.cadreRole}
                   onChange={(e) => setFormData({ ...formData, cadreRole: e.target.value })}
-                  options={roleOptions}
+                  options={formData.introducerRole ? getAvailableRolesForNew(formData.introducerRole) : roleOptions}
                   placeholder="Select role"
                 />
+                <FormInput
+                  label="Introducer Role"
+                  type="select"
+                  value={formData.introducerRole}
+                  onChange={(e) => setFormData({ ...formData, introducerRole: e.target.value, introducerId: '' })}
+                  options={roleOptions}
+                  placeholder="Select introducer role"
+                />
+                <FormInput
+                  label="Introducer ID"
+                  type="select"
+                  value={formData.introducerId}
+                  onChange={(e) => setFormData({ ...formData, introducerId: e.target.value })}
+                  options={caders
+                    .filter(c => c.cadreRole === formData.introducerRole)
+                    .map(c => ({ value: c.cadreId, label: `${c.name} (${c.cadreId})` }))}
+                  placeholder="Select introducer"
+                  disabled={!formData.introducerRole}
+                />
+                {!editingId && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-800">Cadre ID</label>
+                    <input
+                      type="text"
+                      value={(() => {
+                        const maxId = caders.length > 0 && caders.some(c => c.cadreId) 
+                          ? Math.max(...caders.map(c => parseInt(c.cadreId) || 200000)) 
+                          : 200000;
+                        return (maxId + 1).toString();
+                      })()}
+                      readOnly
+                      className="w-full px-3 py-2 border rounded-lg bg-gray-100"
+                    />
+                  </div>
+                )}
+                {editingId && formData.cadreId && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-800">Cadre ID</label>
+                    <input
+                      type="text"
+                      value={formData.cadreId}
+                      readOnly
+                      className="w-full px-3 py-2 border rounded-lg bg-gray-100"
+                    />
+                  </div>
+                )}
                 <FormInput
                   label="Cadre Dhamaka"
                   value={formData.cadreDhamaka}
@@ -419,114 +508,101 @@ const Caders = () => {
         </div>
       )}
 
-      {/* Details Modal */}
+      {/* Cader Details Modal */}
       {showDetailsModal && selectedCader && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-800">
-                Cader Details - {selectedCader.username}
-              </h2>
+              <h2 className="text-xl font-bold text-gray-800">Cader Details -</h2>
               <button onClick={() => setShowDetailsModal(false)} className="text-gray-500 hover:text-gray-700">
                 <X size={24} />
               </button>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <p className="text-sm text-gray-600">Username</p>
-                  <p className="font-semibold text-gray-900">{selectedCader.username}</p>
+                  <p className="text-sm text-gray-600 mb-1">Username</p>
+                  <p className="font-semibold text-gray-900">{selectedCader.name || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Role</p>
-                  <p className="font-semibold text-gray-900">{getRoleFullName(selectedCader.role)}</p>
+                  <p className="text-sm text-gray-600 mb-1">Role</p>
+                  <p className="font-semibold text-gray-900">{getRoleFullName(selectedCader.cadreRole)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Email</p>
-                  <p className="font-semibold text-gray-900">{selectedCader.email}</p>
+                  <p className="text-sm text-gray-600 mb-1">Email</p>
+                  <p className="font-semibold text-gray-900">{selectedCader.email || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Contact</p>
-                  <p className="font-semibold text-gray-900">{selectedCader.contact}</p>
+                  <p className="text-sm text-gray-600 mb-1">Contact</p>
+                  <p className="font-semibold text-gray-900">{selectedCader.mobile || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Percentage</p>
-                  <p className="font-semibold text-gray-900">{selectedCader.percentage}%</p>
+                  <p className="text-sm text-gray-600 mb-1">Percentage</p>
+                  <p className="font-semibold text-gray-900">{(() => {
+                    const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
+                    return percentages[selectedCader.cadreRole] || 0;
+                  })()}%</p>
                 </div>
               </div>
 
-              <div className="border-t pt-4 mb-6">
+              <div className="border-t pt-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-gray-800">Recruitment Hierarchy & Commission</h3>
-                  <button
-                    onClick={() => setShowRecruitModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
-                  >
-                    + Recruit Team Member
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2">
+                    <Plus size={16} /> Recruit Team Member
                   </button>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">This {selectedCader.role} can recruit the following positions with their commission percentages:</p>
-                <div className="space-y-2">
-                  {(() => {
-                    const currentIndex = roleHierarchy.indexOf(selectedCader.role);
-                    return caders.filter((_, idx) => idx <= currentIndex).map((cader, idx) => {
-                      const roleData = roleOptions.find(r => r.value === cader.role);
-                      return (
-                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: cader.role === selectedCader.role ? '#1e3a8a' : '#3b82f6' }}>
-                          <span className="text-white font-medium">{roleData?.label || cader.role}</span>
-                          <span className="text-white font-bold">{cader.percentage}%</span>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-                <div className="mt-4 bg-green-50 p-4 rounded-lg border-2 border-green-200">
+                <p className="text-sm text-gray-600 mb-4">This can recruit the following positions with their commission percentages:</p>
+                
+                <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-4">
                   <p className="text-sm text-gray-600 mb-2">Total Commission Distribution (Example: ₹10,000 booking)</p>
                   <div className="flex items-center justify-between">
-                    <span className="font-bold">Total:</span>
-                    <span className="font-bold text-xl text-green-600">
-                      ₹{(() => {
-                        const currentIndex = roleHierarchy.indexOf(selectedCader.role);
-                        const total = caders.filter((_, idx) => idx <= currentIndex).reduce((sum, c) => sum + (10000 * c.percentage / 100), 0);
-                        return total.toFixed(2);
-                      })()}
-                    </span>
+                    <span className="font-bold text-lg">Total:</span>
+                    <span className="font-bold text-2xl text-green-600">₹{totalCommission.toFixed(2)}</span>
                   </div>
                 </div>
-              </div>
 
-              <div className="border-t pt-4 mb-6">
-                <h3 className="text-lg font-bold mb-4 text-gray-800">Commission Calculation</h3>
-                <p className="text-sm text-gray-600 mb-4">Based on role: {getRoleFullName(selectedCader.role)} - {selectedCader.percentage}%</p>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">Example: If booking amount is ₹10,000</p>
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Commission:</span>
-                    <span className="font-bold text-lg text-blue-700">₹{(10000 * selectedCader.percentage / 100).toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <h3 className="text-lg font-bold mb-4 text-gray-800">Activity History</h3>
-                <div className="space-y-3">
-                  {selectedCader.history?.map((item, idx) => (
-                    <div key={idx} className="flex gap-4 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">{idx + 1}</span>
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-semibold text-gray-900">{item.action}</p>
-                          <p className="text-xs text-gray-500">{item.date}</p>
-                        </div>
-                        <p className="text-sm text-gray-600">{item.details}</p>
-                      </div>
+                {linkedCustomers.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">Linked Customers ({linkedCustomers.length}):</p>
+                    <div className="max-h-60 overflow-y-auto border rounded-lg">
+                      <table className="w-full">
+                        <thead className="bg-blue-50 sticky top-0">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Name</th>
+                            <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Project</th>
+                            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Amount</th>
+                            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Commission</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {linkedCustomers.map((customer, idx) => {
+                            const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
+                            const percentage = percentages[selectedCader.cadreRole] || 0;
+                            const amount = parseFloat(customer.totalAmount) || 0;
+                            const commission = amount * percentage / 100;
+                            return (
+                              <tr key={idx} className="border-b hover:bg-gray-50">
+                                <td className="px-3 py-2 text-sm">{customer.name}</td>
+                                <td className="px-3 py-2 text-sm">{customer.projectName || '-'}</td>
+                                <td className="px-3 py-2 text-sm text-right">₹{amount.toLocaleString('en-IN')}</td>
+                                <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{commission.toFixed(2)}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-bold mb-4 text-gray-800">Commission Calculation</h3>
+                <p className="text-sm text-gray-600 mb-2">Based on role: {getRoleFullName(selectedCader.cadreRole)} - {(() => {
+                  const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
+                  return percentages[selectedCader.cadreRole] || 0;
+                })()}%</p>
               </div>
             </div>
           </div>

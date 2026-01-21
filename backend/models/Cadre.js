@@ -17,6 +17,8 @@ const cadreSchema = new mongoose.Schema({
   companyCode: { type: String, default: '999' },
   cadreRole: String,
   cadreDhamaka: String,
+  introducerRole: String,
+  introducerId: String,
   photo: String,
   createdAt: { type: Date, default: Date.now }
 });

@@ -5,12 +5,11 @@ import Button from '../components/Button';
 import BarChart from '../components/BarChart';
 import LineChart from '../components/LineChart';
 import CountUp from '../components/CountUp';
-import { getCustomers } from '../utils/storage';
-import { getAgents } from '../utils/storage';
+import { getCustomers, getCadres } from '../utils/storage';
 
 const Reports = () => {
   const [customers, setCustomers] = useState([]);
-  const [agents, setAgents] = useState([]);
+  const [cadres, setCadres] = useState([]);
   const [monthlyRevenue, setMonthlyRevenue] = useState([]);
   const [propertySales, setPropertySales] = useState([]);
   const [stats, setStats] = useState({
@@ -27,19 +26,19 @@ const Reports = () => {
 
   const loadData = async () => {
     const customerData = await getCustomers();
-    const agentData = await getAgents();
+    const cadreData = await getCadres();
     setCustomers(customerData);
-    setAgents(agentData);
-    calculateStats(customerData, agentData);
+    setCadres(cadreData);
+    calculateStats(customerData, cadreData);
     calculateMonthlyRevenue(customerData);
     calculatePropertySales(customerData);
   };
 
-  const calculateStats = (customerData, agentData) => {
+  const calculateStats = (customerData, cadreData) => {
     const totalRevenue = customerData.reduce((sum, c) => sum + (parseFloat(c.bookingAmount) || 0), 0);
     const propertiesSold = customerData.length;
     const totalCustomers = customerData.length;
-    const totalAgents = agentData.length;
+    const totalAgents = cadreData.length;
 
     setStats({
       totalRevenue: totalRevenue / 10000000,
@@ -157,12 +156,12 @@ const Reports = () => {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Agents</p>
+              <p className="text-sm text-gray-600">Total Cadres</p>
               <p className="text-2xl font-bold text-blue-700">
                 <CountUp end={stats.totalAgents} duration={2000} />
               </p>
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                <TrendingUp size={14} /> Active agents
+                <TrendingUp size={14} /> Active cadres
               </p>
             </div>
             <UserCheck size={40} className="text-blue-600" />

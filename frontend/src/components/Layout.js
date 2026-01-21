@@ -19,7 +19,6 @@ const Layout = ({ children, setIsLoggedIn }) => {
   const menuItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/customers', icon: Users, label: 'Customers' },
-    { path: '/admin/agents', icon: UserPlus, label: 'Agents' },
     { path: '/admin/caders', icon: UserCog, label: 'Caders' },
     { path: '/admin/commission', icon: DollarSign, label: 'Commission' },
     { path: '/admin/reports', icon: FileText, label: 'Reports' },

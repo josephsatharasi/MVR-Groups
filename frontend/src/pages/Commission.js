@@ -73,30 +73,31 @@ const Commission = () => {
         return sum + (amount * percentage / 100);
       }, 0);
       
-      // Calculate earnings from team members' customers (cumulative percentages)
+      // Calculate earnings from team members' customers
       const teamEarnings = teamMembers.reduce((sum, member) => {
         const memberCustomers = customerData.filter(customer => 
           customer.cadreCode === member.cadreId || customer.agentCode === member.cadreId
         );
         
-        // Get cumulative percentage: member's % + all percentages up the chain to current person
-        const getCumulativePercentage = (memberId) => {
+        // Get all percentages from member role up to current role in hierarchy
+        const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
+        const getChainPercentage = (memberRole, currentRole) => {
+          const memberIndex = roleHierarchy.indexOf(memberRole);
+          const currentIndex = roleHierarchy.indexOf(currentRole);
           let total = 0;
-          let currentMember = cadreData.find(c => c.cadreId === memberId);
           
-          while (currentMember) {
-            total += rolePercentages[currentMember.cadreRole] || 0;
-            if (currentMember.cadreId === person.id) break;
-            currentMember = cadreData.find(c => c.cadreId === currentMember.introducerId);
+          // Add all percentages from member to current in hierarchy
+          for (let i = memberIndex; i <= currentIndex; i++) {
+            total += rolePercentages[roleHierarchy[i]] || 0;
           }
           return total;
         };
         
-        const cumulativePercentage = getCumulativePercentage(member.cadreId);
+        const chainPercentage = getChainPercentage(member.cadreRole, person.role);
         
         const memberEarnings = memberCustomers.reduce((mSum, customer) => {
           const amount = parseFloat(customer.totalAmount) || 0;
-          return mSum + (amount * cumulativePercentage / 100);
+          return mSum + (amount * chainPercentage / 100);
         }, 0);
         
         return sum + memberEarnings;

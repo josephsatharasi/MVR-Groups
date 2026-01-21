@@ -48,9 +48,11 @@ const Caders = () => {
     cadreDhamaka: '',
     introducerRole: '',
     introducerId: '',
+    companyCode999: false,
   });
 
   const [caders, setCaders] = useState([]);
+  const [companyCodeFilter, setCompanyCodeFilter] = useState('all');
 
   useEffect(() => {
     fetchCadres();
@@ -97,13 +99,19 @@ const Caders = () => {
     return found ? found.label : role;
   };
 
-  const filtered = caders.filter(c => 
-    c.name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.email?.toLowerCase().includes(search.toLowerCase()) ||
-    c.mobile?.includes(search) ||
-    c.cadreId?.includes(search) ||
-    c.cadreRole?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = caders.filter(c => {
+    const matchesSearch = c.name?.toLowerCase().includes(search.toLowerCase()) ||
+      c.email?.toLowerCase().includes(search.toLowerCase()) ||
+      c.mobile?.includes(search) ||
+      c.cadreId?.includes(search) ||
+      c.cadreRole?.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesCompanyCode = companyCodeFilter === 'all' || 
+      (companyCodeFilter === '999' && c.companyCode999 === true) ||
+      (companyCodeFilter === 'other' && c.companyCode999 !== true);
+    
+    return matchesSearch && matchesCompanyCode;
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -147,6 +155,7 @@ const Caders = () => {
       cadreDhamaka: row.cadreDhamaka || '',
       introducerRole: row.introducerRole || '',
       introducerId: row.introducerId || '',
+      companyCode999: row.companyCode999 || false,
     });
     setEditingId(row._id);
     setShowFormModal(true);
@@ -200,15 +209,28 @@ const Caders = () => {
         return sum + (amount * percentage / 100);
       }, 0);
       
-      // Calculate team earnings with cumulative percentages
+      // Calculate team earnings - add ALL percentages from member role to current role
       const teamEarnings = team.reduce((sum, member) => {
         const memberCustomers = customers.filter(c => c.cadreCode === member.cadreId || c.agentCode === member.cadreId);
-        const memberPercentage = percentages[member.cadreRole] || 0;
-        const cumulativePercentage = memberPercentage + percentage;
+        
+        // Get all percentages from member role up to current role in hierarchy
+        const getChainPercentage = (memberRole, currentRole) => {
+          const memberIndex = roleHierarchy.indexOf(memberRole);
+          const currentIndex = roleHierarchy.indexOf(currentRole);
+          let total = 0;
+          
+          // Add all percentages from member to current in hierarchy
+          for (let i = memberIndex; i <= currentIndex; i++) {
+            total += percentages[roleHierarchy[i]] || 0;
+          }
+          return total;
+        };
+        
+        const chainPercentage = getChainPercentage(member.cadreRole, row.cadreRole);
         
         return sum + memberCustomers.reduce((mSum, customer) => {
           const amount = parseFloat(customer.totalAmount) || 0;
-          return mSum + (amount * cumulativePercentage / 100);
+          return mSum + (amount * chainPercentage / 100);
         }, 0);
       }, 0);
       
@@ -254,6 +276,7 @@ const Caders = () => {
       cadreDhamaka: '',
       introducerRole: '',
       introducerId: '',
+      companyCode999: false,
     });
     setEditingId(null);
     setShowFormModal(false);
@@ -321,8 +344,21 @@ const Caders = () => {
       </div>
 
       <Card>
-        <div className="mb-4">
-          <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search caders..." />
+        <div className="mb-4 flex gap-4 items-center">
+          <div className="flex-1">
+            <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search caders..." />
+          </div>
+          <div>
+            <select 
+              value={companyCodeFilter} 
+              onChange={(e) => setCompanyCodeFilter(e.target.value)}
+              className="px-4 py-2 border rounded-lg bg-white"
+            >
+              <option value="all">All Caders</option>
+              <option value="999">Company Code 999</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -527,6 +563,18 @@ const Caders = () => {
                   onChange={(e) => setFormData({ ...formData, cadreDhamaka: e.target.value })}
                   placeholder="Enter cadre dhamaka"
                 />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="companyCode999"
+                    checked={formData.companyCode999}
+                    onChange={(e) => setFormData({ ...formData, companyCode999: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <label htmlFor="companyCode999" className="text-sm font-medium text-gray-800">
+                    Company Code 999
+                  </label>
+                </div>
               </div>
               <div className="flex gap-2 pt-4">
                 <Button type="submit" variant="primary">
@@ -595,8 +643,22 @@ const Caders = () => {
                       
                       return teamMembers.map((member, idx) => {
                         const memberPercentage = percentages[member.cadreRole] || 0;
-                        const cumulativePercentage = memberPercentage + currentPercentage;
                         const indent = member.level * 20;
+                        
+                        // Calculate cumulative percentage from member role to current role
+                        const getChainPercentage = (memberRole, currentRole) => {
+                          const memberIndex = roleHierarchy.indexOf(memberRole);
+                          const currentIndex = roleHierarchy.indexOf(currentRole);
+                          let total = 0;
+                          
+                          // Add all percentages from member to current in hierarchy
+                          for (let i = memberIndex; i <= currentIndex; i++) {
+                            total += percentages[roleHierarchy[i]] || 0;
+                          }
+                          return total;
+                        };
+                        
+                        const chainPercentage = getChainPercentage(member.cadreRole, selectedCader.cadreRole);
                         
                         return (
                           <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-blue-50 border border-blue-200" style={{ marginLeft: `${indent}px` }}>
@@ -607,9 +669,9 @@ const Caders = () => {
                             </div>
                             <div className="text-right">
                               <div className="text-sm font-semibold text-blue-700">
-                                {memberPercentage}% + {currentPercentage}% = {cumulativePercentage}%
+                                Chain Total: {chainPercentage}%
                               </div>
-                              <div className="text-xs text-gray-600">Cumulative Commission</div>
+                              <div className="text-xs text-gray-600">All roles in chain</div>
                             </div>
                           </div>
                         );

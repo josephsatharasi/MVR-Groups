@@ -51,15 +51,58 @@ const Commission = () => {
     const commissions = allPersons.map(person => {
       const percentage = rolePercentages[person.role] || 0;
       
-      // Calculate total earnings from customers linked to this cadre
-      const linkedCustomers = customerData.filter(customer => 
+      // Get all team members under this cadre (direct and indirect)
+      const getTeamMembers = (cadreId) => {
+        const directMembers = cadreData.filter(c => c.introducerId === cadreId);
+        let allMembers = [...directMembers];
+        directMembers.forEach(member => {
+          allMembers = [...allMembers, ...getTeamMembers(member.cadreId)];
+        });
+        return allMembers;
+      };
+      
+      const teamMembers = getTeamMembers(person.id);
+      
+      // Calculate earnings from own customers
+      const ownCustomers = customerData.filter(customer => 
         customer.cadreCode === person.id || customer.agentCode === person.id
       );
       
-      const totalEarnings = linkedCustomers.reduce((sum, customer) => {
+      const ownEarnings = ownCustomers.reduce((sum, customer) => {
         const amount = parseFloat(customer.totalAmount) || 0;
         return sum + (amount * percentage / 100);
       }, 0);
+      
+      // Calculate earnings from team members' customers (cumulative percentages)
+      const teamEarnings = teamMembers.reduce((sum, member) => {
+        const memberCustomers = customerData.filter(customer => 
+          customer.cadreCode === member.cadreId || customer.agentCode === member.cadreId
+        );
+        
+        // Get cumulative percentage: member's % + all percentages up the chain to current person
+        const getCumulativePercentage = (memberId) => {
+          let total = 0;
+          let currentMember = cadreData.find(c => c.cadreId === memberId);
+          
+          while (currentMember) {
+            total += rolePercentages[currentMember.cadreRole] || 0;
+            if (currentMember.cadreId === person.id) break;
+            currentMember = cadreData.find(c => c.cadreId === currentMember.introducerId);
+          }
+          return total;
+        };
+        
+        const cumulativePercentage = getCumulativePercentage(member.cadreId);
+        
+        const memberEarnings = memberCustomers.reduce((mSum, customer) => {
+          const amount = parseFloat(customer.totalAmount) || 0;
+          return mSum + (amount * cumulativePercentage / 100);
+        }, 0);
+        
+        return sum + memberEarnings;
+      }, 0);
+      
+      const totalEarnings = ownEarnings + teamEarnings;
 
       // Get advances (stored in localStorage for now)
       const advances = JSON.parse(localStorage.getItem(`advances_${person._id}`) || '[]');

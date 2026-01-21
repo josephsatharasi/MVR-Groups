@@ -28,6 +28,7 @@ const Caders = () => {
   const [selectedCader, setSelectedCader] = useState(null);
   const [linkedCustomers, setLinkedCustomers] = useState([]);
   const [totalCommission, setTotalCommission] = useState(0);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -171,20 +172,52 @@ const Caders = () => {
     try {
       const response = await axios.get(`${API_URL}/customers`);
       const customers = response.data;
-      const linked = customers.filter(c => c.cadreCode === row.cadreId || c.agentCode === row.cadreId);
+      
+      // Get all team members recursively
+      const getTeamMembers = (cadreId, level = 0) => {
+        const directMembers = caders.filter(c => c.introducerId === cadreId);
+        let allMembers = directMembers.map(m => ({ ...m, level }));
+        directMembers.forEach(member => {
+          allMembers = [...allMembers, ...getTeamMembers(member.cadreId, level + 1)];
+        });
+        return allMembers;
+      };
+      
+      const team = getTeamMembers(row.cadreId);
+      setTeamMembers(team);
+      
+      const allTeamIds = [row.cadreId, ...team.map(m => m.cadreId)];
+      const linked = customers.filter(c => allTeamIds.includes(c.cadreCode) || allTeamIds.includes(c.agentCode));
       setLinkedCustomers(linked);
       
       const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
       const percentage = percentages[row.cadreRole] || 0;
-      const total = linked.reduce((sum, customer) => {
+      
+      // Calculate own earnings
+      const ownCustomers = customers.filter(c => c.cadreCode === row.cadreId || c.agentCode === row.cadreId);
+      const ownEarnings = ownCustomers.reduce((sum, customer) => {
         const amount = parseFloat(customer.totalAmount) || 0;
         return sum + (amount * percentage / 100);
       }, 0);
-      setTotalCommission(total);
+      
+      // Calculate team earnings with cumulative percentages
+      const teamEarnings = team.reduce((sum, member) => {
+        const memberCustomers = customers.filter(c => c.cadreCode === member.cadreId || c.agentCode === member.cadreId);
+        const memberPercentage = percentages[member.cadreRole] || 0;
+        const cumulativePercentage = memberPercentage + percentage;
+        
+        return sum + memberCustomers.reduce((mSum, customer) => {
+          const amount = parseFloat(customer.totalAmount) || 0;
+          return mSum + (amount * cumulativePercentage / 100);
+        }, 0);
+      }, 0);
+      
+      setTotalCommission(ownEarnings + teamEarnings);
     } catch (error) {
       console.error('Failed to fetch customers:', error);
       setLinkedCustomers([]);
       setTotalCommission(0);
+      setTeamMembers([]);
     }
   };
 
@@ -552,10 +585,47 @@ const Caders = () => {
                     <Plus size={16} /> Recruit Team Member
                   </button>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">This can recruit the following positions with their commission percentages:</p>
+                <p className="text-sm text-gray-600 mb-4">Team members under this cadre with cumulative commission percentages:</p>
+                
+                {teamMembers.length > 0 && (
+                  <div className="mb-4 space-y-2">
+                    {(() => {
+                      const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
+                      const currentPercentage = percentages[selectedCader.cadreRole] || 0;
+                      
+                      return teamMembers.map((member, idx) => {
+                        const memberPercentage = percentages[member.cadreRole] || 0;
+                        const cumulativePercentage = memberPercentage + currentPercentage;
+                        const indent = member.level * 20;
+                        
+                        return (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-blue-50 border border-blue-200" style={{ marginLeft: `${indent}px` }}>
+                            <div>
+                              <span className="font-medium text-gray-800">{member.name}</span>
+                              <span className="text-xs text-gray-600 ml-2">({getRoleFullName(member.cadreRole)})</span>
+                              <span className="text-xs text-blue-600 ml-2">ID: {member.cadreId}</span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-semibold text-blue-700">
+                                {memberPercentage}% + {currentPercentage}% = {cumulativePercentage}%
+                              </div>
+                              <div className="text-xs text-gray-600">Cumulative Commission</div>
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                )}
+                
+                {teamMembers.length === 0 && (
+                  <div className="text-center py-4 bg-gray-50 rounded-lg mb-4">
+                    <p className="text-gray-500 text-sm">No team members yet</p>
+                  </div>
+                )}
                 
                 <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 mb-4">
-                  <p className="text-sm text-gray-600 mb-2">Total Commission Distribution (Example: ₹10,000 booking)</p>
+                  <p className="text-sm text-gray-600 mb-2">Total Commission from all team sales</p>
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-lg">Total:</span>
                     <span className="font-bold text-2xl text-green-600">₹{totalCommission.toFixed(2)}</span>
@@ -564,7 +634,7 @@ const Caders = () => {
 
                 {linkedCustomers.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">Linked Customers ({linkedCustomers.length}):</p>
+                    <p className="text-sm font-semibold text-gray-700 mb-2">All Customers ({linkedCustomers.length}):</p>
                     <div className="max-h-60 overflow-y-auto border rounded-lg">
                       <table className="w-full">
                         <thead className="bg-blue-50 sticky top-0">

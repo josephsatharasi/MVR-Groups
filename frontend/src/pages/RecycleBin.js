@@ -7,7 +7,6 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const RecycleBin = () => {
   const [deletedCustomers, setDeletedCustomers] = useState([]);
-  const [deletedAgents, setDeletedAgents] = useState([]);
   const [deletedCadres, setDeletedCadres] = useState([]);
   const [activeTab, setActiveTab] = useState('customers');
 
@@ -20,7 +19,6 @@ const RecycleBin = () => {
       const response = await fetch(`${API_URL}/bin`);
       const data = await response.json();
       setDeletedCustomers(data.customers || []);
-      setDeletedAgents(data.agents || []);
       setDeletedCadres(data.cadres || []);
     } catch (error) {
       console.error('Error loading deleted items:', error);
@@ -76,12 +74,6 @@ const RecycleBin = () => {
           Customers ({deletedCustomers.length})
         </button>
         <button
-          onClick={() => setActiveTab('agents')}
-          className={`px-4 py-2 rounded-lg font-semibold ${activeTab === 'agents' ? 'bg-white text-gray-800' : 'bg-gray-200 text-gray-600'}`}
-        >
-          Agents ({deletedAgents.length})
-        </button>
-        <button
           onClick={() => setActiveTab('cadres')}
           className={`px-4 py-2 rounded-lg font-semibold ${activeTab === 'cadres' ? 'bg-white text-gray-800' : 'bg-gray-200 text-gray-600'}`}
         >
@@ -131,54 +123,6 @@ const RecycleBin = () => {
             </table>
             {deletedCustomers.length === 0 && (
               <div className="text-center py-8 text-gray-500">No deleted customers</div>
-            )}
-          </div>
-        )}
-        {activeTab === 'agents' && (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead style={{ backgroundColor: '#1e3a8a' }}>
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Name</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Mobile</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Agent ID</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Cader Role</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Deleted Date</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-white">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {deletedAgents.map((row, idx) => (
-                  <tr key={row._id} className="border-b hover:bg-gray-50" style={{backgroundColor: idx % 2 !== 0 ? '#f9fafb' : 'white'}}>
-                    <td className="px-4 py-3 text-sm font-semibold text-blue-700">{row.name}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{row.mobile}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{row.agentId || '-'}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '33', color: '#1e3a8a'}}>{row.caderRole || '-'}</span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{new Date(row.deletedAt).toLocaleDateString()}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleRestore(row, 'agent')}
-                          className="px-3 py-1 bg-blue-600 rounded text-white text-xs flex items-center gap-1 hover:bg-blue-700"
-                        >
-                          <RotateCcw size={12} /> Restore
-                        </button>
-                        <button
-                          onClick={() => handlePermanentDelete(row, 'agent')}
-                          className="px-3 py-1 bg-red-500 rounded text-white text-xs"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {deletedAgents.length === 0 && (
-              <div className="text-center py-8 text-gray-500">No deleted agents</div>
             )}
           </div>
         )}

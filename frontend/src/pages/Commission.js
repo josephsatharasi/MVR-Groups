@@ -48,8 +48,19 @@ const Commission = () => {
   const calculateCommissions = (cadreData, customerData) => {
     const allPersons = cadreData.map(c => ({ ...c, type: 'Cadre', role: c.cadreRole, id: c.cadreId }));
 
+    const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
+    const getCumulativePercentage = (currentRole) => {
+      const currentIndex = roleHierarchy.indexOf(currentRole);
+      let total = 0;
+      for (let i = 0; i <= currentIndex; i++) {
+        total += rolePercentages[roleHierarchy[i]] || 0;
+      }
+      return total;
+    };
+
     const commissions = allPersons.map(person => {
       const percentage = rolePercentages[person.role] || 0;
+      const cumulativePercentage = getCumulativePercentage(person.role);
       
       // Get all team members under this cadre (direct and indirect)
       const getTeamMembers = (cadreId) => {
@@ -63,41 +74,25 @@ const Commission = () => {
       
       const teamMembers = getTeamMembers(person.id);
       
-      // Calculate earnings from own customers
+      // Calculate earnings from own customers with cumulative percentage
       const ownCustomers = customerData.filter(customer => 
         customer.cadreCode === person.id || customer.agentCode === person.id
       );
       
       const ownEarnings = ownCustomers.reduce((sum, customer) => {
         const amount = parseFloat(customer.totalAmount) || 0;
-        return sum + (amount * percentage / 100);
+        return sum + (amount * cumulativePercentage / 100);
       }, 0);
       
-      // Calculate earnings from team members' customers
+      // Calculate earnings from team members' customers with cumulative percentage
       const teamEarnings = teamMembers.reduce((sum, member) => {
         const memberCustomers = customerData.filter(customer => 
           customer.cadreCode === member.cadreId || customer.agentCode === member.cadreId
         );
         
-        // Get all percentages from member role up to current role in hierarchy
-        const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
-        const getChainPercentage = (memberRole, currentRole) => {
-          const memberIndex = roleHierarchy.indexOf(memberRole);
-          const currentIndex = roleHierarchy.indexOf(currentRole);
-          let total = 0;
-          
-          // Add all percentages from member to current in hierarchy
-          for (let i = memberIndex; i <= currentIndex; i++) {
-            total += rolePercentages[roleHierarchy[i]] || 0;
-          }
-          return total;
-        };
-        
-        const chainPercentage = getChainPercentage(member.cadreRole, person.role);
-        
         const memberEarnings = memberCustomers.reduce((mSum, customer) => {
           const amount = parseFloat(customer.totalAmount) || 0;
-          return mSum + (amount * chainPercentage / 100);
+          return mSum + (amount * cumulativePercentage / 100);
         }, 0);
         
         return sum + memberEarnings;
@@ -207,8 +202,8 @@ const Commission = () => {
       {/* Give Advance Modal */}
       {showAdvanceModal && selectedPerson && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
               <h2 className="text-xl font-bold text-gray-800">
                 Give Advance to {selectedPerson.name}
               </h2>

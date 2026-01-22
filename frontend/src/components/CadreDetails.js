@@ -20,7 +20,7 @@ const CadreDetails = ({ cadre, onClose }) => {
         return sum + parseFloat(customer.commissionAmount);
       }
       const amount = parseFloat(customer.totalAmount) || 0;
-      const percentage = getPercentage(cadre.cadreRole);
+      const percentage = getCumulativePercentage(cadre.cadreRole);
       return sum + (amount * percentage / 100);
     }, 0);
     setTotalCommission(total);
@@ -33,11 +33,22 @@ const CadreDetails = ({ cadre, onClose }) => {
     { value: 'SDO', label: 'SENIOR DEVELOPMENT OFFICE (SDO)', percentage: 1 },
     { value: 'MM', label: 'MARKETING MANAGER (MM)', percentage: 1 },
     { value: 'SMM', label: 'SENIOR MARKETING MANAGER (SMM)', percentage: 1 },
+    { value: 'GM', label: 'GENERAL MANAGER (GM)', percentage: 1 },
     { value: 'SGM', label: 'SENIOR GENERAL MANAGER (SGM)', percentage: 1 },
   ];
 
   const getRoleLabel = (value) => caderRoles.find(r => r.value === value)?.label || value;
   const getPercentage = (value) => caderRoles.find(r => r.value === value)?.percentage || 0;
+  
+  const getCumulativePercentage = (role) => {
+    const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
+    const roleIndex = roleHierarchy.indexOf(role);
+    let total = 0;
+    for (let i = 0; i <= roleIndex; i++) {
+      total += getPercentage(roleHierarchy[i]);
+    }
+    return total;
+  };
 
   const formatIndianNumber = (num) => {
     if (!num) return '0';
@@ -65,7 +76,7 @@ const CadreDetails = ({ cadre, onClose }) => {
                 {getRoleLabel(cadre.cadreRole)}
               </span>
               <span className="px-3 py-1 bg-green-600 text-white rounded-full text-sm font-semibold">
-                {getPercentage(cadre.cadreRole)}% Commission
+                {getCumulativePercentage(cadre.cadreRole)}% Commission
               </span>
             </div>
           </div>
@@ -170,7 +181,7 @@ const CadreDetails = ({ cadre, onClose }) => {
                 <DollarSign className="mt-1 text-green-600" size={20} />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Commission Percentage</p>
-                  <p className="font-bold text-lg text-green-600">{getPercentage(cadre.cadreRole)}%</p>
+                  <p className="font-bold text-lg text-green-600">{getCumulativePercentage(cadre.cadreRole)}%</p>
                 </div>
               </div>
 
@@ -268,7 +279,7 @@ const CadreDetails = ({ cadre, onClose }) => {
                 <Award className="mt-1 text-purple-600" size={20} />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Commission Rate</p>
-                  <p className="font-bold text-2xl text-purple-600">{getPercentage(cadre.cadreRole)}%</p>
+                  <p className="font-bold text-2xl text-purple-600">{getCumulativePercentage(cadre.cadreRole)}%</p>
                 </div>
               </div>
             </div>
@@ -288,7 +299,7 @@ const CadreDetails = ({ cadre, onClose }) => {
                     </thead>
                     <tbody>
                       {linkedCustomers.map((customer, idx) => {
-                        const commission = customer.commissionAmount || (parseFloat(customer.totalAmount) * getPercentage(cadre.cadreRole) / 100);
+                        const commission = customer.commissionAmount || (parseFloat(customer.totalAmount) * getCumulativePercentage(cadre.cadreRole) / 100);
                         return (
                           <tr key={idx} className="border-b hover:bg-gray-50">
                             <td className="px-3 py-2 text-sm">{customer.name}</td>

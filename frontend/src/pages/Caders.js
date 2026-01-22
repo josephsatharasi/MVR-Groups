@@ -5,6 +5,7 @@ import SearchBar from '../components/SearchBar';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import FormInput from '../components/FormInput';
+import ConfirmModal from '../components/ConfirmModal';
 
 import { toast } from 'react-toastify';
 import jsPDF from 'jspdf';
@@ -45,14 +46,14 @@ const Caders = () => {
     panNo: '',
     cadreId: '',
     cadreRole: '',
-    cadreDhamaka: '',
-    introducerRole: '',
     introducerId: '',
     companyCode999: false,
   });
 
   const [caders, setCaders] = useState([]);
   const [companyCodeFilter, setCompanyCodeFilter] = useState('all');
+  const [introducerValidation, setIntroducerValidation] = useState({ valid: false, message: '', cadre: null });
+  const [cadreToDelete, setCadreToDelete] = useState(null);
 
   useEffect(() => {
     fetchCadres();
@@ -69,6 +70,16 @@ const Caders = () => {
   };
 
   const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
+  const rolePercentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
+  
+  const getCumulativePercentage = (role) => {
+    const roleIndex = roleHierarchy.indexOf(role);
+    let total = 0;
+    for (let i = 0; i <= roleIndex; i++) {
+      total += rolePercentages[roleHierarchy[i]] || 0;
+    }
+    return total;
+  };
 
   const getAvailableRoles = (recruiterRole) => {
     if (!recruiterRole) return [];
@@ -79,7 +90,7 @@ const Caders = () => {
   const getAvailableRolesForNew = (introducerRole) => {
     if (!introducerRole) return roleOptions;
     const introducerIndex = roleHierarchy.indexOf(introducerRole);
-    return roleOptions.filter((_, index) => index <= introducerIndex);
+    return roleOptions.filter((_, index) => index < introducerIndex);
   };
 
   const roleOptions = [
@@ -152,25 +163,25 @@ const Caders = () => {
       panNo: row.panNo || '',
       cadreId: row.cadreId || '',
       cadreRole: row.cadreRole || '',
-      cadreDhamaka: row.cadreDhamaka || '',
-      introducerRole: row.introducerRole || '',
       introducerId: row.introducerId || '',
       companyCode999: row.companyCode999 || false,
     });
     setEditingId(row._id);
     setShowFormModal(true);
+    if (row.introducerId) {
+      validateIntroducerId(row.introducerId);
+    }
   };
 
-  const handleDelete = async (row) => {
-    if (window.confirm('Are you sure you want to delete this cadre?')) {
-      try {
-        await axios.delete(`${API_URL}/cadres/${row._id}`);
-        toast.success('Cadre deleted successfully!');
-        fetchCadres();
-      } catch (error) {
-        toast.error('Failed to delete cadre');
-        console.error(error);
-      }
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`${API_URL}/cadres/${cadreToDelete.id}`);
+      toast.success(`${cadreToDelete.name} deleted successfully!`);
+      fetchCadres();
+      setCadreToDelete(null);
+    } catch (error) {
+      toast.error('Failed to delete cadre');
+      console.error(error);
     }
   };
 
@@ -200,37 +211,23 @@ const Caders = () => {
       setLinkedCustomers(linked);
       
       const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
-      const percentage = percentages[row.cadreRole] || 0;
+      const cumulativePercentage = getCumulativePercentage(row.cadreRole);
+      const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
       
-      // Calculate own earnings
+      // Calculate own earnings with cumulative percentage
       const ownCustomers = customers.filter(c => c.cadreCode === row.cadreId || c.agentCode === row.cadreId);
       const ownEarnings = ownCustomers.reduce((sum, customer) => {
         const amount = parseFloat(customer.totalAmount) || 0;
-        return sum + (amount * percentage / 100);
+        return sum + (amount * cumulativePercentage / 100);
       }, 0);
       
-      // Calculate team earnings - add ALL percentages from member role to current role
+      // Calculate team earnings with cumulative percentage
       const teamEarnings = team.reduce((sum, member) => {
         const memberCustomers = customers.filter(c => c.cadreCode === member.cadreId || c.agentCode === member.cadreId);
         
-        // Get all percentages from member role up to current role in hierarchy
-        const getChainPercentage = (memberRole, currentRole) => {
-          const memberIndex = roleHierarchy.indexOf(memberRole);
-          const currentIndex = roleHierarchy.indexOf(currentRole);
-          let total = 0;
-          
-          // Add all percentages from member to current in hierarchy
-          for (let i = memberIndex; i <= currentIndex; i++) {
-            total += percentages[roleHierarchy[i]] || 0;
-          }
-          return total;
-        };
-        
-        const chainPercentage = getChainPercentage(member.cadreRole, row.cadreRole);
-        
         return sum + memberCustomers.reduce((mSum, customer) => {
           const amount = parseFloat(customer.totalAmount) || 0;
-          return mSum + (amount * chainPercentage / 100);
+          return mSum + (amount * cumulativePercentage / 100);
         }, 0);
       }, 0);
       
@@ -273,13 +270,30 @@ const Caders = () => {
       panNo: '',
       cadreId: '',
       cadreRole: '',
-      cadreDhamaka: '',
-      introducerRole: '',
       introducerId: '',
       companyCode999: false,
     });
     setEditingId(null);
     setShowFormModal(false);
+    setIntroducerValidation({ valid: false, message: '', cadre: null });
+  };
+
+  const validateIntroducerId = (id) => {
+    if (!id) {
+      setIntroducerValidation({ valid: false, message: '', cadre: null });
+      return;
+    }
+    const foundCadre = caders.find(c => c.cadreId === id);
+    if (foundCadre) {
+      setIntroducerValidation({ 
+        valid: true, 
+        message: `${foundCadre.name} - ${getRoleFullName(foundCadre.cadreRole)}`, 
+        cadre: foundCadre 
+      });
+      setFormData(prev => ({ ...prev, cadreRole: '' }));
+    } else {
+      setIntroducerValidation({ valid: false, message: 'ID not matched', cadre: null });
+    }
   };
 
   const downloadPDF = () => {
@@ -344,15 +358,15 @@ const Caders = () => {
       </div>
 
       <Card>
-        <div className="mb-4 flex gap-4 items-center">
+        <div className="mb-4 flex flex-col md:flex-row gap-4 items-stretch md:items-center">
           <div className="flex-1">
             <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search caders..." />
           </div>
-          <div>
+          <div className="w-full md:w-auto">
             <select 
               value={companyCodeFilter} 
               onChange={(e) => setCompanyCodeFilter(e.target.value)}
-              className="px-4 py-2 border rounded-lg bg-white"
+              className="w-full px-4 py-2 border rounded-lg bg-white"
             >
               <option value="all">All Caders</option>
               <option value="999">Company Code 999</option>
@@ -393,7 +407,7 @@ const Caders = () => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(row)}
+                        onClick={() => setCadreToDelete({ id: row._id, name: row.name })}
                         className="px-3 py-1 bg-red-500 rounded text-white text-xs"
                       >
                         Delete
@@ -504,31 +518,26 @@ const Caders = () => {
                   placeholder="Enter PAN number"
                 />
                 <FormInput
+                  label="Introducer ID"
+                  value={formData.introducerId}
+                  onChange={(e) => {
+                    setFormData({ ...formData, introducerId: e.target.value });
+                    validateIntroducerId(e.target.value);
+                  }}
+                  placeholder="Enter introducer cadre ID"
+                />
+                {formData.introducerId && (
+                  <div className={`text-sm mt-1 ${introducerValidation.valid ? 'text-green-600' : 'text-red-600'}`}>
+                    {introducerValidation.valid ? '✓ ' : '✗ '}{introducerValidation.message}
+                  </div>
+                )}
+                <FormInput
                   label="Cadre Role"
                   type="select"
                   value={formData.cadreRole}
                   onChange={(e) => setFormData({ ...formData, cadreRole: e.target.value })}
-                  options={formData.introducerRole ? getAvailableRolesForNew(formData.introducerRole) : roleOptions}
+                  options={introducerValidation.cadre ? getAvailableRolesForNew(introducerValidation.cadre.cadreRole) : roleOptions}
                   placeholder="Select role"
-                />
-                <FormInput
-                  label="Introducer Role"
-                  type="select"
-                  value={formData.introducerRole}
-                  onChange={(e) => setFormData({ ...formData, introducerRole: e.target.value, introducerId: '' })}
-                  options={roleOptions}
-                  placeholder="Select introducer role"
-                />
-                <FormInput
-                  label="Introducer ID"
-                  type="select"
-                  value={formData.introducerId}
-                  onChange={(e) => setFormData({ ...formData, introducerId: e.target.value })}
-                  options={caders
-                    .filter(c => c.cadreRole === formData.introducerRole)
-                    .map(c => ({ value: c.cadreId, label: `${c.name} (${c.cadreId})` }))}
-                  placeholder="Select introducer"
-                  disabled={!formData.introducerRole}
                 />
                 {!editingId && (
                   <div>
@@ -557,12 +566,6 @@ const Caders = () => {
                     />
                   </div>
                 )}
-                <FormInput
-                  label="Cadre Dhamaka"
-                  value={formData.cadreDhamaka}
-                  onChange={(e) => setFormData({ ...formData, cadreDhamaka: e.target.value })}
-                  placeholder="Enter cadre dhamaka"
-                />
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -619,10 +622,7 @@ const Caders = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Percentage</p>
-                  <p className="font-semibold text-gray-900">{(() => {
-                    const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
-                    return percentages[selectedCader.cadreRole] || 0;
-                  })()}%</p>
+                  <p className="font-semibold text-gray-900">{getCumulativePercentage(selectedCader.cadreRole)}%</p>
                 </div>
               </div>
 
@@ -639,26 +639,14 @@ const Caders = () => {
                   <div className="mb-4 space-y-2">
                     {(() => {
                       const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
-                      const currentPercentage = percentages[selectedCader.cadreRole] || 0;
+                      const currentCumulativePercentage = getCumulativePercentage(selectedCader.cadreRole);
                       
                       return teamMembers.map((member, idx) => {
                         const memberPercentage = percentages[member.cadreRole] || 0;
                         const indent = member.level * 20;
                         
-                        // Calculate cumulative percentage from member role to current role
-                        const getChainPercentage = (memberRole, currentRole) => {
-                          const memberIndex = roleHierarchy.indexOf(memberRole);
-                          const currentIndex = roleHierarchy.indexOf(currentRole);
-                          let total = 0;
-                          
-                          // Add all percentages from member to current in hierarchy
-                          for (let i = memberIndex; i <= currentIndex; i++) {
-                            total += percentages[roleHierarchy[i]] || 0;
-                          }
-                          return total;
-                        };
-                        
-                        const chainPercentage = getChainPercentage(member.cadreRole, selectedCader.cadreRole);
+                        // Calculate cumulative percentage from FO to current role
+                        const chainPercentage = getCumulativePercentage(selectedCader.cadreRole);
                         
                         return (
                           <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-blue-50 border border-blue-200" style={{ marginLeft: `${indent}px` }}>
@@ -709,10 +697,9 @@ const Caders = () => {
                         </thead>
                         <tbody>
                           {linkedCustomers.map((customer, idx) => {
-                            const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
-                            const percentage = percentages[selectedCader.cadreRole] || 0;
+                            const cumulativePercentage = getCumulativePercentage(selectedCader.cadreRole);
                             const amount = parseFloat(customer.totalAmount) || 0;
-                            const commission = amount * percentage / 100;
+                            const commission = amount * cumulativePercentage / 100;
                             return (
                               <tr key={idx} className="border-b hover:bg-gray-50">
                                 <td className="px-3 py-2 text-sm">{customer.name}</td>
@@ -731,10 +718,7 @@ const Caders = () => {
 
               <div className="border-t pt-6">
                 <h3 className="text-lg font-bold mb-4 text-gray-800">Commission Calculation</h3>
-                <p className="text-sm text-gray-600 mb-2">Based on role: {getRoleFullName(selectedCader.cadreRole)} - {(() => {
-                  const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
-                  return percentages[selectedCader.cadreRole] || 0;
-                })()}%</p>
+                <p className="text-sm text-gray-600 mb-2">Based on role: {getRoleFullName(selectedCader.cadreRole)} - {getCumulativePercentage(selectedCader.cadreRole)}%</p>
               </div>
             </div>
           </div>
@@ -810,6 +794,14 @@ const Caders = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!cadreToDelete}
+        onClose={() => setCadreToDelete(null)}
+        onConfirm={handleDelete}
+        title="Delete Cadre"
+        message={`Are you sure you want to delete ${cadreToDelete?.name}? This action cannot be undone.`}
+      />
     </div>
   );
 };

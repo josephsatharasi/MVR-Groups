@@ -214,20 +214,22 @@ const Caders = () => {
       const cumulativePercentage = getCumulativePercentage(row.cadreRole);
       const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
       
-      // Calculate own earnings with cumulative percentage
+      // Calculate own earnings with full cumulative percentage
       const ownCustomers = customers.filter(c => c.cadreCode === row.cadreId || c.agentCode === row.cadreId);
       const ownEarnings = ownCustomers.reduce((sum, customer) => {
         const amount = parseFloat(customer.totalAmount) || 0;
         return sum + (amount * cumulativePercentage / 100);
       }, 0);
       
-      // Calculate team earnings with cumulative percentage
+      // Calculate team earnings - only the difference between parent and member percentages
       const teamEarnings = team.reduce((sum, member) => {
         const memberCustomers = customers.filter(c => c.cadreCode === member.cadreId || c.agentCode === member.cadreId);
+        const memberCumulativePercentage = getCumulativePercentage(member.cadreRole);
+        const mySharePercentage = cumulativePercentage - memberCumulativePercentage;
         
         return sum + memberCustomers.reduce((mSum, customer) => {
           const amount = parseFloat(customer.totalAmount) || 0;
-          return mSum + (amount * cumulativePercentage / 100);
+          return mSum + (amount * mySharePercentage / 100);
         }, 0);
       }, 0);
       
@@ -402,15 +404,17 @@ const Caders = () => {
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => handleEdit(row)}
-                        className="px-3 py-1 bg-blue-500 rounded text-white text-xs"
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="Edit"
                       >
-                        Edit
+                        <Edit size={18} />
                       </button>
                       <button
                         onClick={() => setCadreToDelete({ id: row._id, name: row.name })}
-                        className="px-3 py-1 bg-red-500 rounded text-white text-xs"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Delete"
                       >
-                        Delete
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </td>
@@ -697,9 +701,22 @@ const Caders = () => {
                         </thead>
                         <tbody>
                           {linkedCustomers.map((customer, idx) => {
-                            const cumulativePercentage = getCumulativePercentage(selectedCader.cadreRole);
                             const amount = parseFloat(customer.totalAmount) || 0;
-                            const commission = amount * cumulativePercentage / 100;
+                            const sellerCadreId = customer.cadreCode || customer.agentCode;
+                            const cumulativePercentage = getCumulativePercentage(selectedCader.cadreRole);
+                            let commission = 0;
+                            
+                            if (sellerCadreId === selectedCader.cadreId) {
+                              // Own sale - full cumulative percentage
+                              commission = amount * cumulativePercentage / 100;
+                            } else {
+                              // Team member sale - only the difference
+                              const sellerCadre = caders.find(c => c.cadreId === sellerCadreId);
+                              const sellerPercentage = sellerCadre ? getCumulativePercentage(sellerCadre.cadreRole) : 0;
+                              const myShare = cumulativePercentage - sellerPercentage;
+                              commission = amount * myShare / 100;
+                            }
+                            
                             return (
                               <tr key={idx} className="border-b hover:bg-gray-50">
                                 <td className="px-3 py-2 text-sm">{customer.name}</td>

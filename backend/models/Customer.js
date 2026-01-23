@@ -24,6 +24,7 @@ const customerSchema = new mongoose.Schema({
   chequeNo: String,
   bankName: String,
   agentCode: String,
+  cadreCode: String,
   bookingDhamaka: String,
   phone: String,
   email: String,

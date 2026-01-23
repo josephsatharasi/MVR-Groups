@@ -74,7 +74,7 @@ const Commission = () => {
       
       const teamMembers = getTeamMembers(person.id);
       
-      // Calculate earnings from own customers with cumulative percentage
+      // Calculate earnings from own customers with full cumulative percentage
       const ownCustomers = customerData.filter(customer => 
         customer.cadreCode === person.id || customer.agentCode === person.id
       );
@@ -84,15 +84,18 @@ const Commission = () => {
         return sum + (amount * cumulativePercentage / 100);
       }, 0);
       
-      // Calculate earnings from team members' customers with cumulative percentage
+      // Calculate earnings from team members' customers - only the difference
       const teamEarnings = teamMembers.reduce((sum, member) => {
         const memberCustomers = customerData.filter(customer => 
           customer.cadreCode === member.cadreId || customer.agentCode === member.cadreId
         );
         
+        const memberCumulativePercentage = getCumulativePercentage(member.cadreRole);
+        const mySharePercentage = cumulativePercentage - memberCumulativePercentage;
+        
         const memberEarnings = memberCustomers.reduce((mSum, customer) => {
           const amount = parseFloat(customer.totalAmount) || 0;
-          return mSum + (amount * cumulativePercentage / 100);
+          return mSum + (amount * mySharePercentage / 100);
         }, 0);
         
         return sum + memberEarnings;

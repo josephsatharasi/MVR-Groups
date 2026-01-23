@@ -70,7 +70,7 @@ const Customers = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
-      await addCustomer({ ...formData, phone: formData.mobile, agentCode: formData.cadreCode });
+      await addCustomer({ ...formData, phone: formData.mobile, agentCode: formData.cadreCode, cadreCode: formData.cadreCode });
       toast.success('Customer added successfully!');
       setShowFormModal(false);
       setFormData({
@@ -214,6 +214,7 @@ const Customers = () => {
               <tr>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Name</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Phone</th>
+                <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Cadre ID</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Project</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Plot No</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Total Amount</th>
@@ -231,6 +232,9 @@ const Customers = () => {
                 >
                   <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: '#1e3a8a'}}>{customer.name}</td>
                   <td className="px-4 md:px-6 py-4 text-sm">{customer.phone || customer.mobile}</td>
+                  <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">
+                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '22', color: '#1e3a8a'}}>{customer.cadreCode || customer.agentCode || '-'}</span>
+                  </td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.projectName || '-'}</td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">
                     <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '33', color: '#1e3a8a'}}>{customer.plotNo || '-'}</span>
@@ -320,9 +324,21 @@ const Customers = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput label="Project Name" value={formData.projectName} onChange={(e) => handleChange('projectName', e.target.value)} placeholder="Enter project name" />
                 <FormInput label="Location" value={formData.location} onChange={(e) => handleChange('location', e.target.value)} placeholder="Enter location" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800">Payment Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormInput label="Total Amount" type="number" value={formData.totalAmount} onChange={(e) => handleChange('totalAmount', e.target.value)} placeholder="Enter total amount" required />
                 <FormInput label="Booking Amount" type="number" value={formData.bookingAmount} onChange={(e) => handleChange('bookingAmount', e.target.value)} placeholder="Enter booking amount" />
-                <FormInput label="Total Amount" type="number" value={formData.totalAmount} onChange={(e) => handleChange('totalAmount', e.target.value)} placeholder="Enter total amount" />
-                <FormInput label="Balance Amount" type="number" value={formData.balanceAmount} readOnly placeholder="Auto calculated" />
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-800">Pending Amount</label>
+                  <input
+                    type="number"
+                    value={formData.balanceAmount}
+                    readOnly
+                    className="w-full px-3 py-2 border rounded-lg bg-gray-100 font-semibold text-red-600"
+                    placeholder="Auto calculated"
+                  />
+                </div>
               </div>
               <h3 className="text-lg font-bold text-gray-800">Payment Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

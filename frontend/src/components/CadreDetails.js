@@ -15,13 +15,21 @@ const CadreDetails = ({ cadre, onClose }) => {
     const linked = customers.filter(c => c.agentCode === cadre.cadreId || c.cadreCode === cadre.cadreId);
     setLinkedCustomers(linked);
     
+    // Calculate commission: own sales get full cumulative %, team sales get the difference
     const total = linked.reduce((sum, customer) => {
-      if (customer.commissionAmount) {
-        return sum + parseFloat(customer.commissionAmount);
-      }
       const amount = parseFloat(customer.totalAmount) || 0;
-      const percentage = getCumulativePercentage(cadre.cadreRole);
-      return sum + (amount * percentage / 100);
+      const sellerCadreId = customer.agentCode || customer.cadreCode;
+      
+      if (sellerCadreId === cadre.cadreId) {
+        // Own sale - get full cumulative percentage
+        const percentage = getCumulativePercentage(cadre.cadreRole);
+        return sum + (amount * percentage / 100);
+      } else {
+        // Team member sale - get only the difference
+        // This requires knowing the seller's role, which we don't have here
+        // For now, just calculate based on own sales
+        return sum;
+      }
     }, 0);
     setTotalCommission(total);
   };
@@ -299,7 +307,16 @@ const CadreDetails = ({ cadre, onClose }) => {
                     </thead>
                     <tbody>
                       {linkedCustomers.map((customer, idx) => {
-                        const commission = customer.commissionAmount || (parseFloat(customer.totalAmount) * getCumulativePercentage(cadre.cadreRole) / 100);
+                        const amount = parseFloat(customer.totalAmount) || 0;
+                        const sellerCadreId = customer.agentCode || customer.cadreCode;
+                        let commission = 0;
+                        
+                        if (sellerCadreId === cadre.cadreId) {
+                          // Own sale - full cumulative %
+                          commission = amount * getCumulativePercentage(cadre.cadreRole) / 100;
+                        }
+                        // For team sales, commission would be calculated in the hierarchy view
+                        
                         return (
                           <tr key={idx} className="border-b hover:bg-gray-50">
                             <td className="px-3 py-2 text-sm">{customer.name}</td>

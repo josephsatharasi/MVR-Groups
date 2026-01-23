@@ -132,7 +132,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
     const tableData = paymentHistory.map((p, index) => [
       index + 1,
       new Date(p.date).toLocaleDateString('en-IN'),
-      `₹${parseFloat(p.amount).toLocaleString('en-IN')}`,
+      parseFloat(p.amount).toLocaleString('en-IN'),
       p.note || '-'
     ]);
     
@@ -140,17 +140,20 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
       startY: 62,
       head: [['S.No', 'Date', 'Amount', 'Note']],
       body: tableData,
+      foot: [['', 'Total Paid:', totalPaid.toLocaleString('en-IN'), '']],
       theme: 'grid',
       headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+      footStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
       styles: { fontSize: 10, cellPadding: 4 },
     });
     
     const finalY = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(12);
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Total Amount: Rs. ${total.toLocaleString('en-IN')}`, 14, finalY);
+    doc.text(`Total Paid: Rs. ${totalPaid.toLocaleString('en-IN')}`, 14, finalY + 7);
     doc.setFont(undefined, 'bold');
-    doc.text(`Total Amount: ₹${total.toLocaleString('en-IN')}`, 14, finalY);
-    doc.text(`Total Paid: ₹${totalPaid.toLocaleString('en-IN')}`, 14, finalY + 7);
-    doc.text(`Pending Amount: ₹${pending.toLocaleString('en-IN')}`, 14, finalY + 14);
+    doc.text(`Pending Amount: Rs. ${pending.toLocaleString('en-IN')}`, 14, finalY + 14);
     
     doc.save(`payment-history-${customer.name}.pdf`);
     toast.success('Payment history downloaded!');

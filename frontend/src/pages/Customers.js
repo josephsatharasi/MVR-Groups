@@ -214,11 +214,11 @@ const Customers = () => {
               <tr>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Name</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Phone</th>
-                <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Cadre ID</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Project</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Plot No</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Total Amount</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Balance</th>
+                <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Cadre ID</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Actions</th>
               </tr>
             </thead>
@@ -232,15 +232,15 @@ const Customers = () => {
                 >
                   <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: '#1e3a8a'}}>{customer.name}</td>
                   <td className="px-4 md:px-6 py-4 text-sm">{customer.phone || customer.mobile}</td>
-                  <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">
-                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '22', color: '#1e3a8a'}}>{customer.cadreCode || customer.agentCode || '-'}</span>
-                  </td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">{customer.projectName || '-'}</td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">
                     <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '33', color: '#1e3a8a'}}>{customer.plotNo || '-'}</span>
                   </td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">₹{formatIndianNumber(customer.totalAmount)}</td>
                   <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: customer.balanceAmount > 0 ? '#dc2626' : '#16a34a'}}>₹{formatIndianNumber(customer.balanceAmount)}</td>
+                  <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">
+                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '22', color: '#1e3a8a'}}>{customer.cadreCode || customer.agentCode || '-'}</span>
+                  </td>
                   <td className="px-4 md:px-6 py-4 text-sm">
                     <div className="flex gap-2">
                       <button 

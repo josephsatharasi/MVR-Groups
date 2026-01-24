@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Download, Edit, Trash2, X } from 'lucide-react';
+import { Users, Plus, Download, Edit, Trash2, X, FileSpreadsheet } from 'lucide-react';
 import Table from '../components/Table';
 import SearchBar from '../components/SearchBar';
 import Card from '../components/Card';
@@ -193,6 +193,12 @@ const Caders = () => {
       const response = await axios.get(`${API_URL}/customers`);
       const customers = response.data;
       
+      // Helper function to get total paid amount
+      const getTotalPaid = (customerId) => {
+        const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
+        return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+      };
+      
       // Get all team members recursively
       const getTeamMembers = (cadreId, level = 0) => {
         const directMembers = caders.filter(c => c.introducerId === cadreId);
@@ -214,22 +220,22 @@ const Caders = () => {
       const cumulativePercentage = getCumulativePercentage(row.cadreRole);
       const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
       
-      // Calculate own earnings with full cumulative percentage
+      // Calculate own earnings based on PAID AMOUNT
       const ownCustomers = customers.filter(c => c.cadreCode === row.cadreId || c.agentCode === row.cadreId);
       const ownEarnings = ownCustomers.reduce((sum, customer) => {
-        const amount = parseFloat(customer.totalAmount) || 0;
-        return sum + (amount * cumulativePercentage / 100);
+        const paidAmount = getTotalPaid(customer._id || customer.id);
+        return sum + (paidAmount * cumulativePercentage / 100);
       }, 0);
       
-      // Calculate team earnings - only the difference between parent and member percentages
+      // Calculate team earnings based on PAID AMOUNT
       const teamEarnings = team.reduce((sum, member) => {
         const memberCustomers = customers.filter(c => c.cadreCode === member.cadreId || c.agentCode === member.cadreId);
         const memberCumulativePercentage = getCumulativePercentage(member.cadreRole);
         const mySharePercentage = cumulativePercentage - memberCumulativePercentage;
         
         return sum + memberCustomers.reduce((mSum, customer) => {
-          const amount = parseFloat(customer.totalAmount) || 0;
-          return mSum + (amount * mySharePercentage / 100);
+          const paidAmount = getTotalPaid(customer._id || customer.id);
+          return mSum + (paidAmount * mySharePercentage / 100);
         }, 0);
       }, 0);
       
@@ -254,6 +260,74 @@ const Caders = () => {
       toast.error('Failed to recruit member');
       console.error(error);
     }
+  };
+
+  const downloadCadreExcel = () => {
+    const excelData = [];
+    
+    // Header row
+    excelData.push(['Level', 'Code', 'Agent', 'Contact', 'Introducer', 'Cadre', 'Recruits', 'Direct', 'Team', 'Bussiness', 'Commission', 'Advance']);
+    
+    // Main cadre row
+    const mainCadreCustomers = linkedCustomers.filter(c => 
+      c.cadreCode === selectedCader.cadreId || c.agentCode === selectedCader.cadreId
+    );
+    const getTotalPaid = (customerId) => {
+      const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
+      return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+    };
+    const mainDirectBusiness = mainCadreCustomers.reduce((sum, c) => sum + getTotalPaid(c._id || c.id), 0);
+    const mainCommission = mainDirectBusiness * getCumulativePercentage(selectedCader.cadreRole) / 100;
+    
+    excelData.push([
+      '1',
+      selectedCader.cadreId,
+      selectedCader.name,
+      selectedCader.mobile,
+      selectedCader.introducerId || '-',
+      getRoleFullName(selectedCader.cadreRole),
+      teamMembers.length,
+      mainDirectBusiness.toFixed(2),
+      mainDirectBusiness.toFixed(2),
+      mainDirectBusiness.toFixed(2),
+      mainCommission.toFixed(2),
+      '0.00'
+    ]);
+    
+    // Team members rows
+    teamMembers.forEach((member, idx) => {
+      const memberCustomers = linkedCustomers.filter(c => 
+        c.cadreCode === member.cadreId || c.agentCode === member.cadreId
+      );
+      const directBusiness = memberCustomers.reduce((sum, c) => sum + getTotalPaid(c._id || c.id), 0);
+      const memberCumulativePercentage = getCumulativePercentage(member.cadreRole);
+      const parentPercentage = getCumulativePercentage(selectedCader.cadreRole);
+      const myShare = parentPercentage - memberCumulativePercentage;
+      const commission = directBusiness * myShare / 100;
+      
+      excelData.push([
+        (idx + 2).toString(),
+        member.cadreId,
+        member.name,
+        member.mobile,
+        member.introducerId || '-',
+        getRoleFullName(member.cadreRole),
+        '0',
+        directBusiness.toFixed(2),
+        directBusiness.toFixed(2),
+        directBusiness.toFixed(2),
+        commission.toFixed(2),
+        '0.00'
+      ]);
+    });
+    
+    const csvContent = excelData.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `cadre-${selectedCader.name}-${selectedCader.cadreId}.csv`;
+    link.click();
+    toast.success('Excel file downloaded successfully!');
   };
 
   const resetForm = () => {
@@ -633,8 +707,11 @@ const Caders = () => {
               <div className="border-t pt-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-gray-800">Recruitment Hierarchy & Commission</h3>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2">
-                    <Plus size={16} /> Recruit Team Member
+                  <button 
+                    onClick={downloadCadreExcel}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
+                  >
+                    <FileSpreadsheet size={16} /> Download Excel
                   </button>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">Team members under this cadre with cumulative commission percentages:</p>
@@ -695,33 +772,41 @@ const Caders = () => {
                           <tr>
                             <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Name</th>
                             <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Project</th>
-                            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Amount</th>
+                            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Total Amount</th>
+                            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Paid Amount</th>
+                            <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Balance</th>
                             <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Commission</th>
                           </tr>
                         </thead>
                         <tbody>
                           {linkedCustomers.map((customer, idx) => {
-                            const amount = parseFloat(customer.totalAmount) || 0;
+                            const totalAmount = parseFloat(customer.totalAmount) || 0;
+                            const getTotalPaid = (customerId) => {
+                              const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
+                              return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+                            };
+                            const paidAmount = getTotalPaid(customer._id || customer.id);
+                            const balance = totalAmount - paidAmount;
                             const sellerCadreId = customer.cadreCode || customer.agentCode;
                             const cumulativePercentage = getCumulativePercentage(selectedCader.cadreRole);
                             let commission = 0;
                             
                             if (sellerCadreId === selectedCader.cadreId) {
-                              // Own sale - full cumulative percentage
-                              commission = amount * cumulativePercentage / 100;
+                              commission = paidAmount * cumulativePercentage / 100;
                             } else {
-                              // Team member sale - only the difference
                               const sellerCadre = caders.find(c => c.cadreId === sellerCadreId);
                               const sellerPercentage = sellerCadre ? getCumulativePercentage(sellerCadre.cadreRole) : 0;
                               const myShare = cumulativePercentage - sellerPercentage;
-                              commission = amount * myShare / 100;
+                              commission = paidAmount * myShare / 100;
                             }
                             
                             return (
                               <tr key={idx} className="border-b hover:bg-gray-50">
                                 <td className="px-3 py-2 text-sm">{customer.name}</td>
                                 <td className="px-3 py-2 text-sm">{customer.projectName || '-'}</td>
-                                <td className="px-3 py-2 text-sm text-right">₹{amount.toLocaleString('en-IN')}</td>
+                                <td className="px-3 py-2 text-sm text-right">₹{totalAmount.toLocaleString('en-IN')}</td>
+                                <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{paidAmount.toLocaleString('en-IN')}</td>
+                                <td className="px-3 py-2 text-sm text-right font-semibold text-red-600">₹{balance.toLocaleString('en-IN')}</td>
                                 <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{commission.toFixed(2)}</td>
                               </tr>
                             );

@@ -58,6 +58,12 @@ const Commission = () => {
       return total;
     };
 
+    // Helper function to get total paid amount for a customer
+    const getTotalPaid = (customerId) => {
+      const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
+      return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+    };
+
     const commissions = allPersons.map(person => {
       const percentage = rolePercentages[person.role] || 0;
       const cumulativePercentage = getCumulativePercentage(person.role);
@@ -74,17 +80,17 @@ const Commission = () => {
       
       const teamMembers = getTeamMembers(person.id);
       
-      // Calculate earnings from own customers with full cumulative percentage
+      // Calculate earnings from own customers based on PAID AMOUNT
       const ownCustomers = customerData.filter(customer => 
         customer.cadreCode === person.id || customer.agentCode === person.id
       );
       
       const ownEarnings = ownCustomers.reduce((sum, customer) => {
-        const amount = parseFloat(customer.totalAmount) || 0;
-        return sum + (amount * cumulativePercentage / 100);
+        const paidAmount = getTotalPaid(customer._id || customer.id);
+        return sum + (paidAmount * cumulativePercentage / 100);
       }, 0);
       
-      // Calculate earnings from team members' customers - only the difference
+      // Calculate earnings from team members' customers based on PAID AMOUNT
       const teamEarnings = teamMembers.reduce((sum, member) => {
         const memberCustomers = customerData.filter(customer => 
           customer.cadreCode === member.cadreId || customer.agentCode === member.cadreId
@@ -94,8 +100,8 @@ const Commission = () => {
         const mySharePercentage = cumulativePercentage - memberCumulativePercentage;
         
         const memberEarnings = memberCustomers.reduce((mSum, customer) => {
-          const amount = parseFloat(customer.totalAmount) || 0;
-          return mSum + (amount * mySharePercentage / 100);
+          const paidAmount = getTotalPaid(customer._id || customer.id);
+          return mSum + (paidAmount * mySharePercentage / 100);
         }, 0);
         
         return sum + memberEarnings;

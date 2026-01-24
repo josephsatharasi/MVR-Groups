@@ -370,12 +370,13 @@ const Customers = () => {
                       )}
                     </div>
                   )}
-                  {cadreValidation.valid && formData.totalAmount && (
+                  {cadreValidation.valid && formData.bookingAmount && (
                     <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-xs text-gray-600 mb-1">Commission Calculation:</p>
+                      <p className="text-xs text-gray-600 mb-1">Commission on Booking Amount:</p>
                       <p className="text-sm font-semibold text-green-700">
-                        ₹{formatIndianNumber(formData.totalAmount)} × {cadreValidation.percentage}% = ₹{formatIndianNumber((parseFloat(formData.totalAmount) * cadreValidation.percentage / 100).toFixed(2))}
+                        ₹{formatIndianNumber(formData.bookingAmount)} × {cadreValidation.percentage}% = ₹{formatIndianNumber((parseFloat(formData.bookingAmount) * cadreValidation.percentage / 100).toFixed(2))}
                       </p>
+                      <p className="text-xs text-gray-500 mt-1">Note: Commission calculated on paid amount only</p>
                     </div>
                   )}
                 </div>

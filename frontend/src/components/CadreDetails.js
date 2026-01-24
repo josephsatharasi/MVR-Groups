@@ -10,24 +10,25 @@ const CadreDetails = ({ cadre, onClose }) => {
     loadLinkedCustomers();
   }, [cadre]);
 
+  const getTotalPaid = (customerId) => {
+    const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
+    return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+  };
+
   const loadLinkedCustomers = async () => {
     const customers = await getCustomers();
     const linked = customers.filter(c => c.agentCode === cadre.cadreId || c.cadreCode === cadre.cadreId);
     setLinkedCustomers(linked);
     
-    // Calculate commission: own sales get full cumulative %, team sales get the difference
+    // Calculate commission based on PAID AMOUNT
     const total = linked.reduce((sum, customer) => {
-      const amount = parseFloat(customer.totalAmount) || 0;
+      const paidAmount = getTotalPaid(customer._id || customer.id);
       const sellerCadreId = customer.agentCode || customer.cadreCode;
       
       if (sellerCadreId === cadre.cadreId) {
-        // Own sale - get full cumulative percentage
         const percentage = getCumulativePercentage(cadre.cadreRole);
-        return sum + (amount * percentage / 100);
+        return sum + (paidAmount * percentage / 100);
       } else {
-        // Team member sale - get only the difference
-        // This requires knowing the seller's role, which we don't have here
-        // For now, just calculate based on own sales
         return sum;
       }
     }, 0);
@@ -301,27 +302,31 @@ const CadreDetails = ({ cadre, onClose }) => {
                       <tr>
                         <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Name</th>
                         <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Project</th>
-                        <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Amount</th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Total Amount</th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Paid Amount</th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Balance</th>
                         <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Commission</th>
                       </tr>
                     </thead>
                     <tbody>
                       {linkedCustomers.map((customer, idx) => {
-                        const amount = parseFloat(customer.totalAmount) || 0;
+                        const totalAmount = parseFloat(customer.totalAmount) || 0;
+                        const paidAmount = getTotalPaid(customer._id || customer.id);
+                        const balance = totalAmount - paidAmount;
                         const sellerCadreId = customer.agentCode || customer.cadreCode;
                         let commission = 0;
                         
                         if (sellerCadreId === cadre.cadreId) {
-                          // Own sale - full cumulative %
-                          commission = amount * getCumulativePercentage(cadre.cadreRole) / 100;
+                          commission = paidAmount * getCumulativePercentage(cadre.cadreRole) / 100;
                         }
-                        // For team sales, commission would be calculated in the hierarchy view
                         
                         return (
                           <tr key={idx} className="border-b hover:bg-gray-50">
                             <td className="px-3 py-2 text-sm">{customer.name}</td>
                             <td className="px-3 py-2 text-sm">{customer.projectName || '-'}</td>
-                            <td className="px-3 py-2 text-sm text-right">₹{formatIndianNumber(customer.totalAmount)}</td>
+                            <td className="px-3 py-2 text-sm text-right">₹{formatIndianNumber(totalAmount)}</td>
+                            <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{formatIndianNumber(paidAmount)}</td>
+                            <td className="px-3 py-2 text-sm text-right font-semibold text-red-600">₹{formatIndianNumber(balance)}</td>
                             <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{formatIndianNumber(commission.toFixed(2))}</td>
                           </tr>
                         );

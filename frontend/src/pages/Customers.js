@@ -163,7 +163,7 @@ const Customers = () => {
       head: [['S.NO', 'Name', 'Phone', 'Project', 'Plot No', 'Total Amount', 'Balance']],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillColor: [47, 79, 79], textColor: 255, fontStyle: 'bold' },
+      headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
       styles: { fontSize: 9, cellPadding: 3 },
     });
     
@@ -218,7 +218,7 @@ const Customers = () => {
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Plot No</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Total Amount</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Balance</th>
-                <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Cadre ID</th>
+                <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Caders ID</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Actions</th>
               </tr>
             </thead>
@@ -354,18 +354,18 @@ const Customers = () => {
                   <FormInput label="UPI ID" value={formData.upiId} onChange={(e) => handleChange('upiId', e.target.value)} placeholder="Enter UPI ID" />
                 )}
                 <div>
-                  <FormInput label="Cadre ID (6 digits)" value={formData.cadreCode} onChange={(e) => handleChange('cadreCode', e.target.value)} placeholder="Enter 6-digit cadre ID" maxLength={6} />
+                  <FormInput label="Caders ID (6 digits)" value={formData.cadreCode} onChange={(e) => handleChange('cadreCode', e.target.value)} placeholder="Enter 6-digit caders ID" maxLength={6} />
                   {cadreValidation.checked && (
                     <div className={`mt-1 text-sm flex items-center gap-1 ${cadreValidation.valid ? 'text-green-600' : 'text-red-600'}`}>
                       {cadreValidation.valid ? (
                         <>
                           <CheckCircle size={16} />
-                          <span>Cadre Found: {cadreValidation.cadre.name} ({cadreValidation.cadre.cadreRole}) - {cadreValidation.percentage}% Commission</span>
+                          <span>Caders Found: {cadreValidation.cadre.name} ({cadreValidation.cadre.cadreRole}) - {cadreValidation.percentage}% Commission</span>
                         </>
                       ) : (
                         <>
                           <XCircle size={16} />
-                          <span>Cadre not found in system</span>
+                          <span>Caders not found in system</span>
                         </>
                       )}
                     </div>

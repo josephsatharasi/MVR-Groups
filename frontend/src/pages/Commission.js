@@ -182,10 +182,10 @@ const Commission = () => {
                   <td className="px-4 py-3 text-sm text-gray-700">{person.id || '-'}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{person.role}</td>
                   <td className="px-4 py-3 text-sm font-semibold text-green-600">{person.percentage}%</td>
-                  <td className="px-4 py-3 text-sm font-semibold text-green-600">₹{person.totalEarnings.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-sm font-semibold text-red-600">₹{person.totalAdvance.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm font-semibold text-green-600">₹{person.totalEarnings.toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3 text-sm font-semibold text-red-600">₹{person.totalAdvance.toLocaleString('en-IN')}</td>
                   <td className="px-4 py-3 text-sm font-semibold" style={{color: person.balance >= 0 ? '#16a34a' : '#dc2626'}}>
-                    ₹{person.balance.toLocaleString()}
+                    ₹{person.balance.toLocaleString('en-IN')}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <button
@@ -225,15 +225,15 @@ const Commission = () => {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <p className="text-gray-600">Total Earned:</p>
-                    <p className="font-semibold text-green-600">₹{selectedPerson.totalEarnings.toLocaleString()}</p>
+                    <p className="font-semibold text-green-600">₹{selectedPerson.totalEarnings.toLocaleString('en-IN')}</p>
                   </div>
                   <div>
                     <p className="text-gray-600">Already Taken:</p>
-                    <p className="font-semibold text-red-600">₹{selectedPerson.totalAdvance.toLocaleString()}</p>
+                    <p className="font-semibold text-red-600">₹{selectedPerson.totalAdvance.toLocaleString('en-IN')}</p>
                   </div>
                   <div className="col-span-2">
                     <p className="text-gray-600">Available Balance:</p>
-                    <p className="font-semibold text-lg text-blue-700">₹{selectedPerson.balance.toLocaleString()}</p>
+                    <p className="font-semibold text-lg text-blue-700">₹{selectedPerson.balance.toLocaleString('en-IN')}</p>
                   </div>
                 </div>
               </div>
@@ -271,7 +271,7 @@ const Commission = () => {
                     {selectedPerson.advances.map((adv, idx) => (
                       <div key={idx} className="bg-gray-50 p-2 rounded text-sm">
                         <div className="flex justify-between">
-                          <span className="font-semibold">₹{parseFloat(adv.amount).toLocaleString()}</span>
+                          <span className="font-semibold">₹{parseFloat(adv.amount).toLocaleString('en-IN')}</span>
                           <span className="text-gray-500">{new Date(adv.date).toLocaleDateString()}</span>
                         </div>
                         {adv.note && <p className="text-gray-600 text-xs mt-1">{adv.note}</p>}

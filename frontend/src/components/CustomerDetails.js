@@ -269,7 +269,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
                   {isEditing ? (
                     <input type="number" name="totalAmount" value={formData.totalAmount} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
                   ) : (
-                    <p className="font-semibold text-lg" style={{color: '#1e3a8a'}}>₹{customer.totalAmount || '0'}</p>
+                  <p className="font-semibold text-lg" style={{color: '#1e3a8a'}}>₹{parseFloat(customer.totalAmount || 0).toLocaleString('en-IN')}</p>
                   )}
                 </div>
               </div>
@@ -281,7 +281,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
                   {isEditing ? (
                     <input type="number" name="bookingAmount" value={formData.bookingAmount} onChange={handleInputChange} className="w-full px-3 py-2 border rounded-lg" />
                   ) : (
-                    <p className="font-semibold text-lg text-green-600">₹{customer.bookingAmount || '0'}</p>
+                  <p className="font-semibold text-lg text-green-600">₹{parseFloat(customer.bookingAmount || 0).toLocaleString('en-IN')}</p>
                   )}
                 </div>
               </div>

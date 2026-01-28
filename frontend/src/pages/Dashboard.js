@@ -39,10 +39,10 @@ const Dashboard = () => {
     const uniqueProjects = [...new Set(data.map(c => c.projectName).filter(Boolean))].length;
 
     setStats([
-      { title: 'Total Earnings', value: `₹${totalEarnings.toLocaleString()}`, icon: IndianRupee, trend: '+0%' },
+      { title: 'Total Earnings', value: `₹${totalEarnings.toLocaleString('en-IN')}`, icon: IndianRupee, trend: '+0%' },
       { title: 'Total Bookings', value: data.length.toString(), icon: Home, trend: '+0%' },
       { title: 'Total Properties', value: uniqueProjects.toString(), icon: Building2, trend: '+0%' },
-      { title: 'Pending Balance', value: `₹${totalBalance.toLocaleString()}`, icon: Clock, trend: '+0%' },
+      { title: 'Pending Balance', value: `₹${totalBalance.toLocaleString('en-IN')}`, icon: Clock, trend: '+0%' },
     ]);
   };
 

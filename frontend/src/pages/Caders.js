@@ -262,35 +262,59 @@ const Caders = () => {
     }
   };
 
+  const formatIndianNumber = (num) => {
+    if (!num) return '0';
+    const number = parseFloat(num);
+    if (isNaN(number)) return '0';
+    return number.toLocaleString('en-IN');
+  };
+
   const downloadCadreExcel = () => {
-    const excelData = [];
+    const doc = new jsPDF('landscape', 'mm', 'a4');
     
-    // Header row
-    excelData.push(['Level', 'Code', 'Agent', 'Contact', 'Introducer', 'Cadre', 'Recruits', 'Direct', 'Team', 'Bussiness', 'Commission', 'Advance']);
+    // Company Header
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text('MVR Groups', 148, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text('Real Estate Management', 148, 21, { align: 'center' });
     
-    // Main cadre row
-    const mainCadreCustomers = linkedCustomers.filter(c => 
-      c.cadreCode === selectedCader.cadreId || c.agentCode === selectedCader.cadreId
-    );
+    // Title
+    doc.setFontSize(13);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Caders Report - ${selectedCader.name}`, 10, 32);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Caders ID: ${selectedCader.cadreId} | Role: ${getRoleFullName(selectedCader.cadreRole)}`, 10, 38);
+    
     const getTotalPaid = (customerId) => {
       const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
       return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
     };
+    
+    // Main cadre data
+    const mainCadreCustomers = linkedCustomers.filter(c => 
+      c.cadreCode === selectedCader.cadreId || c.agentCode === selectedCader.cadreId
+    );
     const mainDirectBusiness = mainCadreCustomers.reduce((sum, c) => sum + getTotalPaid(c._id || c.id), 0);
     const mainCommission = mainDirectBusiness * getCumulativePercentage(selectedCader.cadreRole) / 100;
     
-    excelData.push([
+    const tableData = [];
+    
+    // Main cadre row
+    tableData.push([
       '1',
       selectedCader.cadreId,
       selectedCader.name,
       selectedCader.mobile,
       selectedCader.introducerId || '-',
       getRoleFullName(selectedCader.cadreRole),
-      teamMembers.length,
-      mainDirectBusiness.toFixed(2),
-      mainDirectBusiness.toFixed(2),
-      mainDirectBusiness.toFixed(2),
-      mainCommission.toFixed(2),
+      teamMembers.length.toString(),
+      formatIndianNumber(mainDirectBusiness),
+      formatIndianNumber(mainDirectBusiness),
+      formatIndianNumber(mainDirectBusiness),
+      formatIndianNumber(mainCommission.toFixed(2)),
       '0.00'
     ]);
     
@@ -305,7 +329,7 @@ const Caders = () => {
       const myShare = parentPercentage - memberCumulativePercentage;
       const commission = directBusiness * myShare / 100;
       
-      excelData.push([
+      tableData.push([
         (idx + 2).toString(),
         member.cadreId,
         member.name,
@@ -313,21 +337,54 @@ const Caders = () => {
         member.introducerId || '-',
         getRoleFullName(member.cadreRole),
         '0',
-        directBusiness.toFixed(2),
-        directBusiness.toFixed(2),
-        directBusiness.toFixed(2),
-        commission.toFixed(2),
+        formatIndianNumber(directBusiness),
+        formatIndianNumber(directBusiness),
+        formatIndianNumber(directBusiness),
+        formatIndianNumber(commission.toFixed(2)),
         '0.00'
       ]);
     });
     
-    const csvContent = excelData.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `cadre-${selectedCader.name}-${selectedCader.cadreId}.csv`;
-    link.click();
-    toast.success('Excel file downloaded successfully!');
+    autoTable(doc, {
+      startY: 44,
+      head: [['Level', 'Code', 'Agent', 'Contact', 'Introducer', 'Caders', 'Recruits', 'Direct', 'Team', 'Business', 'Commission', 'Advance']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { 
+        fillColor: [30, 58, 138], 
+        textColor: 255, 
+        fontStyle: 'bold',
+        halign: 'center',
+        valign: 'middle',
+        fontSize: 8
+      },
+      styles: { 
+        fontSize: 7, 
+        cellPadding: 2,
+        valign: 'middle',
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1
+      },
+      columnStyles: {
+        0: { cellWidth: 13, halign: 'center' },
+        1: { cellWidth: 18, halign: 'center' },
+        2: { cellWidth: 25, halign: 'left' },
+        3: { cellWidth: 25, halign: 'center' },
+        4: { cellWidth: 20, halign: 'center' },
+        5: { cellWidth: 48, halign: 'left' },
+        6: { cellWidth: 16, halign: 'center' },
+        7: { cellWidth: 22, halign: 'right' },
+        8: { cellWidth: 22, halign: 'right' },
+        9: { cellWidth: 22, halign: 'right' },
+        10: { cellWidth: 24, halign: 'right' },
+        11: { cellWidth: 17, halign: 'right' }
+      },
+      margin: { left: 7, right: 7 },
+      tableWidth: 'auto'
+    });
+    
+    doc.save(`cadre-${selectedCader.name}-${selectedCader.cadreId}.pdf`);
+    toast.success('PDF downloaded successfully!');
   };
 
   const resetForm = () => {
@@ -386,7 +443,7 @@ const Caders = () => {
     // Title
     doc.setFontSize(16);
     doc.setFont(undefined, 'bold');
-    doc.text('Cadres List', 14, 35);
+    doc.text('Caders List', 14, 35);
     
     const tableData = caders.map((c, index) => [
       index + 1,
@@ -398,10 +455,10 @@ const Caders = () => {
     
     autoTable(doc, {
       startY: 42,
-      head: [['S.NO', 'Name', 'Mobile', 'Cadre Role', 'Address']],
+      head: [['S.NO', 'Name', 'Mobile', 'Caders Role', 'Address']],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillColor: [47, 79, 79], textColor: 255, fontStyle: 'bold' },
+      headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
       styles: { fontSize: 10, cellPadding: 5 },
     });
     
@@ -602,7 +659,7 @@ const Caders = () => {
                     setFormData({ ...formData, introducerId: e.target.value });
                     validateIntroducerId(e.target.value);
                   }}
-                  placeholder="Enter introducer cadre ID"
+                  placeholder="Enter introducer caders ID"
                 />
                 {formData.introducerId && (
                   <div className={`text-sm mt-1 ${introducerValidation.valid ? 'text-green-600' : 'text-red-600'}`}>
@@ -610,7 +667,7 @@ const Caders = () => {
                   </div>
                 )}
                 <FormInput
-                  label="Cadre Role"
+                  label="Caders Role"
                   type="select"
                   value={formData.cadreRole}
                   onChange={(e) => setFormData({ ...formData, cadreRole: e.target.value })}
@@ -619,7 +676,7 @@ const Caders = () => {
                 />
                 {!editingId && (
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-800">Cadre ID</label>
+                    <label className="block text-sm font-medium mb-2 text-gray-800">Caders ID</label>
                     <input
                       type="text"
                       value={(() => {
@@ -635,7 +692,7 @@ const Caders = () => {
                 )}
                 {editingId && formData.cadreId && (
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-800">Cadre ID</label>
+                    <label className="block text-sm font-medium mb-2 text-gray-800">Caders ID</label>
                     <input
                       type="text"
                       value={formData.cadreId}
@@ -711,10 +768,10 @@ const Caders = () => {
                     onClick={downloadCadreExcel}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
                   >
-                    <FileSpreadsheet size={16} /> Download Excel
+                    <Download size={16} /> Download PDF
                   </button>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">Team members under this cadre with cumulative commission percentages:</p>
+                <p className="text-sm text-gray-600 mb-4">Team members under this caders with cumulative commission percentages:</p>
                 
                 {teamMembers.length > 0 && (
                   <div className="mb-4 space-y-2">
@@ -759,7 +816,7 @@ const Caders = () => {
                   <p className="text-sm text-gray-600 mb-2">Total Commission from all team sales</p>
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-lg">Total:</span>
-                    <span className="font-bold text-2xl text-green-600">₹{totalCommission.toFixed(2)}</span>
+                    <span className="font-bold text-2xl text-green-600">₹{totalCommission.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                   </div>
                 </div>
 
@@ -807,7 +864,7 @@ const Caders = () => {
                                 <td className="px-3 py-2 text-sm text-right">₹{totalAmount.toLocaleString('en-IN')}</td>
                                 <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{paidAmount.toLocaleString('en-IN')}</td>
                                 <td className="px-3 py-2 text-sm text-right font-semibold text-red-600">₹{balance.toLocaleString('en-IN')}</td>
-                                <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{commission.toFixed(2)}</td>
+                                <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{commission.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                               </tr>
                             );
                           })}

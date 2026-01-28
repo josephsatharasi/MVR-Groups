@@ -70,7 +70,7 @@ const CadreDetails = ({ cadre, onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="text-white p-6 flex justify-between items-center" style={{background: '#1e3a8a'}}>
-          <h2 className="text-2xl font-bold">Cadre Details</h2>
+          <h2 className="text-2xl font-bold">Caders Details</h2>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors">
             <X size={24} />
           </button>
@@ -160,12 +160,12 @@ const CadreDetails = ({ cadre, onClose }) => {
 
           {/* Cadre Information */}
           <div>
-            <h4 className="font-bold text-lg mb-4 pb-2 border-b" style={{color: '#1e3a8a'}}>Cadre Information</h4>
+            <h4 className="font-bold text-lg mb-4 pb-2 border-b" style={{color: '#1e3a8a'}}>Caders Information</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
                 <Hash className="mt-1 text-blue-600" size={20} />
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600">Cadre ID</p>
+                  <p className="text-sm text-gray-600">Caders ID</p>
                   <p className="font-bold text-lg text-blue-700">{cadre.cadreId || '-'}</p>
                 </div>
               </div>
@@ -181,7 +181,7 @@ const CadreDetails = ({ cadre, onClose }) => {
               <div className="flex items-start gap-3">
                 <Award className="mt-1" style={{color: '#1e3a8a'}} size={20} />
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600">Cadre Role</p>
+                  <p className="text-sm text-gray-600">Caders Role</p>
                   <p className="font-semibold" style={{color: '#1e3a8a'}}>{getRoleLabel(cadre.cadreRole)}</p>
                 </div>
               </div>
@@ -280,7 +280,7 @@ const CadreDetails = ({ cadre, onClose }) => {
                 <DollarSign className="mt-1 text-green-600" size={20} />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Total Commission</p>
-                  <p className="font-bold text-2xl text-green-600">₹{formatIndianNumber(totalCommission.toFixed(2))}</p>
+                  <p className="font-bold text-2xl text-green-600">₹{totalCommission.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                 </div>
               </div>
 
@@ -324,10 +324,10 @@ const CadreDetails = ({ cadre, onClose }) => {
                           <tr key={idx} className="border-b hover:bg-gray-50">
                             <td className="px-3 py-2 text-sm">{customer.name}</td>
                             <td className="px-3 py-2 text-sm">{customer.projectName || '-'}</td>
-                            <td className="px-3 py-2 text-sm text-right">₹{formatIndianNumber(totalAmount)}</td>
-                            <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{formatIndianNumber(paidAmount)}</td>
-                            <td className="px-3 py-2 text-sm text-right font-semibold text-red-600">₹{formatIndianNumber(balance)}</td>
-                            <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{formatIndianNumber(commission.toFixed(2))}</td>
+                            <td className="px-3 py-2 text-sm text-right">₹{totalAmount.toLocaleString('en-IN')}</td>
+                            <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{paidAmount.toLocaleString('en-IN')}</td>
+                            <td className="px-3 py-2 text-sm text-right font-semibold text-red-600">₹{balance.toLocaleString('en-IN')}</td>
+                            <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{commission.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                           </tr>
                         );
                       })}
@@ -340,7 +340,7 @@ const CadreDetails = ({ cadre, onClose }) => {
             {linkedCustomers.length === 0 && (
               <div className="text-center py-8 bg-gray-50 rounded-lg">
                 <Users className="mx-auto mb-2 text-gray-400" size={48} />
-                <p className="text-gray-500">No customers linked to this cadre yet</p>
+                <p className="text-gray-500">No customers linked to this caders yet</p>
               </div>
             )}
           </div>

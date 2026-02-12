@@ -10,6 +10,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [newPayment, setNewPayment] = useState({ amount: '', date: '', note: '' });
+  const [displayAmount, setDisplayAmount] = useState('');
   const [formData, setFormData] = useState({
     name: customer.name || '',
     mobile: customer.phone || customer.mobile || '',
@@ -52,6 +53,12 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
   };
 
   const { total, totalPaid, pending } = calculateAmounts();
+
+  const handlePaymentAmountChange = (value) => {
+    const numericValue = value.replace(/\D/g, '');
+    setNewPayment({ ...newPayment, amount: numericValue });
+    setDisplayAmount(numericValue ? parseFloat(numericValue).toLocaleString('en-IN') : '');
+  };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -101,6 +108,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
     updateCustomer(customer._id || customer.id, { balanceAmount: newBalance.toString() });
     
     setNewPayment({ amount: '', date: '', note: '' });
+    setDisplayAmount('');
     setShowPaymentModal(false);
     toast.success('Payment added successfully!');
     if (onUpdate) onUpdate();
@@ -398,10 +406,9 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">Payment Amount * (Max: ₹{pending.toLocaleString('en-IN')})</label>
                 <input
-                  type="number"
-                  value={newPayment.amount}
-                  onChange={(e) => setNewPayment({ ...newPayment, amount: e.target.value })}
-                  max={pending}
+                  type="text"
+                  value={displayAmount}
+                  onChange={(e) => handlePaymentAmountChange(e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter amount"
                 />

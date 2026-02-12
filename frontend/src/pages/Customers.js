@@ -117,11 +117,12 @@ const Customers = () => {
       const numericValue = value.replace(/\D/g, '').slice(0, 6);
       setFormData({ ...formData, [field]: numericValue });
       validateCadre(numericValue);
-    } else if (field === 'bookingDhamaka') {
+    } else if (field === 'bookingDhamaka' || field === 'registrationDhamaka') {
       const numericValue = value.replace(/\D/g, '');
       setFormData({ ...formData, [field]: numericValue });
-    } else if (field === 'totalAmount' || field === 'bookingAmount') {
-      const newFormData = { ...formData, [field]: value };
+    } else if (field === 'totalAmount' || field === 'bookingAmount' || field === 'price') {
+      const numericValue = value.replace(/\D/g, '');
+      const newFormData = { ...formData, [field]: numericValue };
       const total = parseFloat(newFormData.totalAmount) || 0;
       const booking = parseFloat(newFormData.bookingAmount) || 0;
       newFormData.balanceAmount = (total - booking).toString();
@@ -317,9 +318,9 @@ const Customers = () => {
               </div>
               <h3 className="text-lg font-bold text-gray-800">Plot Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormInput label="Plot / Flat No" value={formData.plotNo} onChange={(e) => handleChange('plotNo', e.target.value)} placeholder="Plot No" />
+                <FormInput label="Plot / Flat No" value={formData.plotNo} onChange={(e) => handleChange('plotNo', e.target.value)} placeholder="Plot No" required />
                 <FormInput label="Gadhi/Ankanam/Sqft" value={formData.gadhiAnkanamSqft} onChange={(e) => handleChange('gadhiAnkanamSqft', e.target.value)} placeholder="Enter area" />
-                <FormInput label="Price" type="number" value={formData.price} onChange={(e) => handleChange('price', e.target.value)} placeholder="Price" />
+                <FormInput label="Price" value={formatIndianNumber(formData.price)} onChange={(e) => handleChange('price', e.target.value)} placeholder="Price" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput label="Project Name" value={formData.projectName} onChange={(e) => handleChange('projectName', e.target.value)} placeholder="Enter project name" />
@@ -327,13 +328,13 @@ const Customers = () => {
               </div>
               <h3 className="text-lg font-bold text-gray-800">Payment Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormInput label="Total Amount" type="number" value={formData.totalAmount} onChange={(e) => handleChange('totalAmount', e.target.value)} placeholder="Enter total amount" required />
-                <FormInput label="Booking Amount" type="number" value={formData.bookingAmount} onChange={(e) => handleChange('bookingAmount', e.target.value)} placeholder="Enter booking amount" />
+                <FormInput label="Total Amount" value={formatIndianNumber(formData.totalAmount)} onChange={(e) => handleChange('totalAmount', e.target.value)} placeholder="Enter total amount" required />
+                <FormInput label="Booking Amount" value={formatIndianNumber(formData.bookingAmount)} onChange={(e) => handleChange('bookingAmount', e.target.value)} placeholder="Enter booking amount" />
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-800">Pending Amount</label>
                   <input
-                    type="number"
-                    value={formData.balanceAmount}
+                    type="text"
+                    value={formatIndianNumber(formData.balanceAmount)}
                     readOnly
                     className="w-full px-3 py-2 border rounded-lg bg-gray-100 font-semibold text-red-600"
                     placeholder="Auto calculated"

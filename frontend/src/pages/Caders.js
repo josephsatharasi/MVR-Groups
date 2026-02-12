@@ -298,7 +298,18 @@ const Caders = () => {
       c.cadreCode === selectedCader.cadreId || c.agentCode === selectedCader.cadreId
     );
     const mainDirectBusiness = mainCadreCustomers.reduce((sum, c) => sum + getTotalPaid(c._id || c.id), 0);
-    const mainCommission = mainDirectBusiness * getCumulativePercentage(selectedCader.cadreRole) / 100;
+    
+    // Calculate total business from all team members
+    const allTeamBusiness = teamMembers.reduce((sum, member) => {
+      const memberCustomers = linkedCustomers.filter(c => 
+        c.cadreCode === member.cadreId || c.agentCode === member.cadreId
+      );
+      return sum + memberCustomers.reduce((mSum, c) => mSum + getTotalPaid(c._id || c.id), 0);
+    }, 0);
+    
+    const totalBusiness = mainDirectBusiness + allTeamBusiness;
+    const mainCommission = totalBusiness * getCumulativePercentage(selectedCader.cadreRole) / 100;
+    const mainRecruits = caders.filter(c => c.introducerId === selectedCader.cadreId).length;
     
     const tableData = [];
     
@@ -310,12 +321,15 @@ const Caders = () => {
       selectedCader.mobile,
       selectedCader.introducerId || '-',
       getRoleFullName(selectedCader.cadreRole),
+      mainRecruits.toString(),
       teamMembers.length.toString(),
       formatIndianNumber(mainDirectBusiness),
-      formatIndianNumber(mainDirectBusiness),
-      formatIndianNumber(mainDirectBusiness),
       formatIndianNumber(mainCommission.toFixed(2)),
-      '0.00'
+      mainCadreCustomers.length > 0 ? (() => {
+        const lastCustomer = mainCadreCustomers[mainCadreCustomers.length - 1];
+        const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${lastCustomer._id || lastCustomer.id}`) || '[]');
+        return paymentHistory.length > 0 ? new Date(paymentHistory[paymentHistory.length - 1].date).toLocaleDateString('en-IN') : '-';
+      })() : '-'
     ]);
     
     // Team members rows
@@ -324,10 +338,36 @@ const Caders = () => {
         c.cadreCode === member.cadreId || c.agentCode === member.cadreId
       );
       const directBusiness = memberCustomers.reduce((sum, c) => sum + getTotalPaid(c._id || c.id), 0);
+      
+      // Get all sub-team members under this member
+      const getSubTeam = (cadreId) => {
+        const direct = teamMembers.filter(m => m.introducerId === cadreId);
+        let all = [...direct];
+        direct.forEach(m => {
+          all = [...all, ...getSubTeam(m.cadreId)];
+        });
+        return all;
+      };
+      
+      const subTeam = getSubTeam(member.cadreId);
+      const subTeamBusiness = subTeam.reduce((sum, subMember) => {
+        const subCustomers = linkedCustomers.filter(c => 
+          c.cadreCode === subMember.cadreId || c.agentCode === subMember.cadreId
+        );
+        return sum + subCustomers.reduce((sSum, c) => sSum + getTotalPaid(c._id || c.id), 0);
+      }, 0);
+      
+      const totalMemberBusiness = directBusiness + subTeamBusiness;
       const memberCumulativePercentage = getCumulativePercentage(member.cadreRole);
-      const parentPercentage = getCumulativePercentage(selectedCader.cadreRole);
-      const myShare = parentPercentage - memberCumulativePercentage;
-      const commission = directBusiness * myShare / 100;
+      const memberCommission = totalMemberBusiness * memberCumulativePercentage / 100;
+      const memberRecruits = caders.filter(c => c.introducerId === member.cadreId).length;
+      
+      // Get last payment date for this member's customers
+      const lastPaymentDate = memberCustomers.length > 0 ? (() => {
+        const lastCustomer = memberCustomers[memberCustomers.length - 1];
+        const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${lastCustomer._id || lastCustomer.id}`) || '[]');
+        return paymentHistory.length > 0 ? new Date(paymentHistory[paymentHistory.length - 1].date).toLocaleDateString('en-IN') : '-';
+      })() : '-';
       
       tableData.push([
         (idx + 2).toString(),
@@ -336,18 +376,17 @@ const Caders = () => {
         member.mobile,
         member.introducerId || '-',
         getRoleFullName(member.cadreRole),
-        '0',
+        memberRecruits.toString(),
+        subTeam.length.toString(),
         formatIndianNumber(directBusiness),
-        formatIndianNumber(directBusiness),
-        formatIndianNumber(directBusiness),
-        formatIndianNumber(commission.toFixed(2)),
-        '0.00'
+        formatIndianNumber(memberCommission.toFixed(2)),
+        lastPaymentDate
       ]);
     });
     
     autoTable(doc, {
       startY: 44,
-      head: [['Level', 'Code', 'Agent', 'Contact', 'Introducer', 'Caders', 'Recruits', 'Direct', 'Team', 'Business', 'Commission', 'Advance']],
+      head: [['Level', 'Code', 'Agent', 'Contact', 'Introducer', 'Caders', 'Recruits', 'Team', 'Direct', 'Commission', 'Released Date']],
       body: tableData,
       theme: 'grid',
       headStyles: { 
@@ -366,18 +405,17 @@ const Caders = () => {
         lineWidth: 0.1
       },
       columnStyles: {
-        0: { cellWidth: 13, halign: 'center' },
+        0: { cellWidth: 12, halign: 'center' },
         1: { cellWidth: 18, halign: 'center' },
-        2: { cellWidth: 25, halign: 'left' },
+        2: { cellWidth: 28, halign: 'left' },
         3: { cellWidth: 25, halign: 'center' },
         4: { cellWidth: 20, halign: 'center' },
-        5: { cellWidth: 48, halign: 'left' },
+        5: { cellWidth: 45, halign: 'left' },
         6: { cellWidth: 16, halign: 'center' },
-        7: { cellWidth: 22, halign: 'right' },
-        8: { cellWidth: 22, halign: 'right' },
-        9: { cellWidth: 22, halign: 'right' },
-        10: { cellWidth: 24, halign: 'right' },
-        11: { cellWidth: 17, halign: 'right' }
+        7: { cellWidth: 14, halign: 'center' },
+        8: { cellWidth: 24, halign: 'right' },
+        9: { cellWidth: 26, halign: 'right' },
+        10: { cellWidth: 24, halign: 'center' }
       },
       margin: { left: 7, right: 7 },
       tableWidth: 'auto'
@@ -816,7 +854,7 @@ const Caders = () => {
                   <p className="text-sm text-gray-600 mb-2">Total Commission from all team sales</p>
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-lg">Total:</span>
-                    <span className="font-bold text-2xl text-green-600">₹{totalCommission.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    <span className="font-bold text-2xl text-green-600">₹{formatIndianNumber(totalCommission.toFixed(2))}</span>
                   </div>
                 </div>
 
@@ -833,6 +871,7 @@ const Caders = () => {
                             <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Paid Amount</th>
                             <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Balance</th>
                             <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Commission</th>
+                            <th className="px-3 py-2 text-center text-xs font-semibold text-gray-700">Released Date</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -844,6 +883,13 @@ const Caders = () => {
                             };
                             const paidAmount = getTotalPaid(customer._id || customer.id);
                             const balance = totalAmount - paidAmount;
+                            
+                            // Get last payment date
+                            const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customer._id || customer.id}`) || '[]');
+                            const lastPaymentDate = paymentHistory.length > 0 
+                              ? new Date(paymentHistory[paymentHistory.length - 1].date).toLocaleDateString('en-IN')
+                              : '-';
+                            
                             const sellerCadreId = customer.cadreCode || customer.agentCode;
                             const cumulativePercentage = getCumulativePercentage(selectedCader.cadreRole);
                             let commission = 0;
@@ -865,6 +911,7 @@ const Caders = () => {
                                 <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{paidAmount.toLocaleString('en-IN')}</td>
                                 <td className="px-3 py-2 text-sm text-right font-semibold text-red-600">₹{balance.toLocaleString('en-IN')}</td>
                                 <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{commission.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td className="px-3 py-2 text-sm text-center text-gray-700">{lastPaymentDate}</td>
                               </tr>
                             );
                           })}

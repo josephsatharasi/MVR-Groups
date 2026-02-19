@@ -6,6 +6,7 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import FormInput from '../components/FormInput';
 import ConfirmModal from '../components/ConfirmModal';
+import CadreIncome from '../components/CadreIncome';
 
 import { toast } from 'react-toastify';
 import jsPDF from 'jspdf';
@@ -925,6 +926,15 @@ const Caders = () => {
               <div className="border-t pt-6">
                 <h3 className="text-lg font-bold mb-4 text-gray-800">Commission Calculation</h3>
                 <p className="text-sm text-gray-600 mb-2">Based on role: {getRoleFullName(selectedCader.cadreRole)} - {getCumulativePercentage(selectedCader.cadreRole)}%</p>
+              </div>
+
+              <div className="border-t pt-6">
+                <CadreIncome 
+                  linkedCustomers={linkedCustomers}
+                  caders={caders}
+                  selectedCader={selectedCader}
+                  getCumulativePercentage={getCumulativePercentage}
+                />
               </div>
             </div>
           </div>

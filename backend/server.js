@@ -10,7 +10,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://mvr-groups-frontned.onrender.com'],
+  origin: ['http://localhost:3000', 'https://mvr-groups-frontned.onrender.com', 'https://vspaze.com'],
   credentials: true
 }));
 app.use(express.json());
@@ -32,6 +32,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/customers', require('./routes/customers'));
 app.use('/api/cadres', require('./routes/cadres'));
 app.use('/api/bin', require('./routes/bin'));
+app.use('/api/income', require('./routes/income'));
 
 // Health check
 app.get('/', (req, res) => {

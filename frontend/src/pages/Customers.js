@@ -26,7 +26,7 @@ const Customers = () => {
     gadhiAnkanamSqft: '', price: '',
     projectName: '', location: '',
     totalAmount: '', bookingAmount: '', balanceAmount: '', paymentType: '', chequeDD: '', chequeNo: '',
-    bankName: '', cadreCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: '',
+    bankName: '', cadreCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: ''
   });
 
   useEffect(() => {
@@ -79,7 +79,7 @@ const Customers = () => {
         gadhiAnkanamSqft: '', price: '',
         projectName: '', location: '',
         totalAmount: '', bookingAmount: '', balanceAmount: '', paymentType: '', chequeDD: '', chequeNo: '',
-        bankName: '', cadreCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: '',
+        bankName: '', cadreCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: ''
       });
       setCadreValidation({ valid: false, cadre: null, checked: false, percentage: 0 });
       loadCustomers();
@@ -381,8 +381,8 @@ const Customers = () => {
                     </div>
                   )}
                 </div>
-                <FormInput label="Booking Dhamaka" type="number" value={formData.bookingDhamaka} onChange={(e) => handleChange('bookingDhamaka', e.target.value)} placeholder="Enter booking dhamaka" />
-                <FormInput label="Registration Dhamaka" type="number" value={formData.registrationDhamaka} onChange={(e) => handleChange('registrationDhamaka', e.target.value)} placeholder="Enter registration dhamaka" />
+                <FormInput label="Booking Dhamaka" type="text" value={formatIndianNumber(formData.bookingDhamaka)} onChange={(e) => handleChange('bookingDhamaka', e.target.value)} placeholder="Enter booking dhamaka" />
+                <FormInput label="Registration Dhamaka" type="text" value={formatIndianNumber(formData.registrationDhamaka)} onChange={(e) => handleChange('registrationDhamaka', e.target.value)} placeholder="Enter registration dhamaka" />
               </div>
               <div className="flex gap-2 pt-4">
                 <Button type="submit" variant="primary" icon={UserPlus}>Add Customer</Button>

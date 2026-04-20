@@ -322,8 +322,7 @@ const Caders = () => {
       selectedCader.mobile,
       selectedCader.introducerId || '-',
       getRoleFullName(selectedCader.cadreRole),
-      mainRecruits.toString(),
-      teamMembers.length.toString(),
+      formatIndianNumber(allTeamBusiness),
       formatIndianNumber(mainDirectBusiness),
       formatIndianNumber(mainCommission.toFixed(2)),
       mainCadreCustomers.length > 0 ? (() => {
@@ -361,7 +360,6 @@ const Caders = () => {
       const totalMemberBusiness = directBusiness + subTeamBusiness;
       const memberCumulativePercentage = getCumulativePercentage(member.cadreRole);
       const memberCommission = totalMemberBusiness * memberCumulativePercentage / 100;
-      const memberRecruits = caders.filter(c => c.introducerId === member.cadreId).length;
       
       // Get last payment date for this member's customers
       const lastPaymentDate = memberCustomers.length > 0 ? (() => {
@@ -377,8 +375,7 @@ const Caders = () => {
         member.mobile,
         member.introducerId || '-',
         getRoleFullName(member.cadreRole),
-        memberRecruits.toString(),
-        subTeam.length.toString(),
+        formatIndianNumber(subTeamBusiness),
         formatIndianNumber(directBusiness),
         formatIndianNumber(memberCommission.toFixed(2)),
         lastPaymentDate
@@ -387,7 +384,7 @@ const Caders = () => {
     
     autoTable(doc, {
       startY: 44,
-      head: [['Level', 'Code', 'Agent', 'Contact', 'Introducer', 'Caders', 'Recruits', 'Team', 'Direct', 'Commission', 'Released Date']],
+      head: [['Level', 'Code', 'Agent', 'Contact', 'Introducer', 'Caders', 'Team Business', 'Direct Business', 'Commission', 'Released Date']],
       body: tableData,
       theme: 'grid',
       headStyles: { 
@@ -412,11 +409,10 @@ const Caders = () => {
         3: { cellWidth: 25, halign: 'center' },
         4: { cellWidth: 20, halign: 'center' },
         5: { cellWidth: 45, halign: 'left' },
-        6: { cellWidth: 16, halign: 'center' },
-        7: { cellWidth: 14, halign: 'center' },
-        8: { cellWidth: 24, halign: 'right' },
-        9: { cellWidth: 26, halign: 'right' },
-        10: { cellWidth: 24, halign: 'center' }
+        6: { cellWidth: 26, halign: 'right' },
+        7: { cellWidth: 26, halign: 'right' },
+        8: { cellWidth: 26, halign: 'right' },
+        9: { cellWidth: 24, halign: 'center' }
       },
       margin: { left: 7, right: 7 },
       tableWidth: 'auto'

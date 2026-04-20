@@ -141,12 +141,12 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
       index + 1,
       new Date(p.date).toLocaleDateString('en-IN'),
       parseFloat(p.amount).toLocaleString('en-IN'),
-      p.note || '-'
+      customer.plotNo || '-'
     ]);
     
     autoTable(doc, {
       startY: 62,
-      head: [['S.No', 'Date', 'Amount', 'Note']],
+      head: [['S.No', 'Date', 'Amount', 'Plot No']],
       body: tableData,
       foot: [['', 'Total Paid:', totalPaid.toLocaleString('en-IN'), '']],
       theme: 'grid',
@@ -347,7 +347,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
                     <tr>
                       <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Date</th>
                       <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700">Amount</th>
-                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Note</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Plot No</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -355,7 +355,7 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
                       <tr key={idx} className="border-b hover:bg-gray-50">
                         <td className="px-3 py-2 text-sm">{new Date(payment.date).toLocaleDateString('en-IN')}</td>
                         <td className="px-3 py-2 text-sm text-right font-semibold text-green-600">₹{parseFloat(payment.amount).toLocaleString('en-IN')}</td>
-                        <td className="px-3 py-2 text-sm text-gray-600">{payment.note || '-'}</td>
+                        <td className="px-3 py-2 text-sm text-gray-600">{customer.plotNo || '-'}</td>
                       </tr>
                     ))}
                   </tbody>

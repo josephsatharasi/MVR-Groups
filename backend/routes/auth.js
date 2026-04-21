@@ -13,7 +13,7 @@ const twilioClient = twilio(
 );
 
 // Email transporter (backup for OTP)
-const emailTransporter = nodemailer.createTransporter({
+const emailTransporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER || 'your-email@gmail.com',

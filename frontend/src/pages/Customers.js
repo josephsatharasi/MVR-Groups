@@ -19,19 +19,22 @@ const Customers = () => {
   const [searchParams] = useSearchParams();
   const [showFormModal, setShowFormModal] = useState(false);
   const [cadres, setCadres] = useState([]);
+  const [agents, setAgents] = useState([]);
   const [cadreValidation, setCadreValidation] = useState({ valid: false, cadre: null, checked: false, percentage: 0 });
+  const [agentValidation, setAgentValidation] = useState({ valid: false, agent: null, checked: false, percentage: 4 });
   const [formData, setFormData] = useState({
     name: '', relationType: '', relation: '', mobile: '', whatsapp: '',
     dob: '', age: '', address: '', pinCode: '', aadharNo: '', plotNo: '',
     gadhiAnkanamSqft: '', price: '',
     projectName: '', location: '',
     totalAmount: '', bookingAmount: '', balanceAmount: '', paymentType: '', chequeDD: '', chequeNo: '',
-    bankName: '', cadreCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: ''
+    bankName: '', cadreCode: '', agentCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: ''
   });
 
   useEffect(() => {
     loadCustomers();
     loadCadres();
+    loadAgents();
   }, []);
 
   const loadCustomers = async () => {
@@ -44,6 +47,18 @@ const Customers = () => {
   const loadCadres = async () => {
     const data = await getCadres();
     setCadres(data);
+  };
+
+  const loadAgents = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/agents`);
+      if (response.ok) {
+        const data = await response.json();
+        setAgents(data);
+      }
+    } catch (error) {
+      console.error('Failed to load agents:', error);
+    }
   };
 
   const getRolePercentage = (role) => {
@@ -79,9 +94,10 @@ const Customers = () => {
         gadhiAnkanamSqft: '', price: '',
         projectName: '', location: '',
         totalAmount: '', bookingAmount: '', balanceAmount: '', paymentType: '', chequeDD: '', chequeNo: '',
-        bankName: '', cadreCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: ''
+        bankName: '', cadreCode: '', agentCode: '', bookingDhamaka: '', upiId: '', registrationDhamaka: ''
       });
       setCadreValidation({ valid: false, cadre: null, checked: false, percentage: 0 });
+      setAgentValidation({ valid: false, agent: null, checked: false, percentage: 4 });
       loadCustomers();
     } catch (error) {
       toast.error('Failed to add customer');
@@ -102,6 +118,19 @@ const Customers = () => {
     }
   };
 
+  const validateAgent = (agentId) => {
+    if (!agentId || agentId.length !== 6) {
+      setAgentValidation({ valid: false, agent: null, checked: false, percentage: 4 });
+      return;
+    }
+    const agent = agents.find(a => a.agentId === agentId);
+    if (agent) {
+      setAgentValidation({ valid: true, agent, checked: true, percentage: 4 });
+    } else {
+      setAgentValidation({ valid: false, agent: null, checked: true, percentage: 4 });
+    }
+  };
+
   const handleChange = (field, value) => {
     if (field === 'mobile' || field === 'whatsapp') {
       const numericValue = value.replace(/\D/g, '').slice(0, 10);
@@ -117,6 +146,10 @@ const Customers = () => {
       const numericValue = value.replace(/\D/g, '').slice(0, 6);
       setFormData({ ...formData, [field]: numericValue });
       validateCadre(numericValue);
+    } else if (field === 'agentCode') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 6);
+      setFormData({ ...formData, [field]: numericValue });
+      validateAgent(numericValue);
     } else if (field === 'bookingDhamaka' || field === 'registrationDhamaka') {
       const numericValue = value.replace(/\D/g, '');
       setFormData({ ...formData, [field]: numericValue });
@@ -220,6 +253,7 @@ const Customers = () => {
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Total Amount</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Balance</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm hidden md:table-cell">Caders ID</th>
+                <th className="px-4 md:px-6 py-3 text-left text-sm hidden lg:table-cell">Agent ID</th>
                 <th className="px-4 md:px-6 py-3 text-left text-sm">Actions</th>
               </tr>
             </thead>
@@ -241,6 +275,9 @@ const Customers = () => {
                   <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: customer.balanceAmount > 0 ? '#dc2626' : '#16a34a'}}>₹{formatIndianNumber(customer.balanceAmount)}</td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">
                     <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '22', color: '#1e3a8a'}}>{customer.cadreCode || customer.agentCode || '-'}</span>
+                  </td>
+                  <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">
+                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#16a34a' + '22', color: '#16a34a'}}>{customer.agentCode || '-'}</span>
                   </td>
                   <td className="px-4 md:px-6 py-4 text-sm">
                     <div className="flex gap-2">
@@ -376,6 +413,33 @@ const Customers = () => {
                       <p className="text-xs text-gray-600 mb-1">Commission on Booking Amount:</p>
                       <p className="text-sm font-semibold text-green-700">
                         ₹{formatIndianNumber(formData.bookingAmount)} × {cadreValidation.percentage}% = ₹{formatIndianNumber((parseFloat(formData.bookingAmount) * cadreValidation.percentage / 100).toFixed(2))}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">Note: Commission calculated on paid amount only</p>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <FormInput label="Agent ID (6 digits)" value={formData.agentCode} onChange={(e) => handleChange('agentCode', e.target.value)} placeholder="Enter 6-digit agent ID" maxLength={6} />
+                  {agentValidation.checked && (
+                    <div className={`mt-1 text-sm flex items-center gap-1 ${agentValidation.valid ? 'text-green-600' : 'text-red-600'}`}>
+                      {agentValidation.valid ? (
+                        <>
+                          <CheckCircle size={16} />
+                          <span>Agent Found: {agentValidation.agent.name} - {agentValidation.percentage}% Commission</span>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle size={16} />
+                          <span>Agent not found in system</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {agentValidation.valid && formData.bookingAmount && (
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-xs text-gray-600 mb-1">Agent Commission on Booking Amount:</p>
+                      <p className="text-sm font-semibold text-blue-700">
+                        ₹{formatIndianNumber(formData.bookingAmount)} × {agentValidation.percentage}% = ₹{formatIndianNumber((parseFloat(formData.bookingAmount) * agentValidation.percentage / 100).toFixed(2))}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">Note: Commission calculated on paid amount only</p>
                     </div>

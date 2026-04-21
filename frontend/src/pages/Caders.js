@@ -215,7 +215,21 @@ const Caders = () => {
       
       const allTeamIds = [row.cadreId, ...team.map(m => m.cadreId)];
       const linked = customers.filter(c => allTeamIds.includes(c.cadreCode) || allTeamIds.includes(c.agentCode));
-      setLinkedCustomers(linked);
+      
+      // Also include customers linked to agents under this cadre
+      const agentsResponse = await axios.get(`${API_URL}/agents`);
+      const agents = agentsResponse.data;
+      const cadreAgents = agents.filter(a => a.cadreId === row.cadreId);
+      const agentIds = cadreAgents.map(a => a.agentId);
+      const agentCustomers = customers.filter(c => agentIds.includes(c.agentCode));
+      
+      const allLinkedCustomers = [...linked, ...agentCustomers];
+      // Remove duplicates
+      const uniqueCustomers = allLinkedCustomers.filter((customer, index, self) => 
+        index === self.findIndex(c => (c._id || c.id) === (customer._id || customer.id))
+      );
+      
+      setLinkedCustomers(uniqueCustomers);
       
       const percentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
       const cumulativePercentage = getCumulativePercentage(row.cadreRole);

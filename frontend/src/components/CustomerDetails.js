@@ -11,6 +11,8 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [newPayment, setNewPayment] = useState({ amount: '', date: '', note: '' });
   const [displayAmount, setDisplayAmount] = useState('');
+  const [agentInfo, setAgentInfo] = useState(null);
+  const [cadreInfo, setCadreInfo] = useState(null);
   const [formData, setFormData] = useState({
     name: customer.name || '',
     mobile: customer.phone || customer.mobile || '',
@@ -25,24 +27,57 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
 
   useEffect(() => {
     loadPaymentHistory();
+    loadAgentAndCadreInfo();
   }, [customer]);
 
+  const loadAgentAndCadreInfo = async () => {
+    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    
+    // Load agent info if customer has agentCode
+    if (customer.agentCode) {
+      try {
+        const agentResponse = await fetch(`${API_URL}/agents`);
+        if (agentResponse.ok) {
+          const agents = await agentResponse.json();
+          const agent = agents.find(a => a.agentId === customer.agentCode);
+          setAgentInfo(agent || null);
+        }
+      } catch (error) {
+        console.error('Failed to load agent info:', error);
+      }
+    }
+    
+    // Load cadre info if customer has cadreCode
+    if (customer.cadreCode) {
+      try {
+        const cadreResponse = await fetch(`${API_URL}/cadres`);
+        if (cadreResponse.ok) {
+          const cadres = await cadreResponse.json();
+          const cadre = cadres.find(c => c.cadreId === customer.cadreCode);
+          setCadreInfo(cadre || null);
+        }
+      } catch (error) {
+        console.error('Failed to load cadre info:', error);
+      }
+    }
+  };
+
   const loadPaymentHistory = () => {
-    const history = JSON.parse(localStorage.getItem(`payment_history_${customer._id || customer.id}`) || '[]');
+    const paymentData = JSON.parse(localStorage.getItem(`payment_history_${customer._id || customer.id}`) || '[]');
     
     // If no payment history exists and booking amount is present, add it as first payment
-    if (history.length === 0 && customer.bookingAmount && parseFloat(customer.bookingAmount) > 0) {
+    if (paymentData.length === 0 && customer.bookingAmount && parseFloat(customer.bookingAmount) > 0) {
       const bookingPayment = {
         amount: parseFloat(customer.bookingAmount),
         date: customer.createdAt ? new Date(customer.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         note: 'Booking Amount',
         timestamp: customer.createdAt || new Date().toISOString()
       };
-      history.push(bookingPayment);
-      localStorage.setItem(`payment_history_${customer._id || customer.id}`, JSON.stringify(history));
+      paymentData.push(bookingPayment);
+      localStorage.setItem(`payment_history_${customer._id || customer.id}`, JSON.stringify(paymentData));
     }
     
-    setPaymentHistory(history);
+    setPaymentHistory(paymentData);
   };
 
   const calculateAmounts = () => {
@@ -264,6 +299,93 @@ const CustomerDetails = ({ customer, onClose, onUpdate }) => {
               ) : (
                 <p className="font-semibold" style={{color: '#1e3a8a'}}>{customer.address || '-'}</p>
               )}
+            </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <h3 className="font-bold mb-4" style={{color: '#1e3a8a'}}>Agent & Cadre Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Agent Information */}
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                  <User size={18} className="text-green-600" />
+                  Agent Details
+                </h4>
+                {customer.agentCode ? (
+                  agentInfo ? (
+                    <div className="space-y-2">
+                      <p className="text-sm"><span className="font-medium text-gray-700">Agent ID:</span> <span className="font-semibold text-green-700">{customer.agentCode}</span></p>
+                      <p className="text-sm"><span className="font-medium text-gray-700">Name:</span> <span className="font-semibold text-green-700">{agentInfo.name}</span></p>
+                      <p className="text-sm"><span className="font-medium text-gray-700">Mobile:</span> <span className="text-green-600">{agentInfo.mobile}</span></p>
+                      <p className="text-sm"><span className="font-medium text-gray-700">Email:</span> <span className="text-green-600">{agentInfo.email || '-'}</span></p>
+                      <div className="mt-3 p-2 bg-green-100 rounded">
+                        <p className="text-xs text-green-800 font-medium">Commission: 4% on paid amount</p>
+                        <p className="text-xs text-green-600">Total Paid: ₹{totalPaid.toLocaleString('en-IN')}</p>
+                        <p className="text-sm font-bold text-green-800">Agent Earnings: ₹{(totalPaid * 0.04).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-red-600">Agent ID: {customer.agentCode}</p>
+                      <p className="text-xs text-red-500">Agent not found in system</p>
+                    </div>
+                  )
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-gray-500">No agent assigned</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Cadre Information */}
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                  <User size={18} className="text-blue-600" />
+                  Cadre Details
+                </h4>
+                {customer.cadreCode ? (
+                  cadreInfo ? (
+                    <div className="space-y-2">
+                      <p className="text-sm"><span className="font-medium text-gray-700">Cadre ID:</span> <span className="font-semibold text-blue-700">{customer.cadreCode}</span></p>
+                      <p className="text-sm"><span className="font-medium text-gray-700">Name:</span> <span className="font-semibold text-blue-700">{cadreInfo.name}</span></p>
+                      <p className="text-sm"><span className="font-medium text-gray-700">Role:</span> <span className="text-blue-600">{cadreInfo.cadreRole}</span></p>
+                      <p className="text-sm"><span className="font-medium text-gray-700">Mobile:</span> <span className="text-blue-600">{cadreInfo.mobile}</span></p>
+                      <p className="text-sm"><span className="font-medium text-gray-700">Email:</span> <span className="text-blue-600">{cadreInfo.email || '-'}</span></p>
+                      <div className="mt-3 p-2 bg-blue-100 rounded">
+                        {(() => {
+                          const rolePercentages = { FO: 4, TL: 2, STL: 1, DO: 1, SDO: 1, MM: 1, SMM: 1, GM: 1, SGM: 1 };
+                          const roleHierarchy = ['FO', 'TL', 'STL', 'DO', 'SDO', 'MM', 'SMM', 'GM', 'SGM'];
+                          const getCumulativePercentage = (role) => {
+                            const roleIndex = roleHierarchy.indexOf(role);
+                            let total = 0;
+                            for (let i = 0; i <= roleIndex; i++) {
+                              total += rolePercentages[roleHierarchy[i]] || 0;
+                            }
+                            return total;
+                          };
+                          const percentage = getCumulativePercentage(cadreInfo.cadreRole);
+                          return (
+                            <>
+                              <p className="text-xs text-blue-800 font-medium">Commission: {percentage}% on paid amount</p>
+                              <p className="text-xs text-blue-600">Total Paid: ₹{totalPaid.toLocaleString('en-IN')}</p>
+                              <p className="text-sm font-bold text-blue-800">Cadre Earnings: ₹{(totalPaid * percentage / 100).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-red-600">Cadre ID: {customer.cadreCode}</p>
+                      <p className="text-xs text-red-500">Cadre not found in system</p>
+                    </div>
+                  )
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-gray-500">No cadre assigned</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

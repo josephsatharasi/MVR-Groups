@@ -70,95 +70,60 @@ router.post('/login', async (req, res) => {
 // Send OTP for password reset
 router.post('/forgot-password', async (req, res) => {
   try {
-    const { mobile } = req.body;
+    const { email } = req.body;
 
-    if (!mobile || mobile.length !== 10) {
-      return res.status(400).json({ message: 'Please provide valid 10-digit mobile number' });
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ message: 'Please provide a valid email address' });
     }
 
-    const user = await User.findOne({ mobile });
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'User not found with this mobile number' });
+      return res.status(404).json({ message: 'User not found with this email address' });
     }
 
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
     // Store OTP with 10 minutes expiry
-    otpStore.set(mobile, {
+    otpStore.set(email, {
       otp,
       expiresAt: Date.now() + 10 * 60 * 1000,
       userId: user._id
     });
 
-    // Send OTP via Twilio
-    let smsSuccess = false;
-    let emailSuccess = false;
-    
+    // Send OTP via Email
     try {
-      console.log('Attempting to send SMS with Twilio...');
-      console.log('From:', process.env.TWILIO_PHONE_NUMBER);
-      console.log('To:', `+91${mobile}`);
-      console.log('Account SID:', process.env.TWILIO_ACCOUNT_SID);
-      console.log('Auth Token exists:', !!process.env.TWILIO_AUTH_TOKEN);
+      console.log('Attempting to send OTP email...');
+      console.log('To:', email);
+      console.log('From:', process.env.EMAIL_FROM);
       
-      const message = await twilioClient.messages.create({
-        body: `Your MVR Groups password reset OTP is: ${otp}. Valid for 10 minutes.`,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: `+91${mobile}`
-      });
-      
-      console.log(`SMS sent successfully. Message SID: ${message.sid}`);
-      console.log(`OTP sent to ${mobile}: ${otp}`);
-      smsSuccess = true;
-    } catch (twilioError) {
-      console.error('Twilio Error Details:', {
-        message: twilioError.message,
-        code: twilioError.code,
-        moreInfo: twilioError.moreInfo,
-        status: twilioError.status
-      });
-      console.log(`Twilio failed. OTP for ${mobile}: ${otp}`);
-    }
-    
-    // If SMS fails and user has email, try sending via email
-    if (!smsSuccess && user.email) {
-      try {
-        await emailTransporter.sendMail({
-          from: process.env.EMAIL_FROM || 'MVR Groups Real Estate <satharasijosephthimothi@gmail.com>',
-          to: user.email,
-          subject: 'MVR Groups - Password Reset OTP',
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #1e3a8a;">MVR Groups - Password Reset</h2>
-              <p>Dear ${user.username || 'User'},</p>
-              <p>You have requested to reset your password. Your OTP is:</p>
-              <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; color: #1e3a8a; border-radius: 8px; margin: 20px 0;">
-                ${otp}
-              </div>
-              <p>This OTP is valid for 10 minutes.</p>
-              <p>If you didn't request this password reset, please ignore this email.</p>
-              <hr style="margin: 20px 0;">
-              <p style="color: #666; font-size: 12px;">MVR Groups Real Estate Management System</p>
+      await emailTransporter.sendMail({
+        from: process.env.EMAIL_FROM || 'MVR Groups Real Estate <satharasijosephthimothi@gmail.com>',
+        to: email,
+        subject: 'MVR Groups - Password Reset OTP',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #1e3a8a;">MVR Groups - Password Reset</h2>
+            <p>Dear ${user.username || 'User'},</p>
+            <p>You have requested to reset your password. Your OTP is:</p>
+            <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; color: #1e3a8a; border-radius: 8px; margin: 20px 0;">
+              ${otp}
             </div>
-          `
-        });
-        console.log(`Email OTP sent to ${user.email}: ${otp}`);
-        emailSuccess = true;
-      } catch (emailError) {
-        console.error('Email Error:', emailError.message);
-      }
-    }
-    
-    // Determine response message
-    let responseMessage = 'OTP sent to your mobile number';
-    if (!smsSuccess && emailSuccess) {
-      responseMessage = 'SMS failed. OTP sent to your registered email address';
-    } else if (!smsSuccess && !emailSuccess) {
-      responseMessage = 'OTP generated. Please check server logs for the OTP (Development mode)';
+            <p>This OTP is valid for 10 minutes.</p>
+            <p>If you didn't request this password reset, please ignore this email.</p>
+            <hr style="margin: 20px 0;">
+            <p style="color: #666; font-size: 12px;">MVR Groups Real Estate Management System</p>
+          </div>
+        `
+      });
+      
+      console.log(`Email OTP sent successfully to ${email}: ${otp}`);
+    } catch (emailError) {
+      console.error('Email Error:', emailError.message);
+      console.log(`Email failed. OTP for ${email}: ${otp}`);
     }
 
-    res.json({ message: 'OTP sent to your mobile number' });
+    res.json({ message: 'OTP sent to your email address' });
   } catch (error) {
     console.error('General error:', error);
     res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
@@ -168,15 +133,15 @@ router.post('/forgot-password', async (req, res) => {
 // Verify OTP
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { mobile, otp } = req.body;
+    const { email, otp } = req.body;
 
-    const storedData = otpStore.get(mobile);
+    const storedData = otpStore.get(email);
     if (!storedData) {
       return res.status(400).json({ message: 'OTP expired or invalid' });
     }
 
     if (Date.now() > storedData.expiresAt) {
-      otpStore.delete(mobile);
+      otpStore.delete(email);
       return res.status(400).json({ message: 'OTP expired' });
     }
 
@@ -196,7 +161,7 @@ router.post('/verify-otp', async (req, res) => {
 // Reset Password
 router.post('/reset-password', async (req, res) => {
   try {
-    const { resetToken, password, mobile } = req.body;
+    const { resetToken, password, email } = req.body;
 
     const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
@@ -210,8 +175,8 @@ router.post('/reset-password', async (req, res) => {
     await user.save();
 
     // Clear OTP from store
-    if (mobile) {
-      otpStore.delete(mobile);
+    if (email) {
+      otpStore.delete(email);
     }
 
     res.json({ message: 'Password reset successful' });

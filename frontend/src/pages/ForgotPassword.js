@@ -7,8 +7,8 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1: Mobile, 2: OTP, 3: New Password
-  const [mobile, setMobile] = useState('');
+  const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
+  const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,8 +17,8 @@ const ForgotPassword = () => {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
-    if (mobile.length !== 10) {
-      toast.error('Please enter valid 10-digit mobile number');
+    if (!email || !email.includes('@')) {
+      toast.error('Please enter a valid email address');
       return;
     }
     setLoading(true);
@@ -26,7 +26,7 @@ const ForgotPassword = () => {
       const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile })
+        body: JSON.stringify({ email })
       });
       const data = await response.json();
       if (response.ok) {
@@ -53,7 +53,7 @@ const ForgotPassword = () => {
       const response = await fetch(`${API_URL}/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile, otp })
+        body: JSON.stringify({ email, otp })
       });
       const data = await response.json();
       if (response.ok) {
@@ -85,7 +85,7 @@ const ForgotPassword = () => {
       const response = await fetch(`${API_URL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resetToken, password, mobile })
+        body: JSON.stringify({ resetToken, password, email })
       });
       const data = await response.json();
       if (response.ok) {
@@ -121,14 +121,13 @@ const ForgotPassword = () => {
         {step === 1 && (
           <form onSubmit={handleSendOTP} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold mb-2 text-blue-700">Mobile Number</label>
+              <label className="block text-sm font-semibold mb-2 text-blue-700">Email Address</label>
               <input
-                type="tel"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter 10-digit mobile number"
-                maxLength={10}
+                placeholder="Enter your email address"
                 required
               />
             </div>
@@ -155,7 +154,7 @@ const ForgotPassword = () => {
                 maxLength={6}
                 required
               />
-              <p className="text-sm text-gray-500 mt-2">OTP sent to +91{mobile}</p>
+              <p className="text-sm text-gray-500 mt-2">OTP sent to {email}</p>
             </div>
             <button
               type="submit"
@@ -169,7 +168,7 @@ const ForgotPassword = () => {
               onClick={() => setStep(1)}
               className="w-full text-gray-600 py-2 text-sm"
             >
-              Change Mobile Number
+              Change Email Address
             </button>
           </form>
         )}

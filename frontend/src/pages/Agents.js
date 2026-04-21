@@ -16,6 +16,9 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const Agents = () => {
   const [search, setSearch] = useState('');
   const [showFormModal, setShowFormModal] = useState(false);
+  const [showCustomersModal, setShowCustomersModal] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [agentCustomers, setAgentCustomers] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [agents, setAgents] = useState([]);
   const [cadres, setCadres] = useState([]);
@@ -162,6 +165,21 @@ const Agents = () => {
     }
   };
 
+  const handleRowClick = async (agent) => {
+    setSelectedAgent(agent);
+    try {
+      // Fetch customers associated with this agent
+      const response = await axios.get(`${API_URL}/customers`);
+      const allCustomers = response.data;
+      const associatedCustomers = allCustomers.filter(customer => customer.agentCode === agent.agentId);
+      setAgentCustomers(associatedCustomers);
+      setShowCustomersModal(true);
+    } catch (error) {
+      toast.error('Failed to fetch agent customers');
+      console.error(error);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -289,14 +307,18 @@ const Agents = () => {
             </thead>
             <tbody>
               {filtered.map((row, rowIdx) => (
-                <tr key={rowIdx} className="border-b hover:bg-gray-50">
+                <tr 
+                  key={rowIdx} 
+                  className="border-b hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleRowClick(row)}
+                >
                   {columns.map((col, colIdx) => (
                     <td key={colIdx} className="px-4 py-3 text-sm text-gray-700">
                       {col.render ? col.render(row) : row[col.field]}
                     </td>
                   ))}
                   <td className="px-4 py-3 text-sm">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => handleEdit(row)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -494,6 +516,131 @@ const Agents = () => {
         title="Delete Agent"
         message={`Are you sure you want to delete ${agentToDelete?.name}? This action cannot be undone.`}
       />
+
+      {/* Agent Customers Modal */}
+      {showCustomersModal && selectedAgent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">Customers Associated with Agent</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Agent: <span className="font-semibold text-blue-600">{selectedAgent.name}</span> 
+                  (ID: <span className="font-semibold">{selectedAgent.agentId}</span>)
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowCustomersModal(false)} 
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-6">
+              {agentCustomers.length > 0 ? (
+                <>
+                  <div className="mb-4 flex items-center justify-between">
+                    <p className="text-sm text-gray-600">
+                      Total Customers: <span className="font-semibold text-blue-600">{agentCustomers.length}</span>
+                    </p>
+                    <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                      <p className="text-xs text-green-800 font-medium">Agent Commission: 4% on paid amounts</p>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto border rounded-lg">
+                    <table className="w-full">
+                      <thead style={{ backgroundColor: '#1e3a8a' }}>
+                        <tr>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-white">Customer Name</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-white">Phone</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-white">Project</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-white">Plot No</th>
+                          <th className="px-4 py-3 text-right text-sm font-semibold text-white">Total Amount</th>
+                          <th className="px-4 py-3 text-right text-sm font-semibold text-white">Paid Amount</th>
+                          <th className="px-4 py-3 text-right text-sm font-semibold text-white">Balance</th>
+                          <th className="px-4 py-3 text-right text-sm font-semibold text-white">Agent Commission</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {agentCustomers.map((customer, idx) => {
+                          const totalAmount = parseFloat(customer.totalAmount) || 0;
+                          const getTotalPaid = (customerId) => {
+                            const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
+                            return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+                          };
+                          const paidAmount = getTotalPaid(customer._id || customer.id);
+                          const balance = totalAmount - paidAmount;
+                          const agentCommission = paidAmount * 0.04; // 4% commission
+                          
+                          return (
+                            <tr key={idx} className="border-b hover:bg-gray-50">
+                              <td className="px-4 py-3 text-sm font-semibold text-blue-700">{customer.name}</td>
+                              <td className="px-4 py-3 text-sm">{customer.phone || customer.mobile}</td>
+                              <td className="px-4 py-3 text-sm">{customer.projectName || '-'}</td>
+                              <td className="px-4 py-3 text-sm">
+                                <span className="px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800">
+                                  {customer.plotNo || '-'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-right font-semibold">₹{totalAmount.toLocaleString('en-IN')}</td>
+                              <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">₹{paidAmount.toLocaleString('en-IN')}</td>
+                              <td className="px-4 py-3 text-sm text-right font-semibold text-red-600">₹{balance.toLocaleString('en-IN')}</td>
+                              <td className="px-4 py-3 text-sm text-right font-bold text-green-700">₹{agentCommission.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot className="bg-gray-50">
+                        <tr>
+                          <td colSpan="5" className="px-4 py-3 text-sm font-bold text-gray-800">Total:</td>
+                          <td className="px-4 py-3 text-sm text-right font-bold text-green-600">
+                            ₹{agentCustomers.reduce((sum, customer) => {
+                              const getTotalPaid = (customerId) => {
+                                const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
+                                return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+                              };
+                              return sum + getTotalPaid(customer._id || customer.id);
+                            }, 0).toLocaleString('en-IN')}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right font-bold text-red-600">
+                            ₹{agentCustomers.reduce((sum, customer) => {
+                              const totalAmount = parseFloat(customer.totalAmount) || 0;
+                              const getTotalPaid = (customerId) => {
+                                const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
+                                return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+                              };
+                              const paidAmount = getTotalPaid(customer._id || customer.id);
+                              return sum + (totalAmount - paidAmount);
+                            }, 0).toLocaleString('en-IN')}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right font-bold text-green-700">
+                            ₹{agentCustomers.reduce((sum, customer) => {
+                              const getTotalPaid = (customerId) => {
+                                const paymentHistory = JSON.parse(localStorage.getItem(`payment_history_${customerId}`) || '[]');
+                                return paymentHistory.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+                              };
+                              const paidAmount = getTotalPaid(customer._id || customer.id);
+                              return sum + (paidAmount * 0.04);
+                            }, 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <Users className="mx-auto mb-4 text-gray-400" size={64} />
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">No Customers Found</h3>
+                  <p className="text-sm text-gray-500">
+                    This agent doesn't have any customers assigned yet.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -85,7 +85,7 @@ const Customers = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
-      await addCustomer({ ...formData, phone: formData.mobile, agentCode: formData.cadreCode, cadreCode: formData.cadreCode });
+      await addCustomer({ ...formData, phone: formData.mobile, agentCode: formData.agentCode, cadreCode: formData.cadreCode });
       toast.success('Customer added successfully!');
       setShowFormModal(false);
       setFormData({
@@ -274,7 +274,7 @@ const Customers = () => {
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">₹{formatIndianNumber(customer.totalAmount)}</td>
                   <td className="px-4 md:px-6 py-4 text-sm font-semibold" style={{color: customer.balanceAmount > 0 ? '#dc2626' : '#16a34a'}}>₹{formatIndianNumber(customer.balanceAmount)}</td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden md:table-cell">
-                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '22', color: '#1e3a8a'}}>{customer.cadreCode || customer.agentCode || '-'}</span>
+                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#1e3a8a' + '22', color: '#1e3a8a'}}>{customer.cadreCode || '-'}</span>
                   </td>
                   <td className="px-4 md:px-6 py-4 text-sm hidden lg:table-cell">
                     <span className="px-2 py-1 rounded text-xs font-semibold" style={{backgroundColor: '#16a34a' + '22', color: '#16a34a'}}>{customer.agentCode || '-'}</span>

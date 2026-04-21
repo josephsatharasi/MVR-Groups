@@ -10,6 +10,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
 import Caders from './pages/Caders';
+import Agents from './pages/Agents';
 import Reports from './pages/Reports';
 import RecycleBin from './pages/RecycleBin';
 import Commission from './pages/Commission';
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/caders" element={<Caders />} />
+                <Route path="/agents" element={<Agents />} />
                 <Route path="/commission" element={<Commission />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/bin" element={<RecycleBin />} />

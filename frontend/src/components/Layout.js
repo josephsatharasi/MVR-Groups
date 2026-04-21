@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, UserPlus, Trash2, Menu, X, LogOut, FileText, UserCog, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, Trash2, Menu, X, LogOut, FileText, UserCog, DollarSign, UserCheck } from 'lucide-react';
 // import logo from '../assets/logo.JPG';
 import ConfirmModal from './ConfirmModal';
 
@@ -20,6 +20,7 @@ const Layout = ({ children, setIsLoggedIn }) => {
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/customers', icon: Users, label: 'Customers' },
     { path: '/admin/caders', icon: UserCog, label: 'Caders' },
+    { path: '/admin/agents', icon: UserCheck, label: 'Agents' },
     { path: '/admin/commission', icon: DollarSign, label: 'Commission' },
     { path: '/admin/reports', icon: FileText, label: 'Reports' },
     { path: '/admin/bin', icon: Trash2, label: 'Recycle Bin' },
